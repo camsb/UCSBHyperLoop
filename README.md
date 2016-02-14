@@ -1,7 +1,7 @@
 # UCSBHyperLoop
 
 #Download Instructions and Activation
-1). Download LPCXpresso V. 7.3 (Mac: https://www.lpcware.com/lpcxpresso/downloads/macosx, Windows: https://www.lpcware.com/lpcxpresso/downloads/windows)
+1). Download LPCXpresso V. 7.3 (Mac: https://www.lpcware.com/lpcxpresso/downloads/macosx, Windows: https://www.lpcware.com/lpcxpresso/downloads/windows)\n
 2). Follow all the License and Download information. 
 3). Activate your free license by following this link: https://www.lpcware.com/lpcxpresso/activate. You will have to create an account to continue.
 4). In LPCXpresso, click Help -> Activate -> Create serial number and register (Free Edition)...
