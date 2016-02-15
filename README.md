@@ -1,13 +1,13 @@
 # UCSB Hyperloop
 ![pod_gif_here](http://www.ucsbhyperloop.com/assets/ucsbhyperloop-d2207c2e7ad8ddb19f23f307bd09f1a862927b595cb68cd3478cf50093f5d581.gif)
 
-## Who Are We?
+## Who are We?
 We are an interdisiplinary team of 30 students and professors competing in SpaceX's Hyperloop Pod Competition. The competition involves designing and building a pod to be tested on a track constructed at SpaceX's Hawthorne headquarters in June 2016.
 
 ## What is the Hyperloop?
 The Hyperloop is a proposed advanced method of high speed transportation between cities that are less than about 900 miles apart (e.g. Los Angeles and San Francisco). The system uses a capsule that is propelled through a low pressure steel tube as it rests on frictionless air bearings or magnets.
 
-## What is this repository?
+## What is this Repository?
 Our design involves two LPC 4088 microcontroller boards for all sensor, communications, and controls relavent to our pod. The code present here is what drives this functionality of our design.
 
 ## Download Instructions and Activation
