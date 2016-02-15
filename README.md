@@ -4,6 +4,14 @@
 ## Who are We?
 We are an interdisiplinary team of 30 students and professors competing in SpaceX's Hyperloop Pod Competition. The competition involves designing and building a pod to be tested on a track constructed at SpaceX's Hawthorne headquarters in June 2016.
 
+The five Computer Engineering/Science students responsible for this repository include:
+
+Benjamin Hartl   https://github.com/benjaminhartl  
+Cameron McCarthy https://github.com/camsb/  
+Celeste Bean     https://github.com/celestebean  
+Connor Buckland  https://github.com/cbuckland  
+Connor Mulcahey  https://github.com/connormulcahey  
+
 ## What is the Hyperloop?
 The Hyperloop is a proposed advanced method of high speed transportation between cities that are less than about 900 miles apart (e.g. Los Angeles and San Francisco). The system uses a capsule that is propelled through a low pressure steel tube as it rests on frictionless air bearings or magnets.
 
