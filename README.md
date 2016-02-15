@@ -1,4 +1,4 @@
-<h1 style="text-align:center;"> UCSB Hyperloop</h1>
+<h1 style="text-align:center;width:100%;">UCSB Hyperloop</h1>
 ![pod_gif_here](http://www.ucsbhyperloop.com/assets/ucsbhyperloop-d2207c2e7ad8ddb19f23f307bd09f1a862927b595cb68cd3478cf50093f5d581.gif)
 
 ## Who We Are
