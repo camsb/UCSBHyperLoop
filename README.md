@@ -1,15 +1,15 @@
 # UCSBHyperLoop
 
-#Who We Are
+## Who We Are
 We are an interdisiplinary team of 30 students and professors competing in SpaceX's Hyperloop Pod Competition. The competition involves designing and building a pod to be tested on a track constructed at SpaceX's Hawthorne headquarters in June 2016.
 
-#What is the Hyperloop?
+## What is the Hyperloop?
 The Hyperloop is a proposed advanced method of high speed transportation between cities that are less than about 900 miles apart (e.g. Los Angeles and San Francisco). The system uses a capsule that is propelled through a low pressure steel tube as it rests on frictionless air bearings or magnets.
 
-#What is this repoistory?
+## What is this repoistory?
 Our design involves two LPC 4088 microcontroller boards for all sensor, communications, and controls relavent to our pod. The code present here is what drives this functionality of our design.
 
-#Download Instructions and Activation
+## Download Instructions and Activation
 1. Download LPCXpresso V. 7.3 (Mac: https://www.lpcware.com/lpcxpresso/downloads/macosx, Windows: https://www.lpcware.com/lpcxpresso/downloads/windows)
 2. Follow all the License and Download information. 
 3. Activate your free license by following this link: https://www.lpcware.com/lpcxpresso/activate. You will have to create an account to continue.
@@ -17,11 +17,11 @@ Our design involves two LPC 4088 microcontroller boards for all sensor, communic
 5. Paste the serial number into the the website listed in step 3, and an LPCXpresso Activation Key will be given to you.
 6. Click Help -> Activate -> Activate (Free Edition)... and paste the code into there. Ensure that license files are created and you are prompted with a successful activation message. You can find where the license files are at the following link (https://www.lpcware.com/content/faq/lpcxpresso/where-license-stored)
 
-#For Windows Users (Downloading Github Application)
+## For Windows Users (Downloading Github Application)
 1. Download the Github application (https://desktop.github.com/) and make sure to that the Git Shell application is installed as well.
 2. You'll need the Git Shell since Windows does not have git command line tools natively installed.
 
-#Setting Up LPCXpresso with LPCOpen and Making a Project
+## Setting Up LPCXpresso with LPCOpen and Making a Project
 1. Open LPCXpresso and select your workplace. 
 2. Select File -> New Project
 3. Select LPCXpresso C Project under the C/C++ tab.
@@ -44,7 +44,7 @@ Our design involves two LPC 4088 microcontroller boards for all sensor, communic
 20. Click next and keep both options unchecked on the Printf options screen.
 21. Click Finish.
 
-#Cloning the Git Repositiory 
+## Cloning the Git Repositiory 
 1. First, remove the src folder created when the project was created.
 2. In the Git Powershell (or Terminal for Windows), navigate to the project directory you just made. For me, it was /Users/myname/LPCXpresso/ucsb_hyperloop
 3. Go to the git respository online (https://github.com/camsb/UCSBHyperLoop) and copy the link by the "HTTPS" button. Currently this shows (https://github.com/camsb/UCSBHyperLoop.git).
