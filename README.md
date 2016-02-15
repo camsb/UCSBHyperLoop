@@ -1,7 +1,7 @@
 # UCSB Hyperloop
 ![pod_gif_here](http://www.ucsbhyperloop.com/assets/ucsbhyperloop-d2207c2e7ad8ddb19f23f307bd09f1a862927b595cb68cd3478cf50093f5d581.gif)
 
-## Who We Are
+## Who Are We?
 We are an interdisiplinary team of 30 students and professors competing in SpaceX's Hyperloop Pod Competition. The competition involves designing and building a pod to be tested on a track constructed at SpaceX's Hawthorne headquarters in June 2016.
 
 ## What is the Hyperloop?
