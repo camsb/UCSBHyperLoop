@@ -1,6 +1,6 @@
 /*
 ===============================================================================
- Name        : blah.c
+ Name        : main.c
  Author      : $(author)
  Version     :
  Copyright   : $(copyright)
