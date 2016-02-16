@@ -7,7 +7,7 @@ We are an interdisiplinary team of 30 students and professors competing in Space
 The five Computer Engineering/Science students responsible for this repository include:
 
 Benjamin Hartl   https://github.com/benjaminhartl  
-Cameron McCarthy https://github.com/camsb
+Cameron McCarthy https://github.com/camsb  
 Celeste Bean     https://github.com/celestebean  
 Connor Buckland  https://github.com/cbuckland  
 Connor Mulcahey  https://github.com/connormulcahey  
