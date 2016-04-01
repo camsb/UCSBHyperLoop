@@ -33,12 +33,12 @@ float* calculateAcceleration( uint8_t* uncalcAcceleration )
 	return acceleration;
 }
 
-uint8_t* getAcceleration()
+float* getAcceleration()
 {
 	//Sample code has options for controlling resolution.
 
 	uint8_t  		wBuffer[ 2 ];
-	static uint8_t 	rBuffer[ 7 ];
+	static uint8_t 	rBuffer[ 6 ];
 	uint8_t 		readVal;
 	float*			calcAcceleration;
 
@@ -46,10 +46,10 @@ uint8_t* getAcceleration()
 	wBuffer[ 0 ] = ( LSM303_REGISTER_ACCEL_CTRL_REG1_A ); // Control register initializes all
 	wBuffer[ 1 ] = 0x57;
 
-	rBuffer[ 0 ] = LSM303_REGISTER_ACCEL_OUT_X_L_A;
+//	rBuffer[ 0 ] = LSM303_REGISTER_ACCEL_OUT_X_L_A;
 
 	Chip_I2C_MasterSend( i2cDev, ACC_ADDRESS, wBuffer, 2 );
-	Chip_I2C_MasterRead( i2cDev, ACC_ADDRESS, rBuffer, 2);
+//	Chip_I2C_MasterRead( i2cDev, ACC_ADDRESS, rBuffer, 2);
 
 	Chip_I2C_MasterCmdRead( i2cDev, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_L_A, &rBuffer[0], 1 );
 	Chip_I2C_MasterCmdRead( i2cDev, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_H_A, &rBuffer[1], 1 );
@@ -59,5 +59,5 @@ uint8_t* getAcceleration()
 	Chip_I2C_MasterCmdRead( i2cDev, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_Z_H_A, &rBuffer[5], 1 );
 
 	calcAcceleration = calculateAcceleration( (uint8_t *)rBuffer);
-	return (uint8_t *)rBuffer;//calculateAcceleration( c, uncalcAcceleration);
+	return (float *)calcAcceleration;//calculateAcceleration( c, uncalcAcceleration);
 }

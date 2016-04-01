@@ -21,7 +21,8 @@ int main(void)
 	printf("Celeste is SSOOOO lame! -Bucky\n");
 	uint32_t 			temperature;
 	uint32_t 			pressure;
-	uint8_t*			acceleration;
+	float*			acceleration;
+	float*			rotation;
 	struct constants  	*c;
 
 	c = ( struct constants * ) calloc( 1, sizeof(struct constants) );
@@ -33,21 +34,27 @@ int main(void)
 
 	//////////////////////////////////////////////////////////////////
 	// get temperature
-	temperature = getTemperature( c );
-	DEBUGOUT( "temperature = %u\n", temperature );
+//	temperature = getTemperature( c );
+//	DEBUGOUT( "temperature = %u\n", temperature );
 
 	//////////////////////////////////////////////////////////////////
 	// get pressure
-	pressure = getPressure( c );
-	DEBUGOUT( "pressure = %u\n", pressure );
+//	pressure = getPressure( c );
+//	DEBUGOUT( "pressure = %u\n", pressure );
 
 	//////////////////////////////////////////////////////////////////
 	// get acceleration
-	while(1) {
-			acceleration = getAcceleration( c );
-			delay(1);
-	}
+//	while(1) {
+//			acceleration = getAcceleration();
+//			delay(1);
+//	}
+	while( 1 )
+	{
+		acceleration = getAcceleration();
+		rotation = getRotAcceleration();
 
+		delay( 100 );
+	}
 	Chip_I2C_DeInit( I2C0 );
 	timer0DeInit();
 
