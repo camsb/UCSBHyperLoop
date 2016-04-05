@@ -1,48 +1,65 @@
 /*
-===============================================================================
- Name        : main.c
- Author      : $(author)
- Version     :
- Copyright   : $(copyright)
- Description : main definition
-===============================================================================
-*/
+ * Main.c
+ *
+ *  Created on: Apr 1, 2016
+ *      Author: benjaminhartl
+ */
 
-#if defined (__USE_LPCOPEN)
-#if defined(NO_BOARD_LIB)
-#include "chip.h"
-#else
-#include "board.h"
-#endif
-#endif
+#include "smooshed.h"
 
-#include <cr_section_macros.h>
+volatile uint32_t   NumOfMS;
+uint8_t             SampleSetting;
+volatile uint8_t    Timer0Running;
+volatile uint32_t   Timer0Count;
 
-// TODO: insert other include files here
-
-// TODO: insert other definitions and declarations here
-
-int main(void) {
-
-#if defined (__USE_LPCOPEN)
-#if !defined(NO_BOARD_LIB)
-    // Read clock settings and update SystemCoreClock variable
+int main(void)
+{
     SystemCoreClockUpdate();
     // Set up and initialize all required blocks and
     // functions related to the board hardware
     Board_Init();
-    // Set the LED to the state of "On"
-    Board_LED_Set(0, true);
-#endif
-#endif
+    printf("Celeste is SSOOOO lame! -Bucky\n");
+    uint32_t            temperature;
+    uint32_t            pressure;
+    float*          acceleration;
+    float*          rotation;
+    struct constants    *c;
 
-    // TODO: insert code here
+    c = ( struct constants * ) calloc( 1, sizeof(struct constants) );
 
-    // Force the counter to be placed into memory
-    volatile static int i = 0 ;
-    // Enter an infinite loop, just incrementing a counter
-    while(1) {
-        i++ ;
+    i2cInit();
+
+    initCalibrationData( c );
+    timer0Init();
+
+    //////////////////////////////////////////////////////////////////
+    // get temperature
+//  temperature = getTemperature( c );
+//  DEBUGOUT( "temperature = %u\n", temperature );
+
+    //////////////////////////////////////////////////////////////////
+    // get pressure
+//  pressure = getPressure( c );
+//  DEBUGOUT( "pressure = %u\n", pressure );
+
+    //////////////////////////////////////////////////////////////////
+    // get acceleration
+//  while(1) {
+//          acceleration = getAcceleration();
+//          delay(1);
+//  }
+    while( 1 )
+    {
+        acceleration = getAcceleration();
+        rotation = getRotAcceleration();
+
+        delay( 100 );
     }
-    return 0 ;
+    Chip_I2C_DeInit( I2C0 );
+    timer0DeInit();
+
+    free( c );
+    //Chip_I2C_DeInit(I2C1);
+
+    return 0;
 }
