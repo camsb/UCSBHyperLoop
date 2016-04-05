@@ -3,7 +3,7 @@
  *
  */
 
-#include "Smooshed.h"
+#include "gyroscope.h"
 
 float* calculateRotAcc( uint8_t* uncalcRotAcceleration )
 {
@@ -35,7 +35,6 @@ float* getRotAcceleration()
 
   uint8_t     wBuffer[ 3 ];
   static uint8_t  rBuffer[ 6 ];
-  uint8_t     readVal;
   float*      calcRotAcceleration;
 
 

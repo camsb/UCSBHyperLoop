@@ -1,9 +1,6 @@
-#include "Smooshed.h"
+#include "temp_press.h"
 
-volatile uint32_t   NumOfMS;
-uint8_t       SampleSetting;
-volatile uint8_t  Timer0Running;
-volatile uint32_t Timer0Count;
+#define SAMPLE_SETTING 0
 
 uint16_t readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
 {
@@ -99,12 +96,12 @@ uint32_t calculatePressure( struct constants *c, uint32_t uncalcPressure )
   X1 = ( c->B2 * ( ( B6 * B6 ) >> 12 ) ) >> 11;
   X2 = ( c->AC2 * B6 ) >> 11;
   X3 = X1 + X2;
-  B3 = ( ( ( ( c->AC1 * 4 ) + X3 ) << SampleSetting ) + 2 ) >> 2;
+  B3 = ( ( ( ( c->AC1 * 4 ) + X3 ) << SAMPLE_SETTING ) + 2 ) >> 2;
   X1 = ( c->AC3 * B6 ) >> 13;
   X2 = ( c->B1 * ( ( B6 * B6 ) >> 12 ) ) >> 16;
   X3 = ( ( X1 + X2 ) + 2 ) >> 2;
   B4 = ( c->AC4 * ( unsigned long )( X3 + 32768 ) ) >> 15;
-  B7 = ( ( unsigned long ) uncalcPressure - B3 ) * ( 50000 >> SampleSetting );
+  B7 = ( ( unsigned long ) uncalcPressure - B3 ) * ( 50000 >> SAMPLE_SETTING );
 
   if( B7 < 0x80000000 )
     pressure = ( B7 * 2 ) / B4;
@@ -118,31 +115,6 @@ uint32_t calculatePressure( struct constants *c, uint32_t uncalcPressure )
 
   return pressure;
 }
-
-uint32_t calculateTemperature( struct constants *c, uint32_t uncalcTemperature )
-{
-  uint32_t  temperature;
-  int32_t   X1;
-  int32_t   X2;
-  //int32_t   X3;
-
-  X1 = ( ( uncalcTemperature - c->AC6 ) * c->AC5 ) >> 15;
-  if( DEBUG ) DEBUGOUT( "X1 = %d\n", X1 );
-
-  X2 = ( c->MC << 11 ) / ( X1 + c->MD );
-  if( DEBUG ) DEBUGOUT( "X2 = %d\n", X2 );
-
-  c->B5 = X1 + X2;
-  if( DEBUG ) DEBUGOUT( "c->B5 = %d\n", c->B5 );
-
-  temperature = ( c->B5 + 8 ) >> 4;
-
-  DEBUGOUT( "Calculated Temperature\n" );
-
-  return temperature;
-}
-
-
 
 uint32_t getPressure( struct constants *c )
 {
@@ -169,6 +141,29 @@ uint32_t getPressure( struct constants *c )
   return calculatePressure( c, uncalcPressure );
 }
 
+uint32_t calculateTemperature( struct constants *c, uint32_t uncalcTemperature )
+{
+  uint32_t  temperature;
+  int32_t   X1;
+  int32_t   X2;
+  //int32_t   X3;
+
+  X1 = ( ( uncalcTemperature - c->AC6 ) * c->AC5 ) >> 15;
+  if( DEBUG ) DEBUGOUT( "X1 = %d\n", X1 );
+
+  X2 = ( c->MC << 11 ) / ( X1 + c->MD );
+  if( DEBUG ) DEBUGOUT( "X2 = %d\n", X2 );
+
+  c->B5 = X1 + X2;
+  if( DEBUG ) DEBUGOUT( "c->B5 = %d\n", c->B5 );
+
+  temperature = ( c->B5 + 8 ) >> 4;
+
+  DEBUGOUT( "Calculated Temperature\n" );
+
+  return temperature;
+}
+
 uint32_t getTemperature( struct constants *c )
 {
   uint32_t  uncalcTemperature;
@@ -188,3 +183,4 @@ uint32_t getTemperature( struct constants *c )
 
   return calculateTemperature( c, uncalcTemperature );
 }
+

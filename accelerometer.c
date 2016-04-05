@@ -2,12 +2,7 @@
  * Acceleration.c
  */
 
-#include "smooshed.h"
-
-volatile uint32_t   NumOfMS;
-uint8_t       SampleSetting;
-volatile uint8_t  Timer0Running;
-volatile uint32_t Timer0Count;
+#include "accelerometer.h"
 
 float* calculateAcceleration( uint8_t* uncalcAcceleration )
 {
@@ -39,7 +34,6 @@ float* getAcceleration()
 
   uint8_t     wBuffer[ 2 ];
   static uint8_t  rBuffer[ 6 ];
-  uint8_t     readVal;
   float*      calcAcceleration;
 
 

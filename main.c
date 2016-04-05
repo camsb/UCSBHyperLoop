@@ -5,12 +5,12 @@
  *      Author: benjaminhartl
  */
 
-#include "smooshed.h"
-
-volatile uint32_t   NumOfMS;
-uint8_t             SampleSetting;
-volatile uint8_t    Timer0Running;
-volatile uint32_t   Timer0Count;
+#include "time.h"
+#include "board.h" 
+#include "temp_press.h"
+#include "stdlib.h"
+#include "accelerometer.h"
+#include "gyroscope.h"
 
 int main(void)
 {
