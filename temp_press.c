@@ -2,6 +2,8 @@
 
 #define SAMPLE_SETTING 0
 
+constants *c;
+
 uint16_t readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
 {
   uint8_t  buffer;
@@ -21,8 +23,9 @@ uint16_t readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
 }
 
 // set the initial calibration data
-void initCalibrationData( struct constants *c )
+void initTempPressCalibrationData()
 {
+  c = ( constants * ) calloc ( 1, sizeof( constants ) );
   c->AC1 = readRegs( BMP_ADDRESS, 0xAA, 0xAB );
   c->AC2 = readRegs( BMP_ADDRESS, 0xAC, 0xAD );
   c->AC3 = readRegs( BMP_ADDRESS, 0xAE, 0xAF );
@@ -34,11 +37,10 @@ void initCalibrationData( struct constants *c )
   c->MB  = readRegs( BMP_ADDRESS, 0xBA, 0xBB );
   c->MC  = readRegs( BMP_ADDRESS, 0xBC, 0xBD );
   c->MD  = readRegs( BMP_ADDRESS, 0xBE, 0xBF );
-
   c->B5  = 0; // set in getTemperature, used in getPressure
 }
 
-void printConstants( struct constants *c )
+void printConstants()
 {
   DEBUGOUT( "%i\n", c->AC1 );
   DEBUGOUT( "%i\n", c->AC2 );
@@ -80,7 +82,7 @@ uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8
   return returnVal;
 }
 
-uint32_t calculatePressure( struct constants *c, uint32_t uncalcPressure )
+uint32_t calculatePressure( uint32_t uncalcPressure )
 {
   uint32_t  pressure;
   int32_t   X1;
@@ -116,7 +118,7 @@ uint32_t calculatePressure( struct constants *c, uint32_t uncalcPressure )
   return pressure;
 }
 
-uint32_t getPressure( struct constants *c )
+uint32_t getPressure()
 {
   uint32_t  uncalcPressure;
   uint8_t   wBuffer[ 2 ];
@@ -136,35 +138,24 @@ uint32_t getPressure( struct constants *c )
   // TODO: set to 0 precision
   // bit shift back, for precision
   uncalcPressure = uncalcPressure >> 8;
-  DEBUGOUT( "uncalcPres = %u\n", uncalcPressure );
-
-  return calculatePressure( c, uncalcPressure );
+  return calculatePressure( uncalcPressure );
 }
 
-uint32_t calculateTemperature( struct constants *c, uint32_t uncalcTemperature )
+int32_t calculateTemperature( uint32_t uncalcTemperature )
 {
-  uint32_t  temperature;
+  int32_t  temperature;
   int32_t   X1;
   int32_t   X2;
-  //int32_t   X3;
 
   X1 = ( ( uncalcTemperature - c->AC6 ) * c->AC5 ) >> 15;
-  if( DEBUG ) DEBUGOUT( "X1 = %d\n", X1 );
-
   X2 = ( c->MC << 11 ) / ( X1 + c->MD );
-  if( DEBUG ) DEBUGOUT( "X2 = %d\n", X2 );
-
   c->B5 = X1 + X2;
-  if( DEBUG ) DEBUGOUT( "c->B5 = %d\n", c->B5 );
-
   temperature = ( c->B5 + 8 ) >> 4;
-
-  DEBUGOUT( "Calculated Temperature\n" );
 
   return temperature;
 }
 
-uint32_t getTemperature( struct constants *c )
+int32_t getTemperature()
 {
   uint32_t  uncalcTemperature;
   uint8_t   wBuffer[ 2 ];
@@ -179,8 +170,7 @@ uint32_t getTemperature( struct constants *c )
   rBuffer[ 1 ] = &t;
 
   uncalcTemperature = getDataValue( wBuffer, rBuffer, 2, BMP_ADDRESS );
-  DEBUGOUT( "uncalcTemperature = %u\n", uncalcTemperature );
 
-  return calculateTemperature( c, uncalcTemperature );
+  return calculateTemperature( uncalcTemperature );
 }
 

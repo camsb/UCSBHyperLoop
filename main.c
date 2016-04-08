@@ -1,9 +1,3 @@
-/*
- * Main.c
- *
- *  Created on: Apr 1, 2016
- *      Author: benjaminhartl
- */
 
 #include "time.h"
 #include "board.h" 
@@ -12,89 +6,49 @@
 #include "accelerometer.h"
 #include "gyroscope.h"
 #include "lcd.h"
+#include "stdio.h"
+#include "sensor_data.h"
+#include "i2c.h"
 
-int main(void) {
+ int main(void)
+ {
 
-#if defined (__USE_LPCOPEN)
-#if !defined(NO_BOARD_LIB)
-    // Read clock settings and update SystemCoreClock variable
+    /* Initialize the board and clock */
     SystemCoreClockUpdate();
-    // Set up and initialize all required blocks and
-    // functions related to the board hardware
     Board_Init();
-#endif
-#endif
-    lcdInit();
 
-    struct Lines lines;
-    L = &lines;
+    i2c_app_init(I2C0, SPEED_100KHZ);
+    initTempPressCalibrationData();
 
-    linesInit();
-    setLine( 0, "012345678910" );
-    setLine( 1, "abcdefghijklm" );
-    setLine( 2, "nopqrstuvwxyz" );
-    setLine( 3, "~!@#$%^&*()_+-=" );
+    gyroAccelXYZ acceleration, rotation;
 
-    timer0Init();
-    timer1Init();
+    while( 1 )
+    {
+        sensorData.temp = getTemperature();
+        DEBUGOUT( "temperature = %d\n", sensorData.temp );
 
-    while(1) {  // infinte loop
-        __WFI();
+        sensorData.pressure = getPressure();
+        DEBUGOUT( "pressure = %u\n", sensorData.pressure );
+
+        acceleration = getAccelerometerData();
+        rotation = getGyroscopeData();
+
+        sensorData.accelX = acceleration.x;
+        DEBUGOUT( "accelX = %f\n", sensorData.accelX );
+        sensorData.accelY = acceleration.y;
+        DEBUGOUT( "accelY = %f\n", sensorData.accelY );
+        sensorData.accelZ = acceleration.z;
+        DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
+
+        sensorData.gyroX = rotation.x;
+        DEBUGOUT( "gyroX = %f\n", sensorData.gyroX );
+        sensorData.gyroY = rotation.y;
+        DEBUGOUT( "gyroY = %f\n", sensorData.gyroY );
+        sensorData.gyroZ = rotation.z;
+        DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
+
+        delay( 100 );
     }
 
-    // Currently will never reach this line because of the infinite loop
-    linesDeInit();
     return 0;
-}
-
-// int main(void)
-// {
-//     SystemCoreClockUpdate();
-//     // Set up and initialize all required blocks and
-//     // functions related to the board hardware
-//     Board_Init();
-//     printf("Celeste is SSOOOO lame! -Bucky\n");
-//     uint32_t            temperature;
-//     uint32_t            pressure;
-//     float*          acceleration;
-//     float*          rotation;
-//     struct constants    *c;
-
-//     c = ( struct constants * ) calloc( 1, sizeof(struct constants) );
-
-//     i2cInit();
-
-//     initCalibrationData( c );
-//     timer0Init();
-
-//     //////////////////////////////////////////////////////////////////
-//     // get temperature
-// //  temperature = getTemperature( c );
-// //  DEBUGOUT( "temperature = %u\n", temperature );
-
-//     //////////////////////////////////////////////////////////////////
-//     // get pressure
-// //  pressure = getPressure( c );
-// //  DEBUGOUT( "pressure = %u\n", pressure );
-
-//     //////////////////////////////////////////////////////////////////
-//     // get acceleration
-// //  while(1) {
-// //          acceleration = getAcceleration();
-// //          delay(1);
-// //  }
-//     while( 1 )
-//     {
-//         acceleration = getAcceleration();
-//         rotation = getRotAcceleration();
-
-//         delay( 100 );
-//     }
-//     Chip_I2C_DeInit( I2C0 );
-//     timer0DeInit();
-
-//     free( c );
-//     //Chip_I2C_DeInit(I2C1);
-
-//     return 0;
-// }
+ }

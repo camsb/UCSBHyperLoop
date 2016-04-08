@@ -4,13 +4,14 @@
 #include "time.h"
 #include "i2c.h"
 #include "stdint.h"
+#include "sensor_data.h"
 
 #define ACC_ADDRESS      0x19
 #define MAG_ADDRESS      0x1E
 #define SENSORS_GRAVITY_STANDARD        (9.80665F)  /**< Earth's gravity in m/s^2 */
 
-float*    calculateAcceleration( uint8_t* uncalcAcceleration );
-float*    getAcceleration();
+gyroAccelXYZ    calculateAcceleration( int16_t* uncalcAcceleration );
+gyroAccelXYZ    getAccelerometerData();
 
 typedef enum
 {                                                     // DEFAULT    TYPE

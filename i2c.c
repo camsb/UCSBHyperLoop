@@ -69,11 +69,3 @@ void I2C0_IRQHandler(void)
 {
   i2c_state_handling(I2C0);
 }
-
-void i2cInit()
-{
-
-  /* Initialize I2C0 */
-  i2c_app_init(I2C0, SPEED_100KHZ);
-
-}
