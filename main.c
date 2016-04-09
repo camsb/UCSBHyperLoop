@@ -20,6 +20,8 @@
     i2c_app_init(I2C0, SPEED_100KHZ);
     initTempPressCalibrationData();
 
+    timer0Init();
+
     gyroAccelXYZ acceleration, rotation;
 
     while( 1 )

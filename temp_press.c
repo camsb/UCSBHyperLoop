@@ -67,7 +67,7 @@ uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8
   Chip_I2C_MasterSend( i2cDev, periph, writeBuf, len );
 
   // delay to allow time for data to be set in correct registers
-  delay( 1 );
+  delay( 10 );
 
   for( i = 0; i < len; i++ )
   {
@@ -166,8 +166,8 @@ int32_t getTemperature()
   wBuffer[ 1 ] = 0x2E;
 
   rBuffer[ 0 ] = 0xF6;
-  //rBuffer[ 1 ] = 0xF7; // Get needs to be an arbitrary address to which the data can be written.
-  rBuffer[ 1 ] = &t;
+  rBuffer[ 1 ] = 0xF7; // Get needs to be an arbitrary address to which the data can be written.
+  // rBuffer[ 1 ] = &t;
 
   uncalcTemperature = getDataValue( wBuffer, rBuffer, 2, BMP_ADDRESS );
 

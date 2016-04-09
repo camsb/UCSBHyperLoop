@@ -1,30 +1,13 @@
 
 #include "gyroscope.h"
 
-gyroAccelXYZ calculateRotAcc( int16_t* uncalcRotAcceleration )
-{
-  gyroAccelXYZ rotAcceleration;
-
-  // Not sure what shifting right by 4 bits does, we may want to take this out for increased
-  // accuracy
-  rotAcceleration.x = (uncalcRotAcceleration[0] | (uncalcRotAcceleration[1] << 8));
-  rotAcceleration.y = (uncalcRotAcceleration[2] | (uncalcRotAcceleration[3] << 8));
-  rotAcceleration.z = (uncalcRotAcceleration[4] | (uncalcRotAcceleration[5] << 8));
-
-  /* NOTE: If using 500 or 2000 DPS, make sure to change this */
-  rotAcceleration.x = rotAcceleration.x * GYRO_SENSITIVITY_250DPS * SENSORS_DPS_TO_RADS;
-  rotAcceleration.y = rotAcceleration.y * GYRO_SENSITIVITY_250DPS * SENSORS_DPS_TO_RADS;
-  rotAcceleration.z = rotAcceleration.z * GYRO_SENSITIVITY_250DPS * SENSORS_DPS_TO_RADS;
-
-  return rotAcceleration;
-}
-
 gyroAccelXYZ getGyroscopeData()
 {
   //Sample code has options for controlling resolution.
 
   uint8_t     wBuffer[ 2 ];
   uint8_t     rBuffer[ 6 ];
+  gyroAccelXYZ rotAcceleration;
 
   wBuffer[ 0 ] = GYRO_REGISTER_CTRL_REG1; // Control register initializes all
   wBuffer[ 1 ] = 0x00;
@@ -47,5 +30,17 @@ gyroAccelXYZ getGyroscopeData()
   Chip_I2C_MasterSend( i2cDev, GYRO_ADDRESS, wBuffer, 2 );
   Chip_I2C_MasterCmdRead( i2cDev, GYRO_ADDRESS, GYRO_REGISTER_OUT_X_L, rBuffer, 6);
 
-  return calculateRotAcc( (int16_t *) rBuffer);
+  // Not sure what shifting right by 4 bits does, we may want to take this out for increased
+  // accuracy
+  rotAcceleration.x = (rBuffer[0] | (rBuffer[1] << 8));
+  rotAcceleration.y = (rBuffer[2] | (rBuffer[3] << 8));
+  rotAcceleration.z = (rBuffer[4] | (rBuffer[5] << 8));
+
+  /* NOTE: If using 500 or 2000 DPS, make sure to change this */
+  rotAcceleration.x = rotAcceleration.x * GYRO_SENSITIVITY_250DPS * SENSORS_DPS_TO_RADS;
+  rotAcceleration.y = rotAcceleration.y * GYRO_SENSITIVITY_250DPS * SENSORS_DPS_TO_RADS;
+  rotAcceleration.z = rotAcceleration.z * GYRO_SENSITIVITY_250DPS * SENSORS_DPS_TO_RADS;
+
+  return rotAcceleration;
+
 }
