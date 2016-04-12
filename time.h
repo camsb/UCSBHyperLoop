@@ -8,6 +8,7 @@ void    delay( uint32_t ms );
 void    timer0DeInit();
 void    timer0Init();
 void    TIMER0_IRQHandler(void);
+void    Reset_Timer_Counter(LPC_TIMER_T *pTMR);
 
 volatile int Timer0Running;
 volatile int NumOfMS;

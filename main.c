@@ -9,6 +9,7 @@
 #include "stdio.h"
 #include "sensor_data.h"
 #include "i2c.h"
+#include "photo_electric.h"
 
  int main(void)
  {
@@ -21,11 +22,18 @@
     initTempPressCalibrationData();
 
     timer0Init();
+    Photoelectric_Init();
 
     gyroAccelXYZ acceleration, rotation;
 
     while( 1 )
     {
+
+        if(strip_detected) {
+          printf("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
+          strip_detected = 0;
+        }
+
         sensorData.temp = getTemperature();
         DEBUGOUT( "temperature = %d\n", sensorData.temp );
 

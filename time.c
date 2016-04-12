@@ -1,5 +1,10 @@
 #include "time.h"
 
+void Reset_Timer_Counter(LPC_TIMER_T *pTMR) {
+  pTMR->TC = 0; // Reset Timer Counter
+//  pTMR->PC = 0; // Reset Prescale Counter
+}
+
 void TIMER0_IRQHandler(void)
 {
   if ( Chip_TIMER_MatchPending( LPC_TIMER0, 1 ) )
@@ -60,7 +65,7 @@ void timer0Init()
 
 void delay( uint32_t ms )
 {
-  
+
  Timer0Running = TRUE;
  NumOfMS = ms;
 
