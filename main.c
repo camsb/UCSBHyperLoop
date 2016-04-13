@@ -24,14 +24,17 @@
     timer0Init();
     Photoelectric_Init();
 
+    DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
+    DEBUGOUT("_______________________________________\n\n");
+
     gyroAccelXYZ acceleration, rotation;
 
     while( 1 )
     {
 
         if(strip_detected) {
-          printf("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
-          strip_detected = 0;
+        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
+        	strip_detected = 0;
         }
 
         sensorData.temp = getTemperature();

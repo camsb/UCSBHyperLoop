@@ -47,7 +47,6 @@ void TIMER3_IRQHandler(void)
 
   strip_region++;
   regional_strip_count = 0;
-  
 }
 
 /* Setup Photoelectric sensor pin as input */

@@ -12,11 +12,11 @@ uint16_t readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
   value = 0;
 
   // get MSB
-  Chip_I2C_MasterCmdRead( i2cDev, slaveAddr, msbReg, &buffer, 1 );
+  Chip_I2C_MasterCmdRead( I2C0, slaveAddr, msbReg, &buffer, 1 );
   value = ( ( uint16_t ) buffer ) << 8;
 
   // get LSB
-  Chip_I2C_MasterCmdRead( i2cDev, slaveAddr, lsbReg, &buffer, 1 );
+  Chip_I2C_MasterCmdRead( I2C0, slaveAddr, lsbReg, &buffer, 1 );
   value = value | ( uint16_t ) buffer;
 
   return value;
@@ -59,12 +59,12 @@ void printConstants()
 uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph )
 {
   int8_t   i;
-  uint32_t readVal; // TODO: This is a uint8_t in Chip_I2C_MasterCmdRead, should be fixed when everything working
+  uint8_t readVal; // TODO: This is a uint8_t in Chip_I2C_MasterCmdRead, should be fixed when everything working
   uint32_t returnVal;
 
   returnVal = 0;
 
-  Chip_I2C_MasterSend( i2cDev, periph, writeBuf, len );
+  Chip_I2C_MasterSend( I2C0, periph, writeBuf, len );
 
   // delay to allow time for data to be set in correct registers
   delay( 10 );
@@ -73,10 +73,9 @@ uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8
   {
     readVal   = 0;
 
-    Chip_I2C_MasterCmdRead( i2cDev, periph, readBuf[ i ], &readVal, 1 );
+    Chip_I2C_MasterCmdRead( I2C0, periph, readBuf[ i ], &readVal, 1 );
 
-    readVal   = readVal & 0xFF;
-    returnVal = returnVal | ( readVal << ( 8 * ( len - i - 1 ) ) );
+    returnVal = returnVal | ( ((uint32_t)readVal) << ( 8 * ( len - i - 1 ) ) );
   }
 
   return returnVal;
@@ -123,15 +122,13 @@ uint32_t getPressure()
   uint32_t  uncalcPressure;
   uint8_t   wBuffer[ 2 ];
   uint8_t   rBuffer[ 3 ];
-  uint8_t   t0;
-  uint8_t   t1;
 
   wBuffer[ 0 ] = 0xF4; // BMP085_REGISTER_CONTROL -- initializes register address
   wBuffer[ 1 ] = 0x34; // BMP085_REGISTER_READPRESSURECMD -- determine which option by putting data in register
 
   rBuffer[ 0 ] = 0xF6; // BMP085_REGISTER_PRESSUREDATA
-  rBuffer[ 1 ] = &t0; // was 0xF7 (just an explicit declaration of memory)
-  rBuffer[ 2 ] = &t1; // was 0xF8
+  rBuffer[ 1 ] = 0xF7; //(just an explicit declaration of memory)
+  rBuffer[ 2 ] = 0xF8;
 
   uncalcPressure = getDataValue( wBuffer, rBuffer, 3, BMP_ADDRESS );
 
@@ -160,14 +157,12 @@ int32_t getTemperature()
   uint32_t  uncalcTemperature;
   uint8_t   wBuffer[ 2 ];
   uint8_t   rBuffer[ 2 ];
-  uint8_t   t;
 
   wBuffer[ 0 ] = 0xF4;
   wBuffer[ 1 ] = 0x2E;
 
   rBuffer[ 0 ] = 0xF6;
   rBuffer[ 1 ] = 0xF7; // Get needs to be an arbitrary address to which the data can be written.
-  // rBuffer[ 1 ] = &t;
 
   uncalcTemperature = getDataValue( wBuffer, rBuffer, 2, BMP_ADDRESS );
 

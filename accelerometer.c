@@ -14,8 +14,8 @@ gyroAccelXYZ getAccelerometerData()
   wBuffer[ 0 ] = ( LSM303_REGISTER_ACCEL_CTRL_REG1_A ); // Control register initializes all
   wBuffer[ 1 ] = 0x57;
 
-  Chip_I2C_MasterSend( i2cDev, ACC_ADDRESS, wBuffer, 2 );
-  Chip_I2C_MasterCmdRead( i2cDev, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, rBuffer, 6 );
+  Chip_I2C_MasterSend( I2C0, ACC_ADDRESS, wBuffer, 2 );
+  Chip_I2C_MasterCmdRead( I2C0, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, rBuffer, 6 );
 
   // Not sure what shifting right by 4 bits does, we may want to take this out for increased
   // accuracy

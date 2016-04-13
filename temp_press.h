@@ -23,15 +23,16 @@ typedef struct {
   int32_t  B5;
 } constants;
 
-uint32_t  calculatePressure( uint32_t uncalcPres );
-int32_t  calculateTemperature( uint32_t uncalcTemp );
+uint32_t  	calculatePressure( uint32_t uncalcPres );
+int32_t  	calculateTemperature( uint32_t uncalcTemp );
 //uint32_t  getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len); // Original declaration.
-uint32_t  getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph );
-int32_t  getTemperature();
-uint32_t  getPressure();
-void    initCalibrationData();
-void    printConstants();
-uint16_t  readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg );
-//void    setCalibrationData( struct constants *c );
+uint32_t  	getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph );
+int32_t  	getTemperature();
+uint32_t  	getPressure();
+void    	initCalibrationData();
+void    	printConstants();
+uint16_t  	readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg );
+//void    	setCalibrationData( struct constants *c );
+void 		initTempPressCalibrationData();
 
 #endif

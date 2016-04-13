@@ -2,8 +2,7 @@
 #include "i2c.h"
 
 /* State machine handler for I2C0 and I2C1 */
-/*static*/ void i2c_state_handling(I2C_ID_T id)
-{
+/*static*/ void i2c_state_handling(I2C_ID_T id) {
   if (Chip_I2C_IsMasterActive(id)) {
     Chip_I2C_MasterStateHandler(id);
   } else {
@@ -12,8 +11,7 @@
 }
 
 /* Print data to console */
-/*static*/ void con_print_data(const uint8_t *dat, int sz)
-{
+/*static*/ void con_print_data(const uint8_t *dat, int sz) {
   int i;
   if (!sz) return;
   for (i = 0; i < sz; i++) {
@@ -24,8 +22,7 @@
 }
 
 /* Set I2C mode to polling/interrupt */
-/*static*/ void i2c_set_mode(I2C_ID_T id, int polling)
-{
+/*static*/ void i2c_set_mode(I2C_ID_T id, int polling) {
   if(!polling) {
     mode_poll &= ~(1 << id);
     Chip_I2C_SetMasterEventHandler(id, Chip_I2C_EventHandler);
@@ -38,8 +35,7 @@
 }
 
 /* Initialize the I2C bus */
-/*static*/ void i2c_app_init(I2C_ID_T id, int speed)
-{
+/*static*/ void i2c_app_init(I2C_ID_T id, int speed) {
   Board_I2C_Init(id);
 
   /* Initialize I2C */
@@ -52,20 +48,9 @@
 }
 
 /**
- * @brief SysTick Interrupt Handler
- * @return  Nothing
- * @note  Systick interrupt handler updates the button status
- */
-// void SysTick_Handler(void)
-// {
-//   i2c_iox_update_regs(2);
-// }
-
-/**
  * @brief I2C0 Interrupt handler
  * @return  None
  */
-void I2C0_IRQHandler(void)
-{
+void I2C0_IRQHandler(void) {
   i2c_state_handling(I2C0);
 }
