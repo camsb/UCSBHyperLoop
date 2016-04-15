@@ -1,6 +1,5 @@
 #include "ethernet.h"
 
-
 /*****************************************************************************
  * Public functions
  ****************************************************************************/
@@ -305,7 +304,7 @@ void Wiz_Destination_Init(uint8_t n) {
 	spi_Send_Blocking(Sn_DPORT_BASE + offset, 0x0002);
 }
 
-void Wiz_Socket_Check(uint8_t n) {
+void Wiz_Address_Check(uint8_t n) {
 	uint16_t offset = 0x0100*n;
 	uint16_t port;
 
@@ -401,7 +400,7 @@ void Wiz_Clear_Buffer(uint8_t n) {
 }
 
 /* Send Outgoing Data */
-uint16_t Wiz_Send(uint8_t n, char* message) {
+uint16_t Wiz_Send(uint8_t n, uint8_t* message) {
 	uint16_t length;
 	uint16_t offset = 0x0100*n;
 	uint16_t dst_mask, dst_ptr, wr_base, rd_ptr0, rd_ptr1;
@@ -417,8 +416,8 @@ uint16_t Wiz_Send(uint8_t n, char* message) {
 	dst_ptr = gSn_TX_BASE[n] + dst_mask;
 
 	/* Setup data and length for send */
-	sprintf(((char *)Tx_Buf) + 4, message);
-	length = strlen(message);
+	sprintf(((char *)Tx_Buf) + 4, (char *)message);
+	length = strlen((char *)message);
 	Tx_Buf[4 + length++] = '\r';
 	Tx_Buf[4 + length++] = '\n';
 	Tx_Buf[4 + length++] = '\0';
@@ -456,7 +455,7 @@ uint16_t Wiz_Send(uint8_t n, char* message) {
 }
 
 /* Read Incoming Data */
-uint16_t Wiz_Recv(uint8_t n) {
+uint16_t Wiz_Recv(uint8_t n, uint8_t *message) {
 	uint16_t length;
 	uint16_t offset = 0x0100*n;
 	uint16_t src_mask, src_ptr, rd_base;
@@ -484,8 +483,8 @@ uint16_t Wiz_Recv(uint8_t n) {
 	} else {
 		spi_Recv_Blocking(src_ptr, length);
 	}
-	memset(Rx_Data, '\0', DATA_BUF_SIZE);
-	memcpy(Rx_Data, &Rx_Buf[4], length);	// SPI HDR 4B, TCP HDR 8B
+	memset(message, '\0', DATA_BUF_SIZE);
+	memcpy(message, &Rx_Buf[4], length);	// SPI HDR 4B, TCP HDR 8B
 //	Rx_Data[length-4] = '\0';
 
 	rd_base += length;

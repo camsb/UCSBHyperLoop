@@ -6,7 +6,7 @@ gyroAccelXYZ getAccelerometerData()
 
   //Sample code has options for controlling resolution.
   uint8_t     wBuffer[ 2 ];
-  uint16_t     rBuffer[ 6 ];
+  uint8_t     rBuffer[ 6 ];
   int16_t rawAcceleration[3];
   gyroAccelXYZ acceleration;
   float LSM303ACCEL_MG_LSB = (0.00094F); 
@@ -19,9 +19,9 @@ gyroAccelXYZ getAccelerometerData()
 
   // Not sure what shifting right by 4 bits does, we may want to take this out for increased
   // accuracy
-  rawAcceleration[0] = (rBuffer[0] | (rBuffer[1] << 8)) >> 4;
-  rawAcceleration[1] = (rBuffer[2] | (rBuffer[3] << 8)) >> 4;
-  rawAcceleration[2] = (rBuffer[4] | (rBuffer[5] << 8)) >> 4;
+  rawAcceleration[0] = (((uint16_t)rBuffer[0]) | (((uint16_t)rBuffer[1]) << 8)) >> 4;
+  rawAcceleration[1] = (((uint16_t)rBuffer[2]) | (((uint16_t)rBuffer[3]) << 8)) >> 4;
+  rawAcceleration[2] = (((uint16_t)rBuffer[4]) | (((uint16_t)rBuffer[5]) << 8)) >> 4;
 
   acceleration.x = ((float)rawAcceleration[0]) * LSM303ACCEL_MG_LSB * SENSORS_GRAVITY_STANDARD;
   acceleration.y = ((float)rawAcceleration[1]) * LSM303ACCEL_MG_LSB * SENSORS_GRAVITY_STANDARD;

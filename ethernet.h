@@ -100,9 +100,7 @@ extern uint16_t gSn_TX_BASE[];
 
 /* SPI Global Variables */
 /*static*/ uint8_t Tx_Buf[BUFFER_SIZE];
-/*static*/ uint8_t Tx_Data[DATA_BUF_SIZE];
 /*static*/ uint8_t Rx_Buf[BUFFER_SIZE];
-/*static*/ uint8_t Rx_Data[DATA_BUF_SIZE];
 /*static*/ SSP_ConfigFormat ssp_format;
 /*static*/ Chip_SSP_DATA_SETUP_T xf_setup;
 static volatile uint8_t  isXferCompleted = 0;
@@ -120,7 +118,7 @@ void Wiz_Memory_Init();
 void Wiz_TCP_Init(uint8_t n);
 void Wiz_UDP_Init(uint8_t n);
 void Wiz_Destination_Init(uint8_t n);
-void Wiz_Socket_Check(uint8_t n);
+void Wiz_Address_Check(uint8_t n);
 void Wiz_TCP_Connect(uint8_t n);
 void Wiz_TCP_Close(uint8_t n);
 void Wiz_UDP_Close(uint8_t n);
@@ -132,7 +130,7 @@ void spi_Recv_Int(uint16_t address);
 void spi_Send_Blocking(uint16_t address, uint16_t length);
 void spi_Recv_Blocking(uint16_t address, uint16_t length);
 uint8_t Wiz_Check_Socket(uint8_t n);
-uint16_t Wiz_Send(uint8_t n, char* message);
-uint16_t Wiz_Recv(uint8_t n);
+uint16_t Wiz_Send(uint8_t n, uint8_t* message);
+uint16_t Wiz_Recv(uint8_t n, uint8_t* message);
 
 #endif /* ETHERNET_H_ */
