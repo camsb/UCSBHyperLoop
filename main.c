@@ -10,11 +10,11 @@
 #include "sensor_data.h"
 #include "i2c.h"
 #include "photo_electric.h"
-#include "short_ranging.h"
+#include "ranging.h"
 
 int main(void)
 {
-	Burst_Mode_Flag = 0;
+
 //	bool end_Flag = false;
 //	uint32_t _bitRate = ADC_MAX_SAMPLE_RATE;
 //	uint8_t bufferUART;
@@ -22,21 +22,27 @@ int main(void)
 	SystemCoreClockUpdate();
 	Board_Init();
 
-	/*ADC Init */
-	Chip_ADC_Init(_LPC_ADC_ID, &ADCSetup);
-	Chip_ADC_EnableChannel(_LPC_ADC_ID, _ADC_CHANNEL, ENABLE);
+	Ranging_Init();
 
-	//STATIC INLINE void Chip_IOCON_PinMux(LPC_IOCON_T *pIOCON, uint8_t port, uint8_t pin, uint32_t mode, uint8_t func)
-
-//	Chip_IOCON_PinMux(0, 13, IOCON_ADMODE_EN, IOCON_FUNC3, IOCON_MODE_INACT);
-//	Chip_IOCON_PinMuxSet(LPC_IOCON, PHOTOELECTRIC_INT_PORT, PHOTOELECTRIC_INT_PIN, IOCON_FUNC0);
-	Chip_IOCON_PinMux(LPC_IOCON, 0, 13, IOCON_ADMODE_EN, IOCON_FUNC3);
+	// Ranging_Int_Measure();
 
 	while(1) {
-		App_Polling_Test();
+		//App_Polling_Test();
 		//getShortDistance();
-		printf("Celeste is c00l\n");
-		delay(1);
+		//printf("Celeste is c00l\n");
+		//delay(1);
+
+		getShortDistance();
+		//delay(1);
+
+//		if(ADC_Interrupt_Done_Flag) {
+//			printf("We made it! \n");
+//			processShortRangingData();
+//
+////			Ranging_Int_Measure();
+//
+//			ADC_Interrupt_Done_Flag = 0;
+//		}
 	}
 	return 0;
 }

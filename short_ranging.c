@@ -1,4 +1,4 @@
-#include "short_ranging.h"
+#include "ranging.h"
 
 /*****************************************************************************
  * Private types/enumerations/variables
@@ -11,6 +11,37 @@
 /*****************************************************************************
  * Private functions
  ****************************************************************************/
+
+/**
+ * @brief	ADC0 interrupt handler sub-routine
+ * @return	Nothing
+ */
+void ADC_IRQHandler(void)
+{
+	/* Interrupt mode: Call the stream interrupt handler */
+	NVIC_DisableIRQ(_LPC_ADC_IRQ);
+	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH7, DISABLE);
+	Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
+
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH0, &LongRangingDataRaw[0]);
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH1, &LongRangingDataRaw[1]);
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH2, &LongRangingDataRaw[2]);
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH3, &LongRangingDataRaw[3]);
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH4, &ShortRangingDataRaw[0]);
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH5, &ShortRangingDataRaw[1]);
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH6, &ShortRangingDataRaw[2]);
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH7, &ShortRangingDataRaw[3]);
+
+	ADC_Interrupt_Done_Flag = 1;
+	printf("In interrupt.\n");
+	//App_print_ADC_value(dataADC);
+	//convertVoltage(dataADC, 1);
+
+	// NVIC_EnableIRQ(_LPC_ADC_IRQ);
+	// Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, _ADC_CHANNEL, ENABLE);
+
+	//else {Interrupt_Continue_Flag = 0; }
+}
 
 /* Print ADC value and delay */
 void App_print_ADC_value(uint16_t data)
@@ -27,26 +58,45 @@ void App_print_ADC_value(uint16_t data)
 }
 
 /* Convert voltage */
-void convertVoltage(uint16_t data)
+void convertVoltage(uint16_t data, uint8_t sensor)
 {
-	volatile uint32_t j;
 	uint16_t index;
-	j = 500000;
 
-	float voltage;
-	voltage = ((float)data) / 1300;
+	float voltage = ((float)data) / 1300;
 
 	if ((voltage < 0.34) || (voltage > 2.43)) {
 		DEBUGOUT("ADC voltage of %.3f V is out of operating range.\n", voltage);
 	}
 	else {
 		index = (uint16_t)(voltage * 100.0 + 0.5) - 33;
-		DEBUGOUT("%.3f V -- %.3f cm at index %d\n", voltage,  shortRangingDistanceLUT[index],  index);
-		//DEBUGOUT("ADC value is : 0x%04x or %.3f V\r\n", data, voltage);
+		ShortRangingMovingAverage[sensor] = ALPHA*ShortRangingMovingAverage[sensor] + BETA*shortRangingDistanceLUT[index];
+		DEBUGOUT("%.3f V -- %.3f cm at index %d\n", voltage, ShortRangingMovingAverage[sensor],  index);
 	}
+}
 
-	/* Delay */
-	while (j--) {}
+/* Convert voltage */
+void convertVoltageShort(uint8_t sensor)
+{
+	uint16_t index;
+
+	float voltage = ((float)ShortRangingDataRaw[sensor]) / 1300;
+
+	if ((voltage < 0.34) || (voltage > 2.43)) {
+		DEBUGOUT("%d sensor voltage of %.3f V is out of operating range.\n", sensor, voltage);
+	}
+	else {
+		index = (uint16_t)(voltage * 100.0 + 0.5) - 33;
+		ShortRangingMovingAverage[sensor] = ALPHA*ShortRangingMovingAverage[sensor] + BETA*shortRangingDistanceLUT[index];
+		DEBUGOUT("%d sensor measures %.3f V -- %.3f cm at index %d\n", sensor, voltage, ShortRangingMovingAverage[sensor],  index);
+	}
+}
+
+/* Process short ranging data */
+void processShortRangingData(void) {
+	convertVoltageShort(0);
+	convertVoltageShort(1);
+	convertVoltageShort(2);
+	convertVoltageShort(3);
 }
 
 /* DMA routine for ADC example */
@@ -126,10 +176,44 @@ void App_Interrupt_Test(void)
 	NVIC_DisableIRQ(_LPC_ADC_IRQ);
 }
 
-/* Polling routine for ADC example */
-/*static */void App_Polling_Test(void)
+
+///* Custom polling and data conversion */
+///*static */void getShortDistance(void)
+//{
+//	uint16_t dataADC;
+//
+//	/* Select using burst mode or not */
+//	if (Burst_Mode_Flag) {
+//		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, ENABLE);
+//	}
+//	else {
+//		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
+//	}
+//
+//	/* Get  adc value until get 'x' character */
+//	while (DEBUGIN() != 'x') {
+//		/* Start A/D conversion if not using burst mode */
+//		if (!Burst_Mode_Flag) {
+//			Chip_ADC_SetStartMode(_LPC_ADC_ID, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+//		}
+//		/* Waiting for A/D conversion complete */
+//		while (Chip_ADC_ReadStatus(_LPC_ADC_ID, _ADC_CHANNEL, ADC_DR_DONE_STAT) != SET) {}
+//		/* Read ADC value */
+//		Chip_ADC_ReadValue(_LPC_ADC_ID, _ADC_CHANNEL, &dataADC);
+//		/* Print ADC value */
+//		convertVoltage(dataADC, 1);
+//	}
+//
+//	/* Disable burst mode, if any */
+//	if (Burst_Mode_Flag) {
+//		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
+//	}
+//}
+
+/*static */void getShortDistance(void)
 {
-	uint16_t dataADC;
+	uint8_t i;
+	uint8_t channel;
 
 	/* Select using burst mode or not */
 	if (Burst_Mode_Flag) {
@@ -139,57 +223,163 @@ void App_Interrupt_Test(void)
 		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
 	}
 
-	/* Get  adc value until get 'x' character */
-	while (DEBUGIN() != 'x') {
+	/* Get  adc value */
+	for(i = 0; i < 1; i++) {
+//		if(i == 0)
+//			channel = ADC_CH4;
+//		if(i == 1)
+//			channel = ADC_CH5;
+//		if(i == 2)
+//			channel = ADC_CH6;
+//		else
+		channel = ADC_CH7;
 		/* Start A/D conversion if not using burst mode */
+		shortChannelChange(3);
 		if (!Burst_Mode_Flag) {
 			Chip_ADC_SetStartMode(_LPC_ADC_ID, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
 		}
 		/* Waiting for A/D conversion complete */
-		while (Chip_ADC_ReadStatus(_LPC_ADC_ID, _ADC_CHANNEL, ADC_DR_DONE_STAT) != SET) {}
+		while (Chip_ADC_ReadStatus(_LPC_ADC_ID, channel, ADC_DR_DONE_STAT) != SET) {}
+
 		/* Read ADC value */
-		Chip_ADC_ReadValue(_LPC_ADC_ID, _ADC_CHANNEL, &dataADC);
+		Chip_ADC_ReadValue(_LPC_ADC_ID, channel, &ShortRangingDataRaw[3]);
+
 		/* Print ADC value */
-		//App_print_ADC_value(dataADC);
-		convertVoltage(dataADC);
+//		convertVoltage(dataADC, 1);
+		convertVoltageShort(3);
 	}
 
+	//processShortRangingData();
 	/* Disable burst mode, if any */
 	if (Burst_Mode_Flag) {
 		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
 	}
 }
 
-/* Custom polling and data conversion */
-/*static */void getShortDistance(void)
-{
-	uint16_t dataADC;
+/* Polling routine for ADC example */
+///*static */void App_Polling_Test(void)
+//{
+//	uint16_t dataADC;
+//
+//	/* Select using burst mode or not */
+//	if (Burst_Mode_Flag) {
+//		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, ENABLE);
+//	}
+//	else {
+//		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
+//	}
+//
+//	/* Get  adc value until get 'x' character */
+//	while (DEBUGIN() != 'x') {
+//		/* Start A/D conversion if not using burst mode */
+//		if (!Burst_Mode_Flag) {
+//			Chip_ADC_SetStartMode(_LPC_ADC_ID, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+//		}
+//		/* Waiting for A/D conversion complete */
+//		while (Chip_ADC_ReadStatus(_LPC_ADC_ID, _ADC_CHANNEL, ADC_DR_DONE_STAT) != SET) {}
+//		/* Read ADC value */
+//		Chip_ADC_ReadValue(_LPC_ADC_ID, _ADC_CHANNEL, &dataADC);
+//		/* Print ADC value */
+//		App_print_ADC_value(dataADC);
+//	}
+//
+//	/* Disable burst mode, if any */
+//	if (Burst_Mode_Flag) {
+//		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
+//	}
+//}
 
-	/* Select using burst mode or not */
+void shortChannelChange(uint8_t sensor) {
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH0, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH1, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH2, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH3, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH4, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH5, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH6, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH7, DISABLE);
+
+	switch(sensor) {
+	case 0:
+		Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH4, ENABLE);
+		break;
+	case 1:
+		Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH5, ENABLE);
+		break;
+	case 2:
+		Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH6, ENABLE);
+		break;
+	case 3:
+		Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH7, ENABLE);
+		break;
+	}
+}
+
+
+void Ranging_Init(void)  {
+	Chip_ADC_Init(_LPC_ADC_ID, &ADCSetup);
+
+	// Burst_Mode_Flag = 1;
+	Burst_Mode_Flag = 1;
+	ADC_Interrupt_Done_Flag = 0;
+
+//	/* Enable port-front long ranging sensor */
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH0, ENABLE);
+////	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH0, DISABLE);
+//	Chip_IOCON_PinMux(LPC_IOCON, 0, 23, IOCON_ADMODE_EN, IOCON_FUNC1);
+//	LongRangingMovingAverage[0] = LONG_FRONT_INITIAL;
+//
+//	/* Enable starboard-front long ranging sensor */
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH1, ENABLE);
+////	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH1, DISABLE);
+//	Chip_IOCON_PinMux(LPC_IOCON, 0, 24, IOCON_ADMODE_EN, IOCON_FUNC1);
+//	LongRangingMovingAverage[1] = LONG_FRONT_INITIAL;
+//
+//	/* Enable port-back long ranging sensor */
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH2, ENABLE);
+////	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH2, DISABLE);
+//	Chip_IOCON_PinMux(LPC_IOCON, 0, 25, IOCON_ADMODE_EN, IOCON_FUNC1);
+//	LongRangingMovingAverage[2] = LONG_BACK_INITIAL;
+//
+//	/* Enable starboard-back long ranging sensor */
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH3, ENABLE);
+////	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH3, DISABLE);
+//	Chip_IOCON_PinMux(LPC_IOCON, 0, 26, IOCON_ADMODE_EN, IOCON_FUNC1);
+//	LongRangingMovingAverage[3] = LONG_BACK_INITIAL;
+//
+//	/* Enable port-front long ranging sensor */
+	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH4, ENABLE);
+//	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH4, DISABLE);
+	Chip_IOCON_PinMux(LPC_IOCON, 1, 30, IOCON_ADMODE_EN, IOCON_FUNC3);
+	ShortRangingMovingAverage[0] = SHORT_FRONT_INITIAL;
+
+	/* Enable starboard-front long ranging sensor */
+	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH5, ENABLE);
+//	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH5, DISABLE);
+	Chip_IOCON_PinMux(LPC_IOCON, 1, 31, IOCON_ADMODE_EN, IOCON_FUNC3);
+	ShortRangingMovingAverage[1] = SHORT_FRONT_INITIAL;
+//
+	/* Enable port-back long ranging sensor */
+	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH6, ENABLE);
+//	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH6, DISABLE);
+	Chip_IOCON_PinMux(LPC_IOCON, 0, 12, IOCON_ADMODE_EN, IOCON_FUNC3);
+	ShortRangingMovingAverage[2] = SHORT_BACK_INITIAL;
+
+	/* Enable starboard-back long ranging sensor */
+	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH7, ENABLE);
+//	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH7, DISABLE);
+	Chip_IOCON_PinMux(LPC_IOCON, 0, 13, IOCON_ADMODE_EN, IOCON_FUNC3);
+	ShortRangingMovingAverage[3] = SHORT_BACK_INITIAL;
+}
+
+void Ranging_Int_Measure() {
+	/* Enable ADC Interrupt */
+	NVIC_EnableIRQ(_LPC_ADC_IRQ);
+	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH7, ENABLE);
+	/* Enable burst mode if any, the AD converter does repeated conversions
+	   at the rate selected by the CLKS field in burst mode automatically */
 	if (Burst_Mode_Flag) {
 		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, ENABLE);
-	}
-	else {
-		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
-	}
-
-	/* Get  adc value until get 'x' character */
-	while (DEBUGIN() != 'x') {
-		/* Start A/D conversion if not using burst mode */
-		if (!Burst_Mode_Flag) {
-			Chip_ADC_SetStartMode(_LPC_ADC_ID, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
-		}
-		/* Waiting for A/D conversion complete */
-		while (Chip_ADC_ReadStatus(_LPC_ADC_ID, _ADC_CHANNEL, ADC_DR_DONE_STAT) != SET) {}
-		/* Read ADC value */
-		Chip_ADC_ReadValue(_LPC_ADC_ID, _ADC_CHANNEL, &dataADC);
-		/* Print ADC value */
-		convertVoltage(dataADC);
-	}
-
-	/* Disable burst mode, if any */
-	if (Burst_Mode_Flag) {
-		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
 	}
 }
 
@@ -197,25 +387,7 @@ void App_Interrupt_Test(void)
  * Public functions
  ****************************************************************************/
 
-/**
- * @brief	ADC0 interrupt handler sub-routine
- * @return	Nothing
- */
-void ADC_IRQHandler(void)
-{
-	uint16_t dataADC;
-	/* Interrupt mode: Call the stream interrupt handler */
-	NVIC_DisableIRQ(_LPC_ADC_IRQ);
-	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, _ADC_CHANNEL, DISABLE);
-	Chip_ADC_ReadValue(_LPC_ADC_ID, _ADC_CHANNEL, &dataADC);
-	ADC_Interrupt_Done_Flag = 1;
-	App_print_ADC_value(dataADC);
-	if (DEBUGIN() != 'x') {
-		NVIC_EnableIRQ(_LPC_ADC_IRQ);
-		Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, _ADC_CHANNEL, ENABLE);
-	}
-	else {Interrupt_Continue_Flag = 0; }
-}
+
 
 ///**
 // * @brief	DMA interrupt handler sub-routine
