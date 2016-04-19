@@ -16,7 +16,7 @@
 void    i2cInit();
 void    I2C0_IRQHandler(void);
 
-static int mode_poll;   /* Poll/Interrupt mode flag */
+int mode_poll;   /* Poll/Interrupt mode flag */
 
 void i2c_state_handling(I2C_ID_T id);
 void con_print_data(const uint8_t *dat, int sz);
