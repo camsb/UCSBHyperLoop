@@ -24,7 +24,7 @@ int main(void)
 
 	Ranging_Init();
 
-	// Ranging_Int_Measure();
+	Ranging_Int_Measure();
 
 	while(1) {
 		//App_Polling_Test();
@@ -32,17 +32,16 @@ int main(void)
 		//printf("Celeste is c00l\n");
 		//delay(1);
 
-		getShortDistance();
+		//getShortDistance();
 		//delay(1);
 
-//		if(ADC_Interrupt_Done_Flag) {
-//			printf("We made it! \n");
-//			processShortRangingData();
-//
-////			Ranging_Int_Measure();
-//
-//			ADC_Interrupt_Done_Flag = 0;
-//		}
+		if(ADC_Interrupt_Done_Flag == 1) {
+			processShortRangingData();
+
+			Ranging_Int_Measure();
+
+			ADC_Interrupt_Done_Flag = 0;
+		}
 	}
 	return 0;
 }

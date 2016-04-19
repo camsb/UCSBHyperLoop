@@ -20,9 +20,10 @@
 #define ALPHA 				.7
 #define BETA				(1 - ALPHA)
 
-static ADC_CLOCK_SETUP_T ADCSetup;
-static volatile uint8_t Burst_Mode_Flag, Interrupt_Continue_Flag;
-static volatile uint8_t ADC_Interrupt_Done_Flag, channelTC, dmaChannelNum;
+ADC_CLOCK_SETUP_T ADCSetup;
+volatile uint8_t Burst_Mode_Flag, Interrupt_Continue_Flag;
+volatile uint8_t channelTC, dmaChannelNum;
+volatile uint8_t ADC_Interrupt_Done_Flag;
 uint32_t DMAbuffer;
 float ShortRangingMovingAverage[4];
 float LongRangingMovingAverage[4];

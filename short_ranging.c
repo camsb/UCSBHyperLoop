@@ -23,17 +23,16 @@ void ADC_IRQHandler(void)
 	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH7, DISABLE);
 	Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
 
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH0, &LongRangingDataRaw[0]);
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH1, &LongRangingDataRaw[1]);
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH2, &LongRangingDataRaw[2]);
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH3, &LongRangingDataRaw[3]);
+//	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH0, &LongRangingDataRaw[0]);
+//	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH1, &LongRangingDataRaw[1]);
+//	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH2, &LongRangingDataRaw[2]);
+//	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH3, &LongRangingDataRaw[3]);
 	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH4, &ShortRangingDataRaw[0]);
 	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH5, &ShortRangingDataRaw[1]);
 	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH6, &ShortRangingDataRaw[2]);
 	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH7, &ShortRangingDataRaw[3]);
 
 	ADC_Interrupt_Done_Flag = 1;
-	printf("In interrupt.\n");
 	//App_print_ADC_value(dataADC);
 	//convertVoltage(dataADC, 1);
 
@@ -93,9 +92,9 @@ void convertVoltageShort(uint8_t sensor)
 
 /* Process short ranging data */
 void processShortRangingData(void) {
-	convertVoltageShort(0);
-	convertVoltageShort(1);
-	convertVoltageShort(2);
+//	convertVoltageShort(0);
+//	convertVoltageShort(1);
+//	convertVoltageShort(2);
 	convertVoltageShort(3);
 }
 
@@ -322,6 +321,7 @@ void Ranging_Init(void)  {
 	// Burst_Mode_Flag = 1;
 	Burst_Mode_Flag = 1;
 	ADC_Interrupt_Done_Flag = 0;
+	uint32_t _bitRate = ADC_MAX_SAMPLE_RATE;
 
 //	/* Enable port-front long ranging sensor */
 //	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH0, ENABLE);
@@ -370,6 +370,8 @@ void Ranging_Init(void)  {
 //	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH7, DISABLE);
 	Chip_IOCON_PinMux(LPC_IOCON, 0, 13, IOCON_ADMODE_EN, IOCON_FUNC3);
 	ShortRangingMovingAverage[3] = SHORT_BACK_INITIAL;
+
+	Chip_ADC_SetSampleRate(_LPC_ADC_ID, &ADCSetup, _bitRate);
 }
 
 void Ranging_Int_Measure() {
