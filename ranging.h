@@ -3,49 +3,33 @@
 
 #include "board.h"
 
-#ifdef BOARD_NXP_LPCXPRESSO_1769
-#define _ADC_CHANNEL 		ADC_CH0
-#else
-#define _ADC_CHANNEL 		ADC_CH7
-#endif
 #define _LPC_ADC_ID 		LPC_ADC
 #define _LPC_ADC_IRQ 		ADC_IRQn
-#define _GPDMA_CONN_ADC 	GPDMA_CONN_ADC
-
 #define LONG_FRONT_INITIAL	45.0	// cm
 #define LONG_BACK_INITIAL	45.0	// cm
 #define SHORT_FRONT_INITIAL	2.5		// cm
 #define SHORT_BACK_INITIAL	2.5		// cm
-
 #define ALPHA 				.6
 #define BETA				(1 - ALPHA)
 
-ADC_CLOCK_SETUP_T ADCSetup;
 volatile uint8_t Burst_Mode_Flag, Interrupt_Continue_Flag;
 volatile uint8_t channelTC, dmaChannelNum;
 volatile uint8_t ADC_Interrupt_Done_Flag;
-uint32_t DMAbuffer;
 float ShortRangingMovingAverage[4];
 float LongRangingMovingAverage[4];
+uint32_t DMAbuffer;
 uint16_t ShortRangingDataRaw[4];
 uint16_t LongRangingDataRaw[4];
+ADC_CLOCK_SETUP_T ADCSetup;
 
-void App_print_ADC_value(uint16_t data); // Given function
 void convertVoltage(uint16_t data, uint8_t sensor);
-void App_DMA_Test(void);
-void App_Interrupt_Test(void);
-void App_Polling_Test(void); // Given function
 void getShortDistance(void);
 void ADC_IRQHandler(void);
-
 void Ranging_Init(void);
-void processShortRangingData(void);
-void processLongRangingData(void);
 void convertVoltageShort(uint8_t sensor);
 void convertVoltageLong(uint8_t sensor);
 void Ranging_Int_Measure();
-void shortChannelChange(uint8_t sensor);
-void longChannelChange(uint8_t sensor);
+void initADCChannel(uint8_t channel, uint8_t port, uint8_t pin, uint8_t func, float init_val);
 
 static const float shortRangingVoltageLUT[] =
 {    0.340, 0.350, 0.360, 0.370, 0.380,
