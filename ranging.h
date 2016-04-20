@@ -17,7 +17,7 @@
 #define SHORT_FRONT_INITIAL	2.5		// cm
 #define SHORT_BACK_INITIAL	2.5		// cm
 
-#define ALPHA 				.7
+#define ALPHA 				.6
 #define BETA				(1 - ALPHA)
 
 ADC_CLOCK_SETUP_T ADCSetup;
@@ -45,6 +45,7 @@ void convertVoltageShort(uint8_t sensor);
 void convertVoltageLong(uint8_t sensor);
 void Ranging_Int_Measure();
 void shortChannelChange(uint8_t sensor);
+void longChannelChange(uint8_t sensor);
 
 static const float shortRangingVoltageLUT[] =
 {    0.340, 0.350, 0.360, 0.370, 0.380,

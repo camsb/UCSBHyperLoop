@@ -9,6 +9,7 @@
 #include "sensor_data.h"
 #include "i2c.h"
 #include "photo_electric.h"
+#include "ranging.h"
 
  int main(void)
  {
@@ -17,49 +18,57 @@
     SystemCoreClockUpdate();
     Board_Init();
 
-    i2c_app_init(I2C0, SPEED_100KHZ);
-    initTempPressCalibrationData();
+//    i2c_app_init(I2C0, SPEED_100KHZ);
+//    initTempPressCalibrationData();
+//
+//    timer0Init();
+//    Photoelectric_Init();
 
-    timer0Init();
-    Photoelectric_Init();
+    Ranging_Init();
+    Ranging_Int_Measure();
 
     DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
-    gyroAccelXYZ acceleration, rotation;
+//    gyroAccelXYZ acceleration, rotation;
 
     while( 1 )
     {
 
-        if(strip_detected) {
-        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
-        	strip_detected = 0;
-        }
+    	getLongDistance();
+    	DEBUGOUT("Long ranging 2: %f cm\t", LongRangingMovingAverage[1]);
+    	DEBUGOUT("Long ranging 4: %f cm\n", LongRangingMovingAverage[3]);
 
-        sensorData.temp = getTemperature();
-        DEBUGOUT( "temperature = %d\n", sensorData.temp );
 
-        sensorData.pressure = getPressure();
-        DEBUGOUT( "pressure = %u\n", sensorData.pressure );
+//        if(strip_detected) {
+//        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
+//        	strip_detected = 0;
+//        }
+//
+//        sensorData.temp = getTemperature();
+//        DEBUGOUT( "temperature = %d\n", sensorData.temp );
+//
+//        sensorData.pressure = getPressure();
+//        DEBUGOUT( "pressure = %u\n", sensorData.pressure );
+//
+//        acceleration = getAccelerometerData();
+//        rotation = getGyroscopeData();
+//
+//        sensorData.accelX = acceleration.x;
+//        DEBUGOUT( "accelX = %f\n", sensorData.accelX );
+//        sensorData.accelY = acceleration.y;
+//        DEBUGOUT( "accelY = %f\n", sensorData.accelY );
+//        sensorData.accelZ = acceleration.z;
+//        DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
+//
+//        sensorData.gyroX = rotation.x;
+//        DEBUGOUT( "gyroX = %f\n", sensorData.gyroX );
+//        sensorData.gyroY = rotation.y;
+//        DEBUGOUT( "gyroY = %f\n", sensorData.gyroY );
+//        sensorData.gyroZ = rotation.z;
+//        DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
 
-        acceleration = getAccelerometerData();
-        rotation = getGyroscopeData();
-
-        sensorData.accelX = acceleration.x;
-        DEBUGOUT( "accelX = %f\n", sensorData.accelX );
-        sensorData.accelY = acceleration.y;
-        DEBUGOUT( "accelY = %f\n", sensorData.accelY );
-        sensorData.accelZ = acceleration.z;
-        DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
-
-        sensorData.gyroX = rotation.x;
-        DEBUGOUT( "gyroX = %f\n", sensorData.gyroX );
-        sensorData.gyroY = rotation.y;
-        DEBUGOUT( "gyroY = %f\n", sensorData.gyroY );
-        sensorData.gyroZ = rotation.z;
-        DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
-
-        delay( 100 );
+//        delay( 100 );
     }
 
     return 0;

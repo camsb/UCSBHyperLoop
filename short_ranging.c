@@ -84,9 +84,26 @@ void convertVoltageShort(uint8_t sensor)
 		DEBUGOUT("%d sensor voltage of %.3f V is out of operating range.\n", sensor, voltage);
 	}
 	else {
-		index = (uint16_t)(voltage * 100.0 + 0.5) - 33;
+		index = (uint16_t)(voltage * 100.0 + 0.5) - 34;
 		ShortRangingMovingAverage[sensor] = ALPHA*ShortRangingMovingAverage[sensor] + BETA*shortRangingDistanceLUT[index];
 		DEBUGOUT("%d sensor measures %.3f V -- %.3f cm at index %d\n", sensor, voltage, ShortRangingMovingAverage[sensor],  index);
+	}
+}
+
+/* Convert voltage */
+void convertVoltageLong(uint8_t sensor)
+{
+	uint16_t index;
+
+	float voltage = ((float)LongRangingDataRaw[sensor]) / 1300.0;
+
+	if ((voltage < 0.49) || (voltage > 2.73)) {
+		DEBUGOUT("%d sensor voltage of %.3f V is out of operating range.\n", sensor, voltage);
+	}
+	else {
+		index = (uint16_t)(voltage * 100.0 + 0.5) - 49;
+		LongRangingMovingAverage[sensor] = ALPHA*LongRangingMovingAverage[sensor] + BETA*longRangingDistanceLUT[index];
+//		DEBUGOUT("%d sensor measures %.3f V -- %.3f cm at index %d\n", sensor, voltage, LongRangingMovingAverage[sensor],  index);
 	}
 }
 
@@ -96,6 +113,13 @@ void processShortRangingData(void) {
 //	convertVoltageShort(1);
 //	convertVoltageShort(2);
 	convertVoltageShort(3);
+}
+
+void processLongRangingData(void) {
+//	convertVoltageLong(0);
+//	convertVoltageLong(1);
+//	convertVoltageLong(2);
+	convertVoltageLong(3);
 }
 
 /* DMA routine for ADC example */
@@ -255,6 +279,57 @@ void App_Interrupt_Test(void)
 	}
 }
 
+
+/*static */void getLongDistance(void)
+{
+	uint8_t i;
+	uint8_t channel;
+
+	/* Select using burst mode or not */
+	if (Burst_Mode_Flag) {
+		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, ENABLE);
+	}
+	else {
+		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
+	}
+
+	/* Get  adc value */
+	for(i = 0; i < 1; i++) {
+//		if(i == 0)
+//			channel = ADC_CH4;
+//		if(i == 1)
+//			channel = ADC_CH5;
+//		if(i == 2)
+//			channel = ADC_CH6;
+//		else
+		channel = ADC_CH3;
+		/* Start A/D conversion if not using burst mode */
+		shortChannelChange(3);
+		if (!Burst_Mode_Flag) {
+			Chip_ADC_SetStartMode(_LPC_ADC_ID, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+		}
+		/* Waiting for A/D conversion complete */
+		while (Chip_ADC_ReadStatus(_LPC_ADC_ID, channel, ADC_DR_DONE_STAT) != SET) {}
+
+		/* Read ADC value */
+//		Chip_ADC_ReadValue(_LPC_ADC_ID, channel, &LongRangingDataRaw[3]);
+		Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH1, &LongRangingDataRaw[1]);
+		Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH3, &LongRangingDataRaw[3]);
+
+		/* Print ADC value */
+//		convertVoltageLong(0);
+		convertVoltageLong(1);
+//		convertVoltageLong(2);
+		convertVoltageLong(3);
+	}
+
+	//processShortRangingData();
+	/* Disable burst mode, if any */
+	if (Burst_Mode_Flag) {
+		Chip_ADC_SetBurstCmd(_LPC_ADC_ID, DISABLE);
+	}
+}
+
 /* Polling routine for ADC example */
 ///*static */void App_Polling_Test(void)
 //{
@@ -314,6 +389,32 @@ void shortChannelChange(uint8_t sensor) {
 	}
 }
 
+void longChannelChange(uint8_t sensor) {
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH0, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH1, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH2, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH3, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH4, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH5, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH6, DISABLE);
+//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH7, DISABLE);
+
+	switch(sensor) {
+	case 0:
+		Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH0, ENABLE);
+		break;
+	case 1:
+		Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH1, ENABLE);
+		break;
+	case 2:
+		Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH2, ENABLE);
+		break;
+	case 3:
+		Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH3, ENABLE);
+		break;
+	}
+}
+
 
 void Ranging_Init(void)  {
 	Chip_ADC_Init(_LPC_ADC_ID, &ADCSetup);
@@ -323,29 +424,29 @@ void Ranging_Init(void)  {
 	ADC_Interrupt_Done_Flag = 0;
 	uint32_t _bitRate = ADC_MAX_SAMPLE_RATE;
 
-//	/* Enable port-front long ranging sensor */
-//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH0, ENABLE);
-////	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH0, DISABLE);
-//	Chip_IOCON_PinMux(LPC_IOCON, 0, 23, IOCON_ADMODE_EN, IOCON_FUNC1);
-//	LongRangingMovingAverage[0] = LONG_FRONT_INITIAL;
-//
-//	/* Enable starboard-front long ranging sensor */
-//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH1, ENABLE);
-////	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH1, DISABLE);
-//	Chip_IOCON_PinMux(LPC_IOCON, 0, 24, IOCON_ADMODE_EN, IOCON_FUNC1);
-//	LongRangingMovingAverage[1] = LONG_FRONT_INITIAL;
-//
-//	/* Enable port-back long ranging sensor */
-//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH2, ENABLE);
-////	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH2, DISABLE);
-//	Chip_IOCON_PinMux(LPC_IOCON, 0, 25, IOCON_ADMODE_EN, IOCON_FUNC1);
-//	LongRangingMovingAverage[2] = LONG_BACK_INITIAL;
-//
-//	/* Enable starboard-back long ranging sensor */
-//	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH3, ENABLE);
-////	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH3, DISABLE);
-//	Chip_IOCON_PinMux(LPC_IOCON, 0, 26, IOCON_ADMODE_EN, IOCON_FUNC1);
-//	LongRangingMovingAverage[3] = LONG_BACK_INITIAL;
+	/* Enable port-front long ranging sensor */
+	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH0, ENABLE);
+//	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH0, DISABLE);
+	Chip_IOCON_PinMux(LPC_IOCON, 0, 23, IOCON_ADMODE_EN, IOCON_FUNC1);
+	LongRangingMovingAverage[0] = LONG_FRONT_INITIAL;
+
+	/* Enable starboard-front long ranging sensor */
+	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH1, ENABLE);
+//	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH1, DISABLE);
+	Chip_IOCON_PinMux(LPC_IOCON, 0, 24, IOCON_ADMODE_EN, IOCON_FUNC1);
+	LongRangingMovingAverage[1] = LONG_FRONT_INITIAL;
+
+	/* Enable port-back long ranging sensor */
+	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH2, ENABLE);
+//	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH2, DISABLE);
+	Chip_IOCON_PinMux(LPC_IOCON, 0, 25, IOCON_ADMODE_EN, IOCON_FUNC1);
+	LongRangingMovingAverage[2] = LONG_BACK_INITIAL;
+
+	/* Enable starboard-back long ranging sensor */
+	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH3, ENABLE);
+//	Chip_ADC_Int_SetChannelCmd(_LPC_ADC_ID, ADC_CH3, DISABLE);
+	Chip_IOCON_PinMux(LPC_IOCON, 0, 26, IOCON_ADMODE_EN, IOCON_FUNC1);
+	LongRangingMovingAverage[3] = LONG_BACK_INITIAL;
 //
 //	/* Enable port-front long ranging sensor */
 	Chip_ADC_EnableChannel(_LPC_ADC_ID, ADC_CH4, ENABLE);
