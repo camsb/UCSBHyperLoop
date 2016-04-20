@@ -1,4 +1,3 @@
-
 #include "time.h"
 #include "board.h" 
 #include "temp_press.h"
@@ -11,6 +10,7 @@
 #include "i2c.h"
 #include "photo_electric.h"
 #include "ethernet.h"
+#include "ranging.h"
 
  int main(void)
  {
@@ -30,10 +30,20 @@
 //    DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
 //    DEBUGOUT("_______________________________________\n\n");
 //
+
+    Ranging_Init();
+
+    DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
+    DEBUGOUT("_______________________________________\n\n");
+
 //    gyroAccelXYZ acceleration, rotation;
 
     while( 1 )
     {
+
+    	getLongDistance();
+    	DEBUGOUT("Long ranging 2: %f cm\t", LongRangingMovingAverage[1]);
+    	DEBUGOUT("Long ranging 4: %f cm\n", LongRangingMovingAverage[3]);
 
 //        if(strip_detected) {
 //        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
@@ -62,8 +72,6 @@
 //        DEBUGOUT( "gyroY = %f\n", sensorData.gyroY );
 //        sensorData.gyroZ = rotation.z;
 //        DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
-//
-//        delay( 100 );
     }
 
     return 0;
