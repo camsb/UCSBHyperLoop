@@ -1,5 +1,5 @@
 #include "sensor_data.h"
 
-// void init_data(){
-
-// }
+void TIMER1_IRQHandler(void){
+  gatherData = 1;
+}

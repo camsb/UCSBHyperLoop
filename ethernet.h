@@ -1,7 +1,6 @@
 #ifndef ETHERNET_H_
 #define ETHERNET_H_
 
-#include <stdio.h>
 #include <string.h>
 #include "board.h"
 #include "stdio.h"
@@ -11,32 +10,30 @@
  ****************************************************************************/
 
 /* SSP Constants */
-#define LPC_SSP           					LPC_SSP1
-#define SSP_IRQ           					SSP1_IRQn
-#define SSPIRQHANDLER     					SSP1_IRQHandler
+#define LPC_SSP           					   LPC_SSP1
+#define SSP_IRQ           					   SSP1_IRQn
+#define SSPIRQHANDLER     					   SSP1_IRQHandler
 
 /* Ethernet */
-#define PROTO_UDP							0
-#define PROTO_TCP							1
+#define PROTO_UDP							         0
+#define PROTO_TCP							         1
 
-//#define LPC_GPDMA_SSP_TX  GPDMA_CONN_SSP1_Tx
-//#define LPC_GPDMA_SSP_RX  GPDMA_CONN_SSP1_Rx
-#define BUFFER_SIZE                         (0x0800)			// 2K
-#define DATA_BUF_SIZE						BUFFER_SIZE - 4		// BUFFER_SIZE - (Header Size)
-#define SSP_DATA_BITS                       (SSP_BITS_8)
-#define SSP_DATA_BIT_NUM(databits)          (databits + 1)
-#define SSP_DATA_BYTES(databits)            (((databits) > SSP_BITS_8) ? 2 : 1)
-#define SSP_LO_BYTE_MSK(databits)           ((SSP_DATA_BYTES(databits) > 1) ? 0xFF : (0xFF >> \
-												(8 - SSP_DATA_BIT_NUM(databits))))
-#define SSP_HI_BYTE_MSK(databits)           ((SSP_DATA_BYTES(databits) > 1) ? (0xFF >> \
-												(16 - SSP_DATA_BIT_NUM(databits))) : 0)
-#define SSP_MODE_SEL                        (0x31)
-#define SSP_TRANSFER_MODE_SEL               (0x32)
-#define SSP_MASTER_MODE_SEL                 (0x31)
-#define SSP_SLAVE_MODE_SEL                  (0x32)
-#define SSP_POLLING_SEL                     (0x31)
-#define SSP_INTERRUPT_SEL                   (0x32)
-#define SSP_DMA_SEL                         (0x33)
+#define BUFFER_SIZE                    (0x0800)			// 2K
+#define DATA_BUF_SIZE						       BUFFER_SIZE - 4		// BUFFER_SIZE - (Header Size)
+#define SSP_DATA_BITS                  (SSP_BITS_8)
+#define SSP_DATA_BIT_NUM(databits)     (databits + 1)
+#define SSP_DATA_BYTES(databits)       (((databits) > SSP_BITS_8) ? 2 : 1)
+#define SSP_LO_BYTE_MSK(databits)      ((SSP_DATA_BYTES(databits) > 1) ? 0xFF : (0xFF >> \
+												               (8 - SSP_DATA_BIT_NUM(databits))))
+#define SSP_HI_BYTE_MSK(databits)      ((SSP_DATA_BYTES(databits) > 1) ? (0xFF >> \
+												               (16 - SSP_DATA_BIT_NUM(databits))) : 0)
+#define SSP_MODE_SEL                   (0x31)
+#define SSP_TRANSFER_MODE_SEL          (0x32)
+#define SSP_MASTER_MODE_SEL            (0x31)
+#define SSP_SLAVE_MODE_SEL             (0x32)
+#define SSP_POLLING_SEL                (0x31)
+#define SSP_INTERRUPT_SEL              (0x32)
+#define SSP_DMA_SEL                    (0x33)
 
 /* Wiznet Registers 		*/
 /* Initialization Registers */
@@ -50,8 +47,8 @@
 #define RTR 			0x0017	// Retry Time-Value (2B)
 #define RCR 			0x0019 	// Retry Count Register
 
-#define RX_SIZE			(0x800)	// 2K
-#define TX_SIZE			(0x800)	// 2K
+#define RX_SIZE			  (0x800)	// 2K
+#define TX_SIZE			  (0x800)	// 2K
 #define RX_MAX_MASK		RX_SIZE-1
 #define TX_MAX_MASK		TX_SIZE-1
 
@@ -67,25 +64,25 @@
 #define Sn_MSS_BASE		0x4012	// Maximum Segment Size (2B)
 
 /* Socket Control Register Commands */
-#define OPEN			0x01
+#define OPEN			  0x01
 #define LISTEN			0x02
 #define CONNECT			0x04
 #define DISCON			0x08
-#define CLOSE			0x10
-#define SEND			0x20
+#define CLOSE			  0x10
+#define SEND			  0x20
 #define SEND_MAC		0x21
 #define SEND_KEEP		0x22
-#define RECV			0x40
+#define RECV			  0x40
 
 /* Socket n (Sn) Data Pointer Base Registers */
-#define Sn_RXMEM_SIZE	0x401E	// Rx Memory size
-#define Sn_TXMEM_SIZE	0x401F	// Tx Memory size
+#define Sn_RXMEM_SIZE	  0x401E	// Rx Memory size
+#define Sn_TXMEM_SIZE	  0x401F	// Tx Memory size
 #define Sn_TX_FSR_BASE	0x4020	// Tx Free Size			(2B)
-#define Sn_TX_RD_BASE	0x4022	// Tx Read Pointer		(2B)
-#define Sn_TX_WR_BASE	0x4024	// Tx Write Pointer 	(2B)
+#define Sn_TX_RD_BASE	  0x4022	// Tx Read Pointer		(2B)
+#define Sn_TX_WR_BASE	  0x4024	// Tx Write Pointer 	(2B)
 #define Sn_RX_RSR_BASE	0x4026	// Rx Received Size 	(2B)
-#define Sn_RX_RD_BASE	0x4028	// Rx Read Pointer 		(2B)
-#define Sn_RX_WR_BASE	0x402A	// Rx Write Pointer 	(2B)
+#define Sn_RX_RD_BASE	  0x4028	// Rx Read Pointer 		(2B)
+#define Sn_RX_WR_BASE	  0x402A	// Rx Write Pointer 	(2B)
 
 /* TCP/IP Defines */
 #define REMOTE_IP0 		192
@@ -99,16 +96,14 @@ extern uint16_t gSn_RX_BASE[];
 extern uint16_t gSn_TX_BASE[];
 
 /* SPI Global Variables */
-/*static*/ uint8_t Tx_Buf[BUFFER_SIZE];
-/*static*/ uint8_t Tx_Data[DATA_BUF_SIZE];
-/*static*/ uint8_t Rx_Buf[BUFFER_SIZE];
-/*static*/ uint8_t Rx_Data[DATA_BUF_SIZE];
-/*static*/ SSP_ConfigFormat ssp_format;
-/*static*/ Chip_SSP_DATA_SETUP_T xf_setup;
-static volatile uint8_t  isXferCompleted = 0;
-/*static*/ uint8_t dmaChSSPTx, dmaChSSPRx;
-static volatile uint8_t isDmaTxfCompleted = 0;
-static volatile uint8_t isDmaRxfCompleted = 0;
+uint8_t Tx_Buf[BUFFER_SIZE];
+uint8_t Tx_Data[DATA_BUF_SIZE];
+uint8_t Rx_Buf[BUFFER_SIZE];
+uint8_t Rx_Data[DATA_BUF_SIZE];
+uint8_t sendData, recvData;
+SSP_ConfigFormat ssp_format;
+Chip_SSP_DATA_SETUP_T xf_setup;
+volatile uint8_t isXferCompleted;
 
 void SSPIRQHANDLER(void);
 void DMA_IRQHandler(void);
@@ -125,12 +120,15 @@ void Wiz_TCP_Connect(uint8_t n);
 void Wiz_TCP_Close(uint8_t n);
 void Wiz_UDP_Close(uint8_t n);
 void Wiz_Clear_Buffer(uint8_t n);
-void Wiz_Khalifa(uint8_t protocol, uint8_t socket);
+void ethernetInit(uint8_t protocol, uint8_t socket);
 void Wiz_Deinit(uint8_t protocol, uint8_t socket);
 void spi_Send_Int(uint16_t address, uint16_t length);
 void spi_Recv_Int(uint16_t address);
 void spi_Send_Blocking(uint16_t address, uint16_t length);
 void spi_Recv_Blocking(uint16_t address, uint16_t length);
+void TIMER2_IRQHandler(void);
+
+
 uint8_t Wiz_Check_Socket(uint8_t n);
 uint16_t Wiz_Send(uint8_t n, char* message);
 uint16_t Wiz_Recv(uint8_t n);

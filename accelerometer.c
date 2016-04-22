@@ -1,15 +1,11 @@
-
 #include "accelerometer.h"
 
-gyroAccelXYZ getAccelerometerData()
-{
-	//Sample code has options for controlling resolution.
-
+gyroAccelXYZ getAccelerometerData(){
 	uint8_t  		wBuffer[ 2 ];
 	uint8_t 		rBuffer[ 6 ];
 	int16_t 		concAcceleration[3];
 	gyroAccelXYZ 	acceleration;
-	float LSM303ACCEL_MG_LSB = (0.00094F); 	// 1, 2, 4 or 12 mg per lsb
+	float LSM303ACCEL_MG_LSB = (0.00093F); 	// 1, 2, 4 or 12 mg per lsb
 
 	wBuffer[ 0 ] = ( LSM303_REGISTER_ACCEL_CTRL_REG1_A ); // Control register initializes all
 	wBuffer[ 1 ] = 0x57;

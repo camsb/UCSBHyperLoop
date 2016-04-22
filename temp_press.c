@@ -2,8 +2,6 @@
 
 #define SAMPLE_SETTING 0
 
-constants *c;
-
 uint16_t readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
 {
   uint8_t  buffer;
@@ -23,7 +21,7 @@ uint16_t readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
 }
 
 // set the initial calibration data
-void initTempPressCalibrationData()
+void temperaturePressureInit()
 {
   c = ( constants * ) calloc ( 1, sizeof( constants ) );
   c->AC1 = readRegs( BMP_ADDRESS, 0xAA, 0xAB );
@@ -55,11 +53,10 @@ void printConstants()
   DEBUGOUT( "%i\n", c->MD );
 }
 
-// uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len) //Original declaration w/o peripheral selection.
 uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph )
 {
   int8_t   i;
-  uint8_t readVal; // TODO: This is a uint8_t in Chip_I2C_MasterCmdRead, should be fixed when everything working
+  uint8_t  readVal;
   uint32_t returnVal;
 
   returnVal = 0;
@@ -67,14 +64,12 @@ uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8
   Chip_I2C_MasterSend( I2C0, periph, writeBuf, len );
 
   // delay to allow time for data to be set in correct registers
-  delay( 10 );
+  delay( 10 ); /* TODO We will have to change the delay function here to be interrupt based */
 
   for( i = 0; i < len; i++ )
   {
     readVal   = 0;
-
     Chip_I2C_MasterCmdRead( I2C0, periph, readBuf[ i ], &readVal, 1 );
-
     returnVal = returnVal | ( ((uint32_t)readVal) << ( 8 * ( len - i - 1 ) ) );
   }
 
@@ -162,7 +157,7 @@ int32_t getTemperature()
   wBuffer[ 1 ] = 0x2E;
 
   rBuffer[ 0 ] = 0xF6;
-  rBuffer[ 1 ] = 0xF7; // Get needs to be an arbitrary address to which the data can be written.
+  rBuffer[ 1 ] = 0xF7;
 
   uncalcTemperature = getDataValue( wBuffer, rBuffer, 2, BMP_ADDRESS );
 

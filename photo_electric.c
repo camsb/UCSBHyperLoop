@@ -2,10 +2,8 @@
 
 void PHOTOELECTRIC_IRQ_HANDLER(void)
 {
-//  NVIC_DisableIRQ(TIMER3_IRQn);
   Chip_TIMER_MatchDisableInt(LPC_TIMER3, 1);
   Chip_TIMER_Disable(LPC_TIMER3);
-//  NVIC_ClearPendingIRQ(TIMER3_IRQn);
 
   Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, PHOTOELECTRIC_INT_PORT, 1 << PHOTOELECTRIC_INT_PIN);
   strip_detected = 1;
@@ -15,7 +13,6 @@ void PHOTOELECTRIC_IRQ_HANDLER(void)
   Reset_Timer_Counter(LPC_TIMER3);
   Chip_TIMER_Enable(LPC_TIMER3);
   Chip_TIMER_MatchEnableInt(LPC_TIMER3, 1);
-//  NVIC_EnableIRQ(TIMER3_IRQn);
 }
 
 void Photoelectric_Timer_Init() {
@@ -66,7 +63,7 @@ void Photoelectric_Interrupt_Enable() {
   NVIC_EnableIRQ(PHOTOELECTRIC_INTERRUPT_NVIC);
 }
 
-void Photoelectric_Init() {
+void photoelectricInit() {
   Photoelectric_GPIO_Init();      // Initialize photoelectric GPIO Pin
   Photoelectric_Interrupt_Enable(); // Initialize photoelectric interrupts
   Photoelectric_Timer_Init();     // Initialize photoelectric timer
