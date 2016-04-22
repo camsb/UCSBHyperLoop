@@ -23,7 +23,7 @@ uint16_t readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
 }
 
 // set the initial calibration data
-void initTempPressCalibrationData()
+void temperaturePressureInit()
 {
   c = ( constants * ) calloc ( 1, sizeof( constants ) );
   c->AC1 = readRegs( BMP_ADDRESS, 0xAA, 0xAB );

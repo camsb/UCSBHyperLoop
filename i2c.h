@@ -13,7 +13,7 @@
 #define SPEED_100KHZ         100000
 #define SPEED_400KHZ         400000
 
-void    i2cInit();
+void 	i2cInit(I2C_ID_T id, int speed);
 void    I2C0_IRQHandler(void);
 
 int mode_poll;   /* Poll/Interrupt mode flag */

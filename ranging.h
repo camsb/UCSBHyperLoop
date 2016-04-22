@@ -22,10 +22,11 @@ uint16_t ShortRangingDataRaw[4];
 uint16_t LongRangingDataRaw[4];
 ADC_CLOCK_SETUP_T ADCSetup;
 
+void getLongDistance();
 void convertVoltage(uint16_t data, uint8_t sensor);
-void getShortDistance(void);
-void ADC_IRQHandler(void);
-void Ranging_Init(void);
+void getShortDistance();
+void ADC_IRQHandler();
+void rangingSensorsInit();
 void convertVoltageShort(uint8_t sensor);
 void convertVoltageLong(uint8_t sensor);
 void Ranging_Int_Measure();

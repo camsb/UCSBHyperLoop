@@ -66,7 +66,7 @@ void Photoelectric_Interrupt_Enable() {
   NVIC_EnableIRQ(PHOTOELECTRIC_INTERRUPT_NVIC);
 }
 
-void Photoelectric_Init() {
+void photoelectricInit() {
   Photoelectric_GPIO_Init();      // Initialize photoelectric GPIO Pin
   Photoelectric_Interrupt_Enable(); // Initialize photoelectric interrupts
   Photoelectric_Timer_Init();     // Initialize photoelectric timer

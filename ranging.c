@@ -68,7 +68,7 @@ void initADCChannel(uint8_t channel, uint8_t port, uint8_t pin, uint8_t func, fl
 	LongRangingMovingAverage[0] = init_val;
 }
 
-void Ranging_Init(void)  {
+void rangingSensorsInit(void)  {
 	Chip_ADC_Init(_LPC_ADC_ID, &ADCSetup);
 
 	Burst_Mode_Flag = 1;
@@ -76,14 +76,14 @@ void Ranging_Init(void)  {
 	uint32_t _bitRate = ADC_MAX_SAMPLE_RATE;
 
 	/* Enable all ranging sensor channels */
-	initADCChannel(ADC_CH0, 0, 23, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Port-front long
-	initADCChannel(ADC_CH1, 0, 24, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Starboard-front long
-	initADCChannel(ADC_CH2, 0, 25, IOCON_FUNC1, LONG_BACK_INITIAL);		// Port-back long
-	initADCChannel(ADC_CH3, 0, 26, IOCON_FUNC1, LONG_BACK_INITIAL);		// Starboard-back long
-	initADCChannel(ADC_CH4, 1, 30, IOCON_FUNC3, SHORT_FRONT_INITIAL);	// Port-front short
-	initADCChannel(ADC_CH5, 1, 31, IOCON_FUNC3, SHORT_FRONT_INITIAL);	// Starboard-front short
-	initADCChannel(ADC_CH6, 0, 12, IOCON_FUNC3, SHORT_BACK_INITIAL);	// Port-back short
-	initADCChannel(ADC_CH7, 0, 13, IOCON_FUNC3, SHORT_BACK_INITIAL);	// Starboard-back short
+	initADCChannel(ADC_CH0, 0, 23, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Port-front long J25
+	initADCChannel(ADC_CH1, 0, 24, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Starboard-front long J30
+	initADCChannel(ADC_CH2, 0, 25, IOCON_FUNC1, LONG_BACK_INITIAL);		// Port-back long J22
+	initADCChannel(ADC_CH3, 0, 26, IOCON_FUNC1, LONG_BACK_INITIAL);		// Starboard-back long J31
+	initADCChannel(ADC_CH4, 1, 30, IOCON_FUNC3, SHORT_FRONT_INITIAL);	// Port-front short J36
+	initADCChannel(ADC_CH5, 1, 31, IOCON_FUNC3, SHORT_FRONT_INITIAL);	// Starboard-front short J37
+	initADCChannel(ADC_CH6, 0, 12, IOCON_FUNC3, SHORT_BACK_INITIAL);	// Port-back short J34
+	initADCChannel(ADC_CH7, 0, 13, IOCON_FUNC3, SHORT_BACK_INITIAL);	// Starboard-back short J35
 
 	Chip_ADC_SetSampleRate(_LPC_ADC_ID, &ADCSetup, _bitRate);
 	Chip_ADC_SetBurstCmd(_LPC_ADC_ID, ENABLE);

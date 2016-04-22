@@ -33,6 +33,6 @@ void    	initCalibrationData();
 void    	printConstants();
 uint16_t  	readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg );
 //void    	setCalibrationData( struct constants *c );
-void 		initTempPressCalibrationData();
+void 		temperaturePressureInit();
 
 #endif

@@ -24,6 +24,6 @@ void TIMER3_IRQHandler(void);
 void Photoelectric_GPIO_Init();
 void Photoelectric_Interrupt_Enable();
 void Photoelectric_Timer_Init();
-void Photoelectric_Init();
+void photoelectricInit();
 
 #endif /* PHOTO_ELECTRIC_H_ */

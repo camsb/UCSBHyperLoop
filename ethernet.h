@@ -1,7 +1,6 @@
 #ifndef ETHERNET_H_
 #define ETHERNET_H_
 
-#include <stdio.h>
 #include <string.h>
 #include "board.h"
 #include "stdio.h"
@@ -99,16 +98,16 @@ extern uint16_t gSn_RX_BASE[];
 extern uint16_t gSn_TX_BASE[];
 
 /* SPI Global Variables */
-/*static*/ uint8_t Tx_Buf[BUFFER_SIZE];
-/*static*/ uint8_t Tx_Data[DATA_BUF_SIZE];
-/*static*/ uint8_t Rx_Buf[BUFFER_SIZE];
-/*static*/ uint8_t Rx_Data[DATA_BUF_SIZE];
-/*static*/ SSP_ConfigFormat ssp_format;
-/*static*/ Chip_SSP_DATA_SETUP_T xf_setup;
-static volatile uint8_t  isXferCompleted = 0;
-/*static*/ uint8_t dmaChSSPTx, dmaChSSPRx;
-static volatile uint8_t isDmaTxfCompleted = 0;
-static volatile uint8_t isDmaRxfCompleted = 0;
+uint8_t Tx_Buf[BUFFER_SIZE];
+uint8_t Tx_Data[DATA_BUF_SIZE];
+uint8_t Rx_Buf[BUFFER_SIZE];
+uint8_t Rx_Data[DATA_BUF_SIZE];
+uint8_t dmaChSSPTx, dmaChSSPRx, sendData, recvData;
+SSP_ConfigFormat ssp_format;
+Chip_SSP_DATA_SETUP_T xf_setup;
+volatile uint8_t isXferCompleted;
+volatile uint8_t isDmaTxfCompleted;
+volatile uint8_t isDmaRxfCompleted;
 
 void SSPIRQHANDLER(void);
 void DMA_IRQHandler(void);
@@ -125,12 +124,13 @@ void Wiz_TCP_Connect(uint8_t n);
 void Wiz_TCP_Close(uint8_t n);
 void Wiz_UDP_Close(uint8_t n);
 void Wiz_Clear_Buffer(uint8_t n);
-void Wiz_Khalifa(uint8_t protocol, uint8_t socket);
+void ethernetInit(uint8_t protocol, uint8_t socket);
 void Wiz_Deinit(uint8_t protocol, uint8_t socket);
 void spi_Send_Int(uint16_t address, uint16_t length);
 void spi_Recv_Int(uint16_t address);
 void spi_Send_Blocking(uint16_t address, uint16_t length);
 void spi_Recv_Blocking(uint16_t address, uint16_t length);
+
 uint8_t Wiz_Check_Socket(uint8_t n);
 uint16_t Wiz_Send(uint8_t n, char* message);
 uint16_t Wiz_Recv(uint8_t n);

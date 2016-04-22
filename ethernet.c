@@ -510,7 +510,11 @@ uint8_t Wiz_Check_Socket(uint8_t n) {
 }
 
 /* Initialize Wiznet Device */
-void Wiz_Khalifa(uint8_t protocol, uint8_t socket) {
+void ethernetInit(uint8_t protocol, uint8_t socket) {
+	isXferCompleted = 0;
+	isDmaRxfCompleted = 0;
+	isDmaTxfCompleted = 0;
+
 	Wiz_SSP_Init();
 	Wiz_Init();
 	Wiz_Network_Init();

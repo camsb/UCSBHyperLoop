@@ -3,18 +3,19 @@
 
 #include "stdint.h"
 #include "board.h"
+#include "sensor_data.h"
+#include "ethernet.h"
 
-void    delay( uint32_t ms );
-void    timer0DeInit();
-void    timer0Init();
-void    TIMER0_IRQHandler(void);
+
 void    Reset_Timer_Counter(LPC_TIMER_T *pTMR);
+void 	timerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
+void    TIMER0_IRQHandler(void);
+void    TIMER1_IRQHandler(void);
+void    TIMER2_IRQHandler(void);
+void    delay( uint32_t ms );
 
-volatile int Timer0Running;
-volatile int NumOfMS;
+volatile uint8_t Timer0Running;
+volatile uint32_t NumOfMS;
 volatile int Timer0Count;
-
-#define TICKRATE_HZ1         2000      // tentatively 100 persecond         // uncomment this line to have time in milliseconds
-//#define TICKRATE_HZ1         2        // 1 per sec
 
 #endif
