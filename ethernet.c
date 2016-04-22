@@ -1,10 +1,5 @@
 #include "ethernet.h"
 
-
-/*****************************************************************************
- * Public functions
- ****************************************************************************/
-
 /* Rx Buffer Addresses */
 uint16_t gSn_RX_BASE[] = {
 	0xC000,	0xC800,	0xD000,	0xD800,	// Socket 0, 1, 2, 3
@@ -17,10 +12,10 @@ uint16_t gSn_TX_BASE[] = {
 	0xA000, 0xA800,	0xB000,	0xB800	// Socket 4, 5, 6, 7
 };
 
-/**
- * @brief	SSP interrupt handler sub-routine
- * @return	Nothing
- */
+void TIMER2_IRQHandler(void){
+	sendData = 1;
+}
+
 void SSPIRQHANDLER(void)
 {
 	Chip_SSP_Int_Disable(LPC_SSP1);	/* Disable all interrupt */
@@ -36,21 +31,6 @@ void SSPIRQHANDLER(void)
 	}
 	else {
 		isXferCompleted = 1;
-	}
-}
-
-/**
- * @brief	DMA interrupt handler sub-routine. Set the waiting flag when transfer is successful
- * @return	Nothing
- */
-void DMA_IRQHandler(void)
-{
-	if (Chip_GPDMA_Interrupt(LPC_GPDMA, dmaChSSPTx) == SUCCESS) {
-		isDmaTxfCompleted = 1;
-	}
-
-	if (Chip_GPDMA_Interrupt(LPC_GPDMA, dmaChSSPRx) == SUCCESS) {
-		isDmaRxfCompleted = 1;
 	}
 }
 
@@ -512,8 +492,6 @@ uint8_t Wiz_Check_Socket(uint8_t n) {
 /* Initialize Wiznet Device */
 void ethernetInit(uint8_t protocol, uint8_t socket) {
 	isXferCompleted = 0;
-	isDmaRxfCompleted = 0;
-	isDmaTxfCompleted = 0;
 
 	Wiz_SSP_Init();
 	Wiz_Init();
@@ -541,37 +519,3 @@ void Wiz_Deinit(uint8_t protocol, uint8_t socket) {
 	/* DeInitialize SSP peripheral */
 	Chip_SSP_DeInit(LPC_SSP1);
 }
-
-//int main(void) {
-//	SystemCoreClockUpdate();
-//	Board_Init();
-//
-//	uint8_t socket = 0;				// Socket 0
-//	uint8_t protocol = 1;			// TCP
-//	uint8_t done = 0;
-//	uint16_t length;
-//
-//	/* Initialize SPI and Wiznet Module */
-//	Wiz_Khalifa(protocol, socket);
-//
-//	char* message = (char *)Tx_Data;
-//	sprintf(message, "Hi there, how are you?");
-//	if(!protocol) {
-//		Wiz_Destination_Init(socket);
-//	}
-//	length = Wiz_Send(socket, message);
-//	printf("%u bytes sent to %u.%u.%u.%u\n",
-//		length, REMOTE_IP0, REMOTE_IP1, REMOTE_IP2, REMOTE_IP3);
-//	while(!done) {
-//		if(Wiz_Check_Socket(socket)) {
-//			printf("Data received!\n");
-//			length = Wiz_Recv(socket);
-//			printf("%s\n", (char *)Rx_Data);
-//			done = 1;
-//		}
-//	}
-//
-//	/* Uninitialize SPI and Wiznet Module */
-//	Wiz_Deinit(protocol, socket);
-//	return 0;
-//}

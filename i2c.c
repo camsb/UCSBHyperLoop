@@ -1,4 +1,3 @@
-
 #include "i2c.h"
 
 void i2cInit(I2C_ID_T id, int speed){
@@ -12,17 +11,6 @@ void i2c_state_handling(I2C_ID_T id) {
   } else {
     Chip_I2C_SlaveStateHandler(id);
   }
-}
-
-/* Print data to console */
-void con_print_data(const uint8_t *dat, int sz) {
-  int i;
-  if (!sz) return;
-  for (i = 0; i < sz; i++) {
-    if (!(i & 0xF)) DEBUGOUT("\r\n%02X: ", i);
-    DEBUGOUT(" %02X", dat[i]);
-  }
-  DEBUGOUT("\r\n");
 }
 
 /* Set I2C mode to polling/interrupt */

@@ -16,7 +16,6 @@
 #include "stdlib.h"
 #include "accelerometer.h"
 #include "gyroscope.h"
-#include "lcd.h"
 #include "stdio.h"
 #include "sensor_data.h"
 #include "i2c.h"

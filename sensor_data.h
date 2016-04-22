@@ -3,6 +3,8 @@
 
 #include "stdint.h"
 
+void    TIMER1_IRQHandler(void);
+
 typedef struct{
 
   float x;
@@ -29,7 +31,6 @@ typedef struct{
   float shortRangingJ37;
   int32_t temp;
   uint32_t pressure;
-
 
 } sensor;
 

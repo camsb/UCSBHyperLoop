@@ -47,16 +47,7 @@ void TIMER0_IRQHandler(void){
   }
 }
 
-/* Used for the gather data function */
-void TIMER1_IRQHandler(void){
-	gatherData = 1;
-}
-
-/* Used for the send data function */
-void TIMER2_IRQHandler(void){
-	sendData = 1;
-}
-
+/* Needs to be changed to be interrupt based. */
 void delay( uint32_t ms )
 {
 
