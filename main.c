@@ -1,3 +1,15 @@
+/* UC Santa Barbara Hyperloop Team
+ *
+ * UCSB Hyperloop Controller
+ *
+ * Celeste Bean
+ * TV's Connor Buckland
+ * Ben Hartl
+ * TV's Cameron McCarthy
+ * Connor Mulcahey
+ *
+ */
+
 #include "time.h"
 #include "board.h" 
 #include "temp_press.h"
