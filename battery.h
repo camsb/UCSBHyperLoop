@@ -44,5 +44,6 @@ typedef struct {
   float BATSUM;
 } batteries;
 
+batteries battery;
 
 #endif /* BATTERY_H_ */
