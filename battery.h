@@ -33,7 +33,16 @@
 #define TS1_HI          0x2C
 #define TS2_HI          0x2D
 
-
+// Each of the 5 battery cells and the sum of them all
+typedef struct {
+  float AC1;
+  float AC2;
+  float AC3;
+  float AC4;
+  float AC5;
+  
+  float BATSUM;
+} batteries;
 
 
 #endif /* BATTERY_H_ */
