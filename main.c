@@ -23,6 +23,7 @@
 #include "ethernet.h"
 #include "ranging.h"
 #include "braking.h"
+#include "battery.h"
 
  int main(void)
  {
@@ -100,6 +101,14 @@
 			DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
 			sensorData.gyroZ = rotation.z;
 			DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
+			
+			getBatteryData();
+			DEBUGOUT( "AC1    = %f\t", battery.AC1 );
+			DEBUGOUT( "AC2    = %f\t", battery.AC2 );
+			DEBUGOUT( "AC3    = %f\t", battery.AC3 );
+			DEBUGOUT( "AC4    = %f\t", battery.AC4 );
+			DEBUGOUT( "AC5    = %f\t", battery.AC5 );
+			DEBUGOUT( "BATSUM = %f\t", battery.BATSUM );
         }
 
         if(sendData){
