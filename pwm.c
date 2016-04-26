@@ -1,36 +1,29 @@
 #include "pwm.h"
 
-///* Initialize PWM */
-//void Init_PWM(LPC_TIMER_T * timer, uint16_t prescaler, uint16_t OnResetValue)
-//{
-//    /* Setup Timer for PWM */
-//    Chip_TIMER_Init(timer);
-//    // MR0 reset
-//    Chip_TIMER_ResetOnMatchEnable(timer, 0);
-//    // Set the frequency prescaler for the timer
-//    Chip_TIMER_PrescaleSet(timer, prescaler-1);
-//    // Set MR0 value for resetting the timer
-//    Chip_TIMER_SetMatch(timer, 0, OnResetValue);
-//    // Set PWM Control Register
-//    Chip_TIMER_PWMWrite(timer, (1<<0 | 1<<1 | 1<<2));
-//    // Enable Timer
-//    Chip_TIMER_Enable(timer);
-//}
+void Set_Channel_PWM(LPC_PWM_T * pwm, uint8_t channel, float duty){
+	uint32_t duty_int = ((float)ON_RESET_VALUE)*duty;
+	Chip_PWM_SetMatch(pwm, channel, duty_int);
+	Chip_PWM_LatchEnable(pwm, channel, PWM_OUT_ENABLED);
+}
+
+void Init_Channel(LPC_PWM_T * pwm, uint8_t channel){
+	if(pwm == LPC_PWM0)
+		Chip_IOCON_PinMuxSet(LPC_IOCON, 3, channel + 15, IOCON_FUNC2);
+	else
+		Chip_IOCON_PinMuxSet(LPC_IOCON, 2, channel - 1, IOCON_FUNC1);
+
+	Chip_PWM_SetMatch(pwm, channel, 0);
+	Chip_PWM_LatchEnable(pwm, channel, PWM_OUT_ENABLED);
+	Chip_PWM_SetControlMode(pwm, channel, PWM_SINGLE_EDGE_CONTROL_MODE, PWM_OUT_ENABLED);
+}
 
 /* Initialize PWM */
-void Init_PWM(LPC_PWM_T * pwm, uint16_t prescaler, float duty)
+void Init_PWM(LPC_PWM_T * pwm)
 {
-	uint16_t OnResetValue = 3500;
-	uint32_t duty_int = ((float)OnResetValue)*duty;
-
 	Chip_PWM_Init(pwm);
-	Chip_PWM_PrescaleSet(pwm, prescaler);
-	Chip_PWM_SetMatch(pwm, 0, OnResetValue);
-	Chip_PWM_SetMatch(pwm, 1, duty_int);
+	Chip_PWM_PrescaleSet(pwm, 0);
+	Chip_PWM_SetMatch(pwm, 0, ON_RESET_VALUE);
 	Chip_PWM_ResetOnMatchEnable(pwm, 0);
-//	Chip_PWM_SetCountClockSrc(pwm, PWM_CAPSRC_RISING_PCLK, 0);
-	Chip_PWM_LatchEnable(pwm, 1, PWM_OUT_ENABLED);
-	Chip_PWM_SetControlMode(pwm, 1, PWM_SINGLE_EDGE_CONTROL_MODE, PWM_OUT_ENABLED);
 	Chip_PWM_Reset(pwm);
 	Chip_PWM_Enable(pwm);
 }

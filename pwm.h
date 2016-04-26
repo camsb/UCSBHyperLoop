@@ -27,6 +27,8 @@ typedef struct {                          /*!< TIMERn Structure       */
 	__IO uint32_t CTCR;
 } LPC_PWM_T;
 
+#define ON_RESET_VALUE 3500
+
 /** PWM0, PWM1 structures */
 #define LPC_PWM0 			  ((LPC_PWM_T *) LPC_PWM0_BASE)
 #define LPC_PWM1 			  ((LPC_PWM_T *) LPC_PWM1_BASE)
@@ -77,7 +79,9 @@ typedef enum
     PWM_OUT_ENABLED=1,
 } PWM_OUT_CMD;
 
-void Init_PWM(LPC_PWM_T * pwm, uint16_t prescaler, float duty);
+void Init_PWM(LPC_PWM_T * pwm);
+void Init_Channel(LPC_PWM_T * pwm, uint8_t channel);
+void Set_Channel_PWM(LPC_PWM_T * pwm, uint8_t channel, float duty);
 void Chip_TIMER_PWMWrite(LPC_TIMER_T *pTMR, uint32_t pwmval);
 uint32_t Chip_TIMER_PWMRead(LPC_TIMER_T *pTMR);
 

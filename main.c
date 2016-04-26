@@ -33,108 +33,100 @@
     Board_Init();
 
     /* Initialize PWM */
-    Init_PWM(LPC_PWM1, 0, 0.1);
-    Set_PWM(2,0);
+    Init_PWM(LPC_PWM1);
+    Init_Channel(LPC_PWM1, 1);
+    Set_Channel_PWM(LPC_PWM1, 1, 0.5);
 
+    /* Initialize timers for the delay function, sending data, and gathering data. */
+    timerInit(LPC_TIMER0, TIMER0_IRQn, 1000);
+    timerInit(LPC_TIMER1, TIMER1_IRQn, 4);
+    timerInit(LPC_TIMER2, TIMER2_IRQn, 8);
 
-    //    Chip_IOCON_PinMuxSet(LPC_IOCON, 2, 0, IOCON_FUNC1);
-    //    Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_TIMER0);
-    //    Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_PWM1);
-    //    Init_PWM(LPC_TIMER0, 1, 1000);
-    //    Chip_TIMER_SetMatch(LPC_TIMER0, 1, 500);
+    /* Initialize I2C and all sensors. */
+    i2cInit(I2C0, SPEED_100KHZ);
+    temperaturePressureInit();
+    photoelectricInit();
+    ethernetInit(PROTO_UDP, 0);
+    rangingSensorsInit();
 
+    DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
+    DEBUGOUT("_______________________________________\n\n");
 
+    gyroAccelXYZ acceleration, rotation;
 
-//    /* Initialize timers for the delay function, sending data, and gathering data. */
-//    timerInit(LPC_TIMER0, TIMER0_IRQn, 1000);
-//    timerInit(LPC_TIMER1, TIMER1_IRQn, 4);
-//    timerInit(LPC_TIMER2, TIMER2_IRQn, 8);
-//
-//    /* Initialize I2C and all sensors. */
-//    i2cInit(I2C0, SPEED_100KHZ);
-//    temperaturePressureInit();
-//    photoelectricInit();
-//    ethernetInit(PROTO_UDP, 0);
-//    rangingSensorsInit();
-//
-//    DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
-//    DEBUGOUT("_______________________________________\n\n");
-//
-//    gyroAccelXYZ acceleration, rotation;
-//
-//    while( 1 )
-//    {
-//        if(strip_detected) {
-//        	strip_detected = 0;
-//
-//        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
-//        }
-//
-//        if(gatherData){
-//        	gatherData = 0;
-//
-//			getLongDistance(); /* Fills in global array LongRangingMovingAverage */
-//			sensorData.longRangingJ22 = LongRangingMovingAverage[2];
-//			DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
-//			sensorData.longRangingJ25 = LongRangingMovingAverage[0];
-//			DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
-//			sensorData.longRangingJ30 = LongRangingMovingAverage[1];
-//			DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
-//			sensorData.longRangingJ31 = LongRangingMovingAverage[3];
-//			DEBUGOUT( "longRangingJ31 = %f\n", sensorData.longRangingJ31 );
-//
-//			getShortDistance(); /* Fills in global array ShortRangingMovingAverage */
-//			sensorData.shortRangingJ34 = ShortRangingMovingAverage[2];
-//			DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
-//			sensorData.shortRangingJ35 = ShortRangingMovingAverage[3];
-//			DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
-//			sensorData.shortRangingJ36 = ShortRangingMovingAverage[0];
-//			DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
-//			sensorData.shortRangingJ37 = ShortRangingMovingAverage[1];
-//			DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
-//
-//			sensorData.temp = getTemperature();
-//			DEBUGOUT( "temperature = %d\n", sensorData.temp );
-//
-//			sensorData.pressure = getPressure();
-//			DEBUGOUT( "pressure = %u\n", sensorData.pressure );
-//
-//			acceleration = getAccelerometerData();
-//			sensorData.accelX = acceleration.x;
-//			DEBUGOUT( "accelX = %f\t", sensorData.accelX );
-//			sensorData.accelY = acceleration.y;
-//			DEBUGOUT( "accelY = %f\t", sensorData.accelY );
-//			sensorData.accelZ = acceleration.z;
-//			DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
-//
-//			rotation = getGyroscopeData();
-//			sensorData.gyroX = rotation.x;
-//			DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
-//			sensorData.gyroY = rotation.y;
-//			DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
-//			sensorData.gyroZ = rotation.z;
-//			DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
-//        }
-//
-//        if(sendData){
-//        	sendData = 0;
-//
-//        	DEBUGOUT( "Sending Data!\n" );
-//        }
-//
-//        if(recvData){
-//        	recvData = 0;
-//
-//        	DEBUGOUT( "Receiving Data!\n" );
-//        }
-//
-//        if(emergencyBrake){
-//        	emergencyBrake = 0;
-//
-//        	DEBUGOUT( "Emergency brake signal received!\n" );
-//        }
-//
-//    }
+    while( 1 )
+    {
+        if(strip_detected) {
+        	strip_detected = 0;
+
+        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
+        }
+
+        if(gatherData){
+        	gatherData = 0;
+
+			getLongDistance(); /* Fills in global array LongRangingMovingAverage */
+			sensorData.longRangingJ22 = LongRangingMovingAverage[2];
+			DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
+			sensorData.longRangingJ25 = LongRangingMovingAverage[0];
+			DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
+			sensorData.longRangingJ30 = LongRangingMovingAverage[1];
+			DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
+			sensorData.longRangingJ31 = LongRangingMovingAverage[3];
+			DEBUGOUT( "longRangingJ31 = %f\n", sensorData.longRangingJ31 );
+
+			getShortDistance(); /* Fills in global array ShortRangingMovingAverage */
+			sensorData.shortRangingJ34 = ShortRangingMovingAverage[2];
+			DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
+			sensorData.shortRangingJ35 = ShortRangingMovingAverage[3];
+			DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
+			sensorData.shortRangingJ36 = ShortRangingMovingAverage[0];
+			DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
+			sensorData.shortRangingJ37 = ShortRangingMovingAverage[1];
+			DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
+
+			sensorData.temp = getTemperature();
+			DEBUGOUT( "temperature = %d\n", sensorData.temp );
+
+			sensorData.pressure = getPressure();
+			DEBUGOUT( "pressure = %u\n", sensorData.pressure );
+
+			acceleration = getAccelerometerData();
+			sensorData.accelX = acceleration.x;
+			DEBUGOUT( "accelX = %f\t", sensorData.accelX );
+			sensorData.accelY = acceleration.y;
+			DEBUGOUT( "accelY = %f\t", sensorData.accelY );
+			sensorData.accelZ = acceleration.z;
+			DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
+
+			rotation = getGyroscopeData();
+			sensorData.gyroX = rotation.x;
+			DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
+			sensorData.gyroY = rotation.y;
+			DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
+			sensorData.gyroZ = rotation.z;
+			DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
+        }
+
+        if(sendData){
+        	sendData = 0;
+
+        	DEBUGOUT( "Sending Data!\n" );
+        }
+
+        if(recvData){
+        	recvData = 0;
+
+        	DEBUGOUT( "Receiving Data!\n" );
+        }
+
+        if(emergencyBrake){
+        	emergencyBrake = 0;
+
+        	DEBUGOUT( "Emergency brake signal received!\n" );
+        }
+
+    }
 
     return 0;
  }
