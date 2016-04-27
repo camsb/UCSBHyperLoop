@@ -12,8 +12,22 @@ uint16_t gSn_TX_BASE[] = {
 	0xA000, 0xA800,	0xB000,	0xB800	// Socket 4, 5, 6, 7
 };
 
+void sendData(){
+	sendDataFlag = 0;
+  // Rest of function here.
+}
+
+void recvData(){
+	recvDataFlag = 0;
+	// Rest of function here.
+}
+
 void TIMER2_IRQHandler(void){
-	sendData = 1;
+	sendDataFlag = 1;
+}
+
+void gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
+	 sendSensorDataTimerInit(timer, timerInterrupt, tickRate);
 }
 
 void SSPIRQHANDLER(void)

@@ -32,7 +32,6 @@ typedef enum
   GYRO_RANGE_2000DPS = 2000
 } gyroRange_t;
 
-gyroAccelXYZ   getGyroscopeData();
-gyroAccelXYZ   calculateRotAcc( int16_t* uncalcRotAcc );
+gyroAccelXYZ  getGyroscopeData();
 
 #endif

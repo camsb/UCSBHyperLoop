@@ -3,7 +3,9 @@
 
 #include "stdint.h"
 
+void    collectData();
 void    TIMER1_IRQHandler(void);
+void    gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 
 typedef struct{
 
@@ -34,7 +36,7 @@ typedef struct{
 
 } sensor;
 
-uint8_t gatherData;
+uint8_t collectDataFlag;
 sensor sensorData;
 
 #endif

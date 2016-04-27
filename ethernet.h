@@ -100,11 +100,13 @@ uint8_t Tx_Buf[BUFFER_SIZE];
 uint8_t Tx_Data[DATA_BUF_SIZE];
 uint8_t Rx_Buf[BUFFER_SIZE];
 uint8_t Rx_Data[DATA_BUF_SIZE];
-uint8_t sendData, recvData;
+uint8_t sendDataFlag, recvDataFlag;
 SSP_ConfigFormat ssp_format;
 Chip_SSP_DATA_SETUP_T xf_setup;
 volatile uint8_t isXferCompleted;
 
+void sendData();
+void recvData();
 void SSPIRQHANDLER(void);
 void DMA_IRQHandler(void);
 void Wiz_Init();
@@ -127,6 +129,7 @@ void spi_Recv_Int(uint16_t address);
 void spi_Send_Blocking(uint16_t address, uint16_t length);
 void spi_Recv_Blocking(uint16_t address, uint16_t length);
 void TIMER2_IRQHandler(void);
+void gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 
 
 uint8_t Wiz_Check_Socket(uint8_t n);

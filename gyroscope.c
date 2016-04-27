@@ -1,8 +1,6 @@
-
 #include "gyroscope.h"
 
-gyroAccelXYZ getGyroscopeData()
-{
+gyroAccelXYZ getGyroscopeData(){
   //Sample code has options for controlling resolution.
 
   uint8_t     wBuffer[ 2 ];

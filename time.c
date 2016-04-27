@@ -31,6 +31,10 @@ void timerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
 	return;
 }
 
+void delayTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
+  timerInit(timer, timerInterrupt, tickRate);
+}
+
 /* Used for the delay function */
 void TIMER0_IRQHandler(void){
   if ( Chip_TIMER_MatchPending( LPC_TIMER0, 1 ) ){
