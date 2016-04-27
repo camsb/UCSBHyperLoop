@@ -24,6 +24,7 @@
 #include "ethernet.h"
 #include "ranging.h"
 #include "braking.h"
+#include "battery.h"
 
  int main(void)
  {
@@ -48,6 +49,18 @@
     photoelectricInit();
     ethernetInit(PROTO_UDP, 0);
     rangingSensorsInit();
+    batteryInit();
+
+    getBatteryData();
+	DEBUGOUT( "VC1    = %f\n", battery.VC1 );
+	DEBUGOUT( "VC2    = %f\n", battery.VC2 );
+	DEBUGOUT( "VC3    = %f\n", battery.VC3 );
+	DEBUGOUT( "VC4    = %f\n", battery.VC4 );
+	DEBUGOUT( "VC5    = %f\n", battery.VC5 );
+	DEBUGOUT( "GAIN   = %f\n", battery.GAIN );
+	DEBUGOUT( "OFFSET = %f\n", battery.OFFSET );
+	DEBUGOUT( "BATSUM = %f\n", battery.BATSUM );
+
 
     DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
