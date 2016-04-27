@@ -1,4 +1,7 @@
 #include "temp_press.h"
+#include "time.h"
+#include "i2c.h"
+#include "stdlib.h"
 
 #define SAMPLE_SETTING 0
 

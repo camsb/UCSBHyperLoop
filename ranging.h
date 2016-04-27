@@ -22,6 +22,15 @@ uint16_t ShortRangingDataRaw[4];
 uint16_t LongRangingDataRaw[4];
 ADC_CLOCK_SETUP_T ADCSetup;
 
+typedef struct{
+
+  float sensor0;
+  float sensor1;
+  float sensor2;
+  float sensor3;
+
+} rangingData;
+
 /* Starts at 0.34V, goes to 2.43V, increments in intervals of 0.01V */
 static const float shortRangingDistanceLUT[] =
 {    17.664, 17.139, 16.641, 16.169, 15.719, 15.292, 14.885, 14.499, 14.130, 13.780,
@@ -72,9 +81,9 @@ static const float longRangingDistanceLUT[] =
      19.491, 19.362, 19.234, 19.107, 18.981, 18.855, 18.731, 18.607, 18.484, 18.362,
      18.241, 18.120, 18.000, 17.882, 17.764 };
 
-void getLongDistance();
+rangingData getLongDistance();
 void convertVoltage(uint16_t data, uint8_t sensor);
-void getShortDistance();
+rangingData getShortDistance();
 void ADC_IRQHandler();
 void rangingSensorsInit();
 void convertVoltageShort(uint8_t sensor);

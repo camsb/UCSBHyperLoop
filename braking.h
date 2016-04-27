@@ -3,6 +3,8 @@
 
 #include "board.h"
 
-uint8_t emergencyBrake;
+void emergencyBrake();
+
+uint8_t emergencyBrakeFlag;
 
 #endif

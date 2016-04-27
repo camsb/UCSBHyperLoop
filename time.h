@@ -1,11 +1,7 @@
 #ifndef TIME_H_
 #define TIME_H_
 
-#include "stdint.h"
 #include "board.h"
-#include "sensor_data.h"
-#include "ethernet.h"
-
 
 /* Timer 0 is being used for the delay function. */
 /* Timer 1 is being used for the gather data function. */
@@ -14,6 +10,7 @@
 
 void    Reset_Timer_Counter(LPC_TIMER_T *pTMR);
 void 	  timerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
+void    delayTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 void    TIMER0_IRQHandler(void);
 void    delay( uint32_t ms );
 
