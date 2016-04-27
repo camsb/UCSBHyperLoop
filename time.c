@@ -1,4 +1,6 @@
 #include "time.h"
+#include "sensor_data.h"
+#include "ethernet.h"
 
 void Reset_Timer_Counter(LPC_TIMER_T *pTMR) {
   pTMR->TC = 0; // Reset Timer Counter
@@ -29,6 +31,10 @@ void timerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
 	NVIC_EnableIRQ( timerInterrupt );
 
 	return;
+}
+
+void delayTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
+  timerInit(timer, timerInterrupt, tickRate);
 }
 
 /* Used for the delay function */

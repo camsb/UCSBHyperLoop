@@ -1,10 +1,7 @@
 #ifndef TEMP_PRESS_H_
 #define TEMP_PRESS_H_
 
-#include "time.h"
 #include "board.h"
-#include "i2c.h"
-#include "stdlib.h"
 
 #define BMP_ADDRESS 0x77 // Datasheet is misleading--rightshift all bits by 1.  Determined via "probeslave"
 
