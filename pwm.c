@@ -10,7 +10,7 @@ void Init_Channel(LPC_PWM_T * pwm, uint8_t channel){
 	if(pwm == LPC_PWM0)
 		Chip_IOCON_PinMuxSet(LPC_IOCON, 3, channel + 15, IOCON_FUNC2);
 	else
-		Chip_IOCON_PinMuxSet(LPC_IOCON, 2, channel - 1, IOCON_FUNC1);
+		Chip_IOCON_PinMuxSet(LPC_IOCON, 3, channel + 23, IOCON_FUNC2);
 
 	Chip_PWM_SetMatch(pwm, channel, 0);
 	Chip_PWM_LatchEnable(pwm, channel, PWM_OUT_ENABLED);

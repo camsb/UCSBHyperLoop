@@ -32,10 +32,10 @@
     SystemCoreClockUpdate();
     Board_Init();
 
-    /* Initialize PWM */
+    /* Initialize PWM for motor control. Note, PWM function is commented for usage later.*/
     Init_PWM(LPC_PWM1);
     Init_Channel(LPC_PWM1, 1);
-    Set_Channel_PWM(LPC_PWM1, 1, 0.5);
+    // Set_Channel_PWM(LPC_PWM1, 1, 0.5);
 
     /* Initialize timers for the delay function, sending data, and gathering data. */
     timerInit(LPC_TIMER0, TIMER0_IRQn, 1000);
@@ -56,9 +56,10 @@
 
     while( 1 )
     {
+
         if(strip_detected) {
         	strip_detected = 0;
-
+            // Call function here
         	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
         }
 
@@ -110,19 +111,19 @@
 
         if(sendData){
         	sendData = 0;
-
+            // Call function here
         	DEBUGOUT( "Sending Data!\n" );
         }
 
         if(recvData){
         	recvData = 0;
-
+            // Call function here
         	DEBUGOUT( "Receiving Data!\n" );
         }
 
         if(emergencyBrake){
         	emergencyBrake = 0;
-
+            // Call function here
         	DEBUGOUT( "Emergency brake signal received!\n" );
         }
 
