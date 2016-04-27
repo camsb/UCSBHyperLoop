@@ -32,7 +32,7 @@ void convertVoltageLong(uint8_t sensor)
 	}
 }
 
-void getShortDistance(void)
+rangingData getShortDistance(void)
 {
 	rangingData short_data;
 
@@ -56,7 +56,7 @@ void getShortDistance(void)
 	return short_data;
 }
 
-void getLongDistance(void)
+rangingData getLongDistance(void)
 {
 	rangingData long_data;
 

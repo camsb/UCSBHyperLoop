@@ -1,4 +1,5 @@
 #include "gyroscope.h"
+#include "sensor_data.h"
 
 gyroAccelXYZ getGyroscopeData(){
   //Sample code has options for controlling resolution.

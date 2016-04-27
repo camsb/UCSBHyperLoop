@@ -1,4 +1,5 @@
 #include "accelerometer.h"
+#include "sensor_data.h"
 
 gyroAccelXYZ getAccelerometerData(){
 	uint8_t  		wBuffer[ 2 ];

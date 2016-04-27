@@ -4,7 +4,6 @@
 #include "time.h"
 #include "i2c.h"
 #include "board.h"
-#include "sensor_data.h"
 
 #define GYRO_ADDRESS                      0x6B
 #define GYRO_SENSITIVITY_250DPS           0.00875F    // Roughly 22/256 for fixed point match
