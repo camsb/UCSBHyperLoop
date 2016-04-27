@@ -1,4 +1,5 @@
 #include "photo_electric.h"
+#include "time.h"
 
 void stripDetected(){
   stripDetectedFlag = 0;

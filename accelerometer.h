@@ -1,8 +1,6 @@
 #ifndef ACCELEROMETER_H_
 #define ACCELEROMETER_H_
 
-#include "i2c.h"
-#include "board.h"
 #include "sensor_data.h"
 
 #define ACC_ADDRESS      0x19

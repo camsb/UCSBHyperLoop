@@ -2,8 +2,6 @@
 #define SENSOR_DATA_H_
 
 #include "board.h"
-#include "time.h"
-#include "ranging.h"
 
 void    collectData();
 void    TIMER1_IRQHandler(void);

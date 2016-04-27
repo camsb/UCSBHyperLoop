@@ -1,4 +1,7 @@
 #include "ethernet.h"
+#include <string.h>
+#include "stdio.h"
+#include "time.h"
 
 /* Rx Buffer Addresses */
 uint16_t gSn_RX_BASE[] = {
@@ -26,8 +29,8 @@ void TIMER2_IRQHandler(void){
 	sendDataFlag = 1;
 }
 
-void gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
-	 sendSensorDataTimerInit(timer, timerInterrupt, tickRate);
+void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
+	 timerInit(timer, timerInterrupt, tickRate);
 }
 
 void SSPIRQHANDLER(void)

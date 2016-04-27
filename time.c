@@ -1,4 +1,6 @@
 #include "time.h"
+#include "sensor_data.h"
+#include "ethernet.h"
 
 void Reset_Timer_Counter(LPC_TIMER_T *pTMR) {
   pTMR->TC = 0; // Reset Timer Counter

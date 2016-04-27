@@ -2,7 +2,6 @@
 #define PHOTO_ELECTRIC_H_
 
 #include "board.h"
-#include "time.h"
 
 #define PHOTOELECTRIC_TIMER_RATE      (11)        /* 1 ticks per second */
 #define PHOTOELECTRIC_INT_PIN         5       /* GPIO pin number mapped to interrupt */

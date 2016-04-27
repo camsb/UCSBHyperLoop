@@ -1,11 +1,7 @@
 #ifndef TIME_H_
 #define TIME_H_
 
-#include "stdint.h"
 #include "board.h"
-#include "sensor_data.h"
-#include "ethernet.h"
-
 
 /* Timer 0 is being used for the delay function. */
 /* Timer 1 is being used for the gather data function. */

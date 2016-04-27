@@ -1,9 +1,7 @@
 #ifndef ETHERNET_H_
 #define ETHERNET_H_
 
-#include <string.h>
 #include "board.h"
-#include "stdio.h"
 
 /*****************************************************************************
  * Private types/enumerations/variables
@@ -129,7 +127,7 @@ void spi_Recv_Int(uint16_t address);
 void spi_Send_Blocking(uint16_t address, uint16_t length);
 void spi_Recv_Blocking(uint16_t address, uint16_t length);
 void TIMER2_IRQHandler(void);
-void gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
+void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 
 
 uint8_t Wiz_Check_Socket(uint8_t n);

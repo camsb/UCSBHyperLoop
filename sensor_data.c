@@ -1,6 +1,8 @@
 #include "sensor_data.h"
 #include "gyroscope.h"
 #include "accelerometer.h"
+#include "time.h"
+#include "ranging.h"
 
 void collectData(){
   collectDataFlag = 0;
