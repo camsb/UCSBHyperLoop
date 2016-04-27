@@ -2,11 +2,11 @@
  *
  * UCSB Hyperloop Controller
  *
- * Celeste Bean
- * TV's Connor Buckland
- * Ben Hartl
- * TV's Cameron McCarthy
- * Connor Mulcahey
+ * Celeste "is the Coolest" Bean
+ * Connor "The Gooblet" Buckland
+ * Ben "Super Weenie Hut Jr" Hartl
+ * Cameron "Frat Star" McCarthy
+ * Connor "Leg Exploding" Mulcahey
  *
  */
 
