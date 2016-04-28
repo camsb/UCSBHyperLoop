@@ -141,10 +141,6 @@ void spi_Recv_Blocking(uint16_t address, uint16_t length) {
 void Wiz_Init() {
 	xf_setup.length = BUFFER_SIZE; // May not be necessary
 
-	/* Software Reset Wiznet (Mode Register) */
-	Tx_Buf[4] = 0x80; // Data
-	spi_Send_Blocking(MR, 0x0001);
-
 	/* Interrupt Mask Registers */
 	Tx_Buf[4] = 0x00; // Data
 	spi_Send_Blocking(IMR, 0x0001);
@@ -202,6 +198,50 @@ void Wiz_Check_Network_Registers() {
 	Tx_Buf[4] = Tx_Buf[5] = Tx_Buf[6] = Tx_Buf[7] = 0xFF; // Dummy data
 	spi_Recv_Blocking(SIPR, 0x0004);
 	printf("Source IP: %u.%u.%u.%u\n", Rx_Buf[4], Rx_Buf[5], Rx_Buf[6], Rx_Buf[7]);
+}
+
+/* Socket Interrupt Initialization */
+void Wiz_Int_Init(uint8_t n) {
+	uint16_t offset = 0x0100*n;
+
+	/* General Interrupt Mask */
+	Tx_Buf[4] = 0x01;
+	spi_Send_Blocking(IMR, 0x0001);
+
+	/* General Socket Interrupt Mask */
+	Tx_Buf[4] = 0x01 << n;
+	spi_Send_Blocking(IMR2, 0x0001);
+
+	/* Socket n Interrupt Mask Register */
+	Tx_Buf[4] = 0x1F;
+	spi_Send_Blocking(Sn_IMR_BASE + offset, 0x0001);
+
+	/* Configure Wiznet interrupt pin as input */
+	Chip_IOCON_PinMuxSet(LPC_IOCON, WIZNET_INT_PORT, WIZNET_INT_PIN, IOCON_FUNC0);
+	Chip_GPIO_SetPinDIRInput(LPC_GPIO, WIZNET_INT_PORT, WIZNET_INT_PIN);
+}
+
+/* Check Socket Interrupts */
+uint8_t Wiz_Int_Check() {
+	/* Check Wiznet Interrupt Pin for Interrupts */
+	if(Chip_GPIO_ReadPortBit(LPC_GPIO, WIZNET_INT_PORT, WIZNET_INT_PIN))
+		return 0;
+	return 1;
+}
+
+uint8_t Wiz_Int_Clear(uint8_t n) {
+	uint16_t offset = 0x0100*n;
+
+	/* Read Socket n Interrupt Register */
+	Tx_Buf[4] = 0xFF;
+	spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
+	uint8_t result = Tx_Buf[4];
+
+	/* Clear Socket n Interrupt Register */
+	Tx_Buf[4] = 0x00;
+	spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
+
+	return result;
 }
 
 /* TCP Initialization */
@@ -347,11 +387,13 @@ void Wiz_TCP_Connect(uint8_t n) {
 	Tx_Buf[4] = CONNECT;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
 
+	printf("Establishing TCP connection...\n");
 	do {
 		/* Wait for connection */
 		Rx_Buf[4] = 0xFF;
 		spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
 	} while((Rx_Buf[4] & 0x01) != 0x01);
+	printf("Connected\n");
 }
 
 /* Close TCP Socket */
@@ -367,6 +409,8 @@ void Wiz_TCP_Close(uint8_t n) {
 		Rx_Buf[4] = 0xFF;
 		spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
 	} while((Rx_Buf[4] & 0x02) != 0x02);
+
+	print("TCP connection closed\n");
 
 	/* Clear Socket Interrupts */
 	Tx_Buf[4] = 0xFF;
@@ -508,21 +552,36 @@ uint8_t Wiz_Check_Socket(uint8_t n) {
 	return 0;
 }
 
+Wiz_Restart() {
+	/* Software Reset Wiznet (Mode Register) */
+	Tx_Buf[4] = 0x80; // Data
+	spi_Send_Blocking(MR, 0x0001);
+}
+
 /* Initialize Wiznet Device */
 void Wiz_Khalifa(uint8_t protocol, uint8_t socket) {
 	Wiz_SSP_Init();
+	Wiz_Restart();
+	uint16_t i, j;
+	for (i = 0; i < 60000; i++) {
+		for (j = 0; j < 600; j++) { }
+	}
+
 	Wiz_Init();
 	Wiz_Network_Init();
 	Wiz_Check_Network_Registers();
 	Wiz_Memory_Init();
-	if(protocol)
+	if(protocol) {
+		Wiz_Int_Init(socket);
 		Wiz_TCP_Init(socket);
-	else
+	} else {
 		Wiz_UDP_Init(socket);
+	}
 	Wiz_Clear_Buffer(socket);
 
 	if(protocol) {
 		Wiz_TCP_Connect(socket);
+		printf("Established TCP connection");
 	}
 }
 

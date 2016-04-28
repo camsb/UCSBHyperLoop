@@ -6,9 +6,9 @@
 #include "board.h"
 #include "stdio.h"
 
-/*****************************************************************************
- * Private types/enumerations/variables
- ****************************************************************************/
+/* Wiznet Interrupt Input Pin */
+#define WIZNET_INT_PORT						0
+#define WIZNET_INT_PIN						4
 
 /* SSP Constants */
 #define LPC_SSP           					LPC_SSP1
@@ -19,8 +19,6 @@
 #define PROTO_UDP							0
 #define PROTO_TCP							1
 
-//#define LPC_GPDMA_SSP_TX  GPDMA_CONN_SSP1_Tx
-//#define LPC_GPDMA_SSP_RX  GPDMA_CONN_SSP1_Rx
 #define BUFFER_SIZE                         (0x0800)			// 2K
 #define DATA_BUF_SIZE						BUFFER_SIZE - 4		// BUFFER_SIZE - (Header Size)
 #define SSP_DATA_BITS                       (SSP_BITS_8)
@@ -49,6 +47,8 @@
 #define IMR 			0x0016 	// Interrupt Mask Register
 #define RTR 			0x0017	// Retry Time-Value (2B)
 #define RCR 			0x0019 	// Retry Count Register
+#define IR2				0x0034	// Socket Interrupt Register
+#define IMR2			0x0036	// Socket Interrupt Mask
 
 #define RX_SIZE			(0x800)	// 2K
 #define TX_SIZE			(0x800)	// 2K
@@ -65,6 +65,7 @@
 #define Sn_DIPR_BASE	0x400C	// Destination IP 		(4B)
 #define Sn_DPORT_BASE	0x4010	// Destination port 	(2B)
 #define Sn_MSS_BASE		0x4012	// Maximum Segment Size (2B)
+#define Sn_IMR_BASE		0x402C	// Socket Interrupt Mask
 
 /* Socket Control Register Commands */
 #define OPEN			0x01
@@ -76,6 +77,13 @@
 #define SEND_MAC		0x21
 #define SEND_KEEP		0x22
 #define RECV			0x40
+
+/* Socket Interrupt Bitmasks */
+#define SEND_OK			0x10
+#define TIMEOUT			0x08
+#define RECV			0x04
+#define DISCON			0x02
+#define Sn_CON			0x01
 
 /* Socket n (Sn) Data Pointer Base Registers */
 #define Sn_RXMEM_SIZE	0x401E	// Rx Memory size
@@ -99,22 +107,24 @@ extern uint16_t gSn_RX_BASE[];
 extern uint16_t gSn_TX_BASE[];
 
 /* SPI Global Variables */
-/*static*/ uint8_t Tx_Buf[BUFFER_SIZE];
-/*static*/ uint8_t Rx_Buf[BUFFER_SIZE];
-/*static*/ SSP_ConfigFormat ssp_format;
-/*static*/ Chip_SSP_DATA_SETUP_T xf_setup;
+uint8_t Tx_Buf[BUFFER_SIZE];
+uint8_t Rx_Buf[BUFFER_SIZE];
+SSP_ConfigFormat ssp_format;
+Chip_SSP_DATA_SETUP_T xf_setup;
 static volatile uint8_t  isXferCompleted = 0;
-/*static*/ uint8_t dmaChSSPTx, dmaChSSPRx;
+uint8_t dmaChSSPTx, dmaChSSPRx;
 static volatile uint8_t isDmaTxfCompleted = 0;
 static volatile uint8_t isDmaRxfCompleted = 0;
 
 void SSPIRQHANDLER(void);
 void DMA_IRQHandler(void);
+void Wiz_Restart();
 void Wiz_Init();
 void Wiz_SSP_Init();
 void Wiz_Network_Init();
 void Wiz_Check_Network_Registers();
 void Wiz_Memory_Init();
+void Wiz_Int_Init(uint8_t n);
 void Wiz_TCP_Init(uint8_t n);
 void Wiz_UDP_Init(uint8_t n);
 void Wiz_Destination_Init(uint8_t n);
@@ -130,7 +140,9 @@ void spi_Recv_Int(uint16_t address);
 void spi_Send_Blocking(uint16_t address, uint16_t length);
 void spi_Recv_Blocking(uint16_t address, uint16_t length);
 uint8_t Wiz_Check_Socket(uint8_t n);
+uint8_t Wiz_Int_Check();
+uint8_t Wiz_Int_Clear(uint8_t n);
 uint16_t Wiz_Send(uint8_t n, uint8_t* message);
 uint16_t Wiz_Recv(uint8_t n, uint8_t* message);
 
-#endif /* ETHERNET_H_ */
+#endif
