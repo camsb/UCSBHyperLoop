@@ -38,19 +38,15 @@ void SSPIRQHANDLER(void)
 	}
 }
 
-/**
- * @brief	DMA interrupt handler sub-routine. Set the waiting flag when transfer is successful
- * @return	Nothing
- */
-void DMA_IRQHandler(void)
-{
-	if (Chip_GPDMA_Interrupt(LPC_GPDMA, dmaChSSPTx) == SUCCESS) {
-		isDmaTxfCompleted = 1;
-	}
+/* Wiznet GPIO Interrupt Handler */
+void WIZNET_IRQ_HANDLER(void) {
+	/* Clear GPIO Interrupt, Set Wiznet Interrupt Flag */
+	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, WIZNET_INT_PORT, 1 << WIZNET_INT_PIN);
+	wizIntFlag = 1;
+}
 
-	if (Chip_GPDMA_Interrupt(LPC_GPDMA, dmaChSSPRx) == SUCCESS) {
-		isDmaRxfCompleted = 1;
-	}
+void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate) {
+	 //timerInit(timer, timerInterrupt, tickRate);
 }
 
 /* SSP Initialization */
@@ -204,12 +200,14 @@ void Wiz_Check_Network_Registers() {
 void Wiz_Int_Init(uint8_t n) {
 	uint16_t offset = 0x0100*n;
 
-	/* General Interrupt Mask */
-	Tx_Buf[4] = 0x01;
+	/* Datasheet and addresses are backwards for
+	 * Socket Interrupt Mask and General Interrupt Mask. */
+	/* Socket Interrupt Mask */
+	Tx_Buf[4] = 0x01 << n;
 	spi_Send_Blocking(IMR, 0x0001);
 
-	/* General Socket Interrupt Mask */
-	Tx_Buf[4] = 0x01 << n;
+	/* General Interrupt Mask */
+	Tx_Buf[4] = 0x00;
 	spi_Send_Blocking(IMR2, 0x0001);
 
 	/* Socket n Interrupt Mask Register */
@@ -219,6 +217,9 @@ void Wiz_Int_Init(uint8_t n) {
 	/* Configure Wiznet interrupt pin as input */
 	Chip_IOCON_PinMuxSet(LPC_IOCON, WIZNET_INT_PORT, WIZNET_INT_PIN, IOCON_FUNC0);
 	Chip_GPIO_SetPinDIRInput(LPC_GPIO, WIZNET_INT_PORT, WIZNET_INT_PIN);
+
+	/* Configure the GPIO interrupt */
+	Chip_GPIOINT_SetIntFalling(LPC_GPIOINT, WIZNET_INT_PORT, 1 << WIZNET_INT_PIN); // Set to falling edge trigger
 }
 
 /* Check Socket Interrupts */
@@ -238,7 +239,12 @@ uint8_t Wiz_Int_Clear(uint8_t n) {
 	uint8_t result = Tx_Buf[4];
 
 	/* Clear Socket n Interrupt Register */
-	Tx_Buf[4] = 0x00;
+//	Tx_Buf[4] = result;
+//	spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
+//	Tx_Buf[4] = 0xFF;
+//	spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
+
+	Tx_Buf[4] = result;
 	spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
 
 	return result;
@@ -552,7 +558,7 @@ uint8_t Wiz_Check_Socket(uint8_t n) {
 	return 0;
 }
 
-Wiz_Restart() {
+void Wiz_Restart() {
 	/* Software Reset Wiznet (Mode Register) */
 	Tx_Buf[4] = 0x80; // Data
 	spi_Send_Blocking(MR, 0x0001);
@@ -580,8 +586,8 @@ void Wiz_Khalifa(uint8_t protocol, uint8_t socket) {
 	Wiz_Clear_Buffer(socket);
 
 	if(protocol) {
-		Wiz_TCP_Connect(socket);
-		printf("Established TCP connection");
+//		Wiz_TCP_Connect(socket);
+//		printf("Established TCP connection\n");
 	}
 }
 
@@ -595,37 +601,3 @@ void Wiz_Deinit(uint8_t protocol, uint8_t socket) {
 	/* DeInitialize SSP peripheral */
 	Chip_SSP_DeInit(LPC_SSP1);
 }
-
-//int main(void) {
-//	SystemCoreClockUpdate();
-//	Board_Init();
-//
-//	uint8_t socket = 0;				// Socket 0
-//	uint8_t protocol = 1;			// TCP
-//	uint8_t done = 0;
-//	uint16_t length;
-//
-//	/* Initialize SPI and Wiznet Module */
-//	Wiz_Khalifa(protocol, socket);
-//
-//	char* message = (char *)Tx_Data;
-//	sprintf(message, "Hi there, how are you?");
-//	if(!protocol) {
-//		Wiz_Destination_Init(socket);
-//	}
-//	length = Wiz_Send(socket, message);
-//	printf("%u bytes sent to %u.%u.%u.%u\n",
-//		length, REMOTE_IP0, REMOTE_IP1, REMOTE_IP2, REMOTE_IP3);
-//	while(!done) {
-//		if(Wiz_Check_Socket(socket)) {
-//			printf("Data received!\n");
-//			length = Wiz_Recv(socket);
-//			printf("%s\n", (char *)Rx_Data);
-//			done = 1;
-//		}
-//	}
-//
-//	/* Uninitialize SPI and Wiznet Module */
-//	Wiz_Deinit(protocol, socket);
-//	return 0;
-//}

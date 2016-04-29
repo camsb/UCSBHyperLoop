@@ -44,11 +44,11 @@
 #define SHAR 			0x0009	// Source Hardware Address (6B)
 #define SIPR 			0x000F	// Source IP Address (4B)
 #define IR				0x0015	// Interrupt Register
-#define IMR 			0x0016 	// Interrupt Mask Register
+#define IMR 			0x0016 	// Socket Mask Register
 #define RTR 			0x0017	// Retry Time-Value (2B)
 #define RCR 			0x0019 	// Retry Count Register
 #define IR2				0x0034	// Socket Interrupt Register
-#define IMR2			0x0036	// Socket Interrupt Mask
+#define IMR2			0x0036	// General Interrupt Mask
 
 #define RX_SIZE			(0x800)	// 2K
 #define TX_SIZE			(0x800)	// 2K
@@ -81,8 +81,8 @@
 /* Socket Interrupt Bitmasks */
 #define SEND_OK			0x10
 #define TIMEOUT			0x08
-#define RECV			0x04
-#define DISCON			0x02
+#define RECV_PKT		0x04
+#define DISCON_SKT		0x02
 #define Sn_CON			0x01
 
 /* Socket n (Sn) Data Pointer Base Registers */
@@ -103,6 +103,22 @@
 #define REMOTE_PORT0 	0xA1 // 41234
 #define REMOTE_PORT1 	0x12
 
+/* Protocol methods */
+#define AUT 			"AUT"
+#define ACK 			"ACK"
+#define BMP 			"BMP"
+#define TMP 			"TMP"
+#define POS 			"POS"
+#define VEL 			"VEL"
+#define ACC 			"ACC"
+#define ROL 			"ROL"
+#define PIT 			"PIT"
+#define YAW 			"YAW"
+#define PWR 			"PWR"
+#define MSG 			"MSG"
+#define PWR 			"PWR"
+#define PASSWORD 		"gaucholoop"
+
 extern uint16_t gSn_RX_BASE[];
 extern uint16_t gSn_TX_BASE[];
 
@@ -113,11 +129,13 @@ SSP_ConfigFormat ssp_format;
 Chip_SSP_DATA_SETUP_T xf_setup;
 static volatile uint8_t  isXferCompleted = 0;
 uint8_t dmaChSSPTx, dmaChSSPRx;
+uint8_t wizIntFlag;
 static volatile uint8_t isDmaTxfCompleted = 0;
 static volatile uint8_t isDmaRxfCompleted = 0;
 
 void SSPIRQHANDLER(void);
-void DMA_IRQHandler(void);
+void WIZNET_IRQ_HANDLER(void);
+void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 void Wiz_Restart();
 void Wiz_Init();
 void Wiz_SSP_Init();
