@@ -1,3 +1,14 @@
+/* UC Santa Barbara Hyperloop Team
+ *
+ * UCSB Hyperloop Controller
+ *
+ * Celeste Bean
+ * TV's Connor Buckland
+ * Ben Hartl
+ * TV's Cameron McCarthy
+ * Connor Mulcahey
+ *
+ */
 
 #include "time.h"
 #include "board.h"
@@ -5,48 +16,86 @@
 #include "stdlib.h"
 #include "accelerometer.h"
 #include "gyroscope.h"
-#include "lcd.h"
 #include "stdio.h"
 #include "string.h"
 #include "sensor_data.h"
 #include "i2c.h"
 #include "photo_electric.h"
+#include "pwm.h"
 #include "ethernet.h"
 #include "gpio.h"
+#include "ranging.h"
+#include "braking.h"
 
 int main(void)
 {
     /* Initialize the board and clock */
     SystemCoreClockUpdate();
     Board_Init();
-//
-//    i2c_app_init(I2C0, SPEED_100KHZ);
-//    initTempPressCalibrationData();
-//
-//    timer0Init();
-//    Photoelectric_Init();
-//
-//
-    Wiz_Khalifa(PROTO_TCP, SOCKET_ID); // WizNet initialization
-//    sendSensorDataTimerInit(LPC_TIMER2, TIMER2_IRQn, 1);
+
+    /* Initialize PWM for motor control. Note, PWM function is commented for usage later.*/
+    Init_PWM(LPC_PWM1);
+    Init_Channel(LPC_PWM1, 1);
+    // Set_Channel_PWM(LPC_PWM1, 1, 0.5);
+
+    /* Initialize timers for the delay function, gathering data, and sending data. */
+    delayTimerInit(LPC_TIMER0, TIMER0_IRQn, 1000);
+    gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 8);
+    sendSensorDataTimerInit(LPC_TIMER2, TIMER2_IRQn, 4);
+
+    /* Initialize I2C and all sensors. */
+    i2cInit(I2C0, SPEED_100KHZ);
+    temperaturePressureInit();
+    photoelectricInit();
+    ethernetInit(PROTO_TCP, 0);
+    rangingSensorsInit();
+
+    DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
+    DEBUGOUT("_______________________________________\n\n");
+
+	sendDataFlag = 1;
+
+	int val_len;
+	char method[4] = {0};
+	char value[30] = {0};
+	rec_method(method, value, &val_len);
+	printf("rec: %s:%s\n", method, value);
+	printf("-----------------\n");
 
     /* Enable GPIO Interrupts */
     GPIO_Interrupt_Enable();
 
-//    printf("send: AUT:gaucholoop\n");
-//    send_method(AUT, "gaucholoop", 10);
-    int val_len;
-    char method[4] = {0};
-    char value[30] = {0};
-    rec_method(method, value, &val_len);
-    printf("rec: %s:%s\n", method, value);
-    printf("-----------------\n");
+    while( 1 )
+    {
 
-    sendDataFlag = 1;
+        if(stripDetectedFlag) {
+            stripDetected();
+        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
+        }
 
-    while(1) {
+        if(collectDataFlag){
+            collectData();
+            DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
+            DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
+            DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
+            DEBUGOUT( "longRangingJ31 = %f\n", sensorData.longRangingJ31 );
+            DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
+            DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
+            DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
+            DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
+            DEBUGOUT( "temperature = %d\n", sensorData.temp );
+            DEBUGOUT( "pressure = %u\n", sensorData.pressure );
+            DEBUGOUT( "accelX = %f\t", sensorData.accelX );
+            DEBUGOUT( "accelY = %f\t", sensorData.accelY );
+            DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
+            DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
+            DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
+            DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
+        }
+
     	if(sendDataFlag) {
-    		// sendData();
+    		//sendData();
+    		DEBUGOUT( "Sending Data!\n" );
 
     		sendDataFlag = 0;
     		send_method(BMP, "100.0", 5);
@@ -60,50 +109,18 @@ int main(void)
     		send_method(BMP, "108.8", 5);
     		send_method(BMP, "109.9", 5);
 
-    	} if(wizIntFlag) {
-
-    		wizIntFunction();
-
     	}
-    }
 
-//    DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
-//    DEBUGOUT("_______________________________________\n\n");
-//
-//    gyroAccelXYZ acceleration, rotation;
+    	/* Handle all Wiznet Interrupts, including RECV */
+        if(wizIntFlag) {
+    		wizIntFunction();
+    	}
 
-    while( 1 )
-    {
+        if(emergencyBrakeFlag){
+            emergencyBrake();
+        	DEBUGOUT( "Emergency brake signal received!\n" );
+        }
 
-//        if(strip_detected) {
-//        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
-//        	strip_detected = 0;
-//        }
-//
-//        sensorData.temp = getTemperature();
-//        DEBUGOUT( "temperature = %d\n", sensorData.temp );
-//
-//        sensorData.pressure = getPressure();
-//        DEBUGOUT( "pressure = %u\n", sensorData.pressure );
-//
-//        acceleration = getAccelerometerData();
-//        rotation = getGyroscopeData();
-//
-//        sensorData.accelX = acceleration.x;
-//        DEBUGOUT( "accelX = %f\n", sensorData.accelX );
-//        sensorData.accelY = acceleration.y;
-//        DEBUGOUT( "accelY = %f\n", sensorData.accelY );
-//        sensorData.accelZ = acceleration.z;
-//        DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
-//
-//        sensorData.gyroX = rotation.x;
-//        DEBUGOUT( "gyroX = %f\n", sensorData.gyroX );
-//        sensorData.gyroY = rotation.y;
-//        DEBUGOUT( "gyroY = %f\n", sensorData.gyroY );
-//        sensorData.gyroZ = rotation.z;
-//        DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
-//
-//        delay( 100 );
     }
 
     return 0;

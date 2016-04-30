@@ -1,7 +1,11 @@
 #ifndef SENSOR_DATA_H_
 #define SENSOR_DATA_H_
 
-#include "stdint.h"
+#include "board.h"
+
+void    collectData();
+void    TIMER1_IRQHandler(void);
+void    gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 
 typedef struct{
 
@@ -19,31 +23,20 @@ typedef struct{
   float accelX;
   float accelY;
   float accelZ;
+  float longRangingJ22;
+  float longRangingJ25;
+  float longRangingJ30;
+  float longRangingJ31;
+  float shortRangingJ34;
+  float shortRangingJ35;
+  float shortRangingJ36;
+  float shortRangingJ37;
   int32_t temp;
   uint32_t pressure;
 
 } sensor;
 
-// typedef struct stringDataPair{
-
-//   int val;
-//   char * name;
-
-// }stringDataPair;
-
-// typedef struct sensorPosition{
-
-  // stringDataPair gyroX;
-  // stringDataPair gyroY;
-  // stringDataPair gyroZ;
-  // stringDataPair accelX;
-  // stringDataPair accelY;
-  // stringDataPair accelZ;
-  // stringDataPair temp;
-  // stringDataPair pressure;
-
-// }sensorData;
-
+uint8_t collectDataFlag;
 sensor sensorData;
 
 #endif

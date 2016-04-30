@@ -1,8 +1,7 @@
 #include "ethernet.h"
-
-/*****************************************************************************
- * Public functions
- ****************************************************************************/
+#include <string.h>
+#include "stdio.h"
+#include "time.h"
 
 /* Rx Buffer Addresses */
 uint16_t gSn_RX_BASE[] = {
@@ -16,10 +15,14 @@ uint16_t gSn_TX_BASE[] = {
 	0xA000, 0xA800,	0xB000,	0xB800	// Socket 4, 5, 6, 7
 };
 
-/**
- * @brief	SSP interrupt handler sub-routine
- * @return	Nothing
- */
+void TIMER2_IRQHandler(void){
+	sendDataFlag = 1;
+}
+
+void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
+	 timerInit(timer, timerInterrupt, tickRate);
+}
+
 void SSPIRQHANDLER(void)
 {
 	Chip_SSP_Int_Disable(LPC_SSP1);	/* Disable all interrupt */
@@ -43,10 +46,6 @@ void WIZNET_IRQ_HANDLER(void) {
 	/* Clear GPIO Interrupt, Set Wiznet Interrupt Flag */
 	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, WIZNET_INT_PORT, 1 << WIZNET_INT_PIN);
 	wizIntFlag = 1;
-}
-
-void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate) {
-	 //timerInit(timer, timerInterrupt, tickRate);
 }
 
 /* SSP Initialization */
@@ -256,6 +255,11 @@ void rec_method(char *method, char *val, int *val_len) {
 		memcpy(val, Net_Rx_Data + 4, *val_len);
 		val[*val_len] = '\0';
 	}
+}
+
+void sendData(){
+	sendDataFlag = 0;
+  // Rest of function here.
 }
 
 /* Handle Wiznet Interrupt */
@@ -651,7 +655,9 @@ void Wiz_Restart() {
 }
 
 /* Initialize Wiznet Device */
-void Wiz_Khalifa(uint8_t protocol, uint8_t socket) {
+void ethernetInit(uint8_t protocol, uint8_t socket) {
+	isXferCompleted = 0;
+
 	Wiz_SSP_Init();
 	Wiz_Restart();
 	uint16_t i, j;

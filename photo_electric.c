@@ -1,22 +1,25 @@
 #include "photo_electric.h"
 #include "gpio.h"
+#include "time.h"
+
+void stripDetected(){
+  stripDetectedFlag = 0;
+  // Rest of function here.
+}
 
 void PHOTOELECTRIC_IRQ_HANDLER(void)
 {
-	//  NVIC_DisableIRQ(TIMER3_IRQn);
-	Chip_TIMER_MatchDisableInt(LPC_TIMER3, 1);
-	Chip_TIMER_Disable(LPC_TIMER3);
-	//  NVIC_ClearPendingIRQ(TIMER3_IRQn);
+  Chip_TIMER_MatchDisableInt(LPC_TIMER3, 1);
+  Chip_TIMER_Disable(LPC_TIMER3);
 
-	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, PHOTOELECTRIC_INT_PORT, 1 << PHOTOELECTRIC_INT_PIN);
-	strip_detected = 1;
-	strip_count++;
-	regional_strip_count++;
+  Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, PHOTOELECTRIC_INT_PORT, 1 << PHOTOELECTRIC_INT_PIN);
+  stripDetectedFlag = 1;
+  strip_count++;
+  regional_strip_count++;
 
-	Reset_Timer_Counter(LPC_TIMER3);
-	Chip_TIMER_Enable(LPC_TIMER3);
-	Chip_TIMER_MatchEnableInt(LPC_TIMER3, 1);
-	//  NVIC_EnableIRQ(TIMER3_IRQn);
+  Reset_Timer_Counter(LPC_TIMER3);
+  Chip_TIMER_Enable(LPC_TIMER3);
+  Chip_TIMER_MatchEnableInt(LPC_TIMER3, 1);
 }
 
 void Photoelectric_Timer_Init() {
@@ -39,15 +42,14 @@ void Photoelectric_Timer_Init() {
 
 void TIMER3_IRQHandler(void)
 {
-	if (Chip_TIMER_MatchPending(LPC_TIMER3, 1)) {
-		Chip_TIMER_ClearMatch(LPC_TIMER3, 1);
-		Chip_TIMER_MatchDisableInt(LPC_TIMER3, 1);
-		Chip_TIMER_Disable(LPC_TIMER3);
-		Reset_Timer_Counter(LPC_TIMER3);
-	}
-
-	strip_region++;
-	regional_strip_count = 0;
+  if (Chip_TIMER_MatchPending(LPC_TIMER3, 1)) {
+    Chip_TIMER_ClearMatch(LPC_TIMER3, 1);
+    Chip_TIMER_MatchDisableInt(LPC_TIMER3, 1);
+    Chip_TIMER_Disable(LPC_TIMER3);
+    Reset_Timer_Counter(LPC_TIMER3);
+  }
+  strip_region++;
+  regional_strip_count = 0;
 }
 
 /* Setup Photoelectric sensor pin as input */
@@ -62,12 +64,8 @@ void Photoelectric_Interrupt_Enable() {
 	Chip_GPIOINT_SetIntRising(LPC_GPIOINT, PHOTOELECTRIC_INT_PORT, 1 << PHOTOELECTRIC_INT_PIN); // Set to rising edge trigger
 }
 
-void Photoelectric_Init() {
+void photoelectricInit() {
 	Photoelectric_GPIO_Init();      // Initialize photoelectric GPIO Pin
 	Photoelectric_Interrupt_Enable(); // Initialize photoelectric interrupts
 	Photoelectric_Timer_Init();     // Initialize photoelectric timer
-	strip_detected = 0;         // Initialize photoelectric interrupt flag
-	strip_count = 0;
-	regional_strip_count = 0;
-	strip_region = 0;
 }
