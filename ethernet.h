@@ -9,6 +9,8 @@
 /* Wiznet Interrupt Input Pin */
 #define WIZNET_INT_PORT						0
 #define WIZNET_INT_PIN						4
+#define WIZNET_IRQ_HANDLER     				GPIO_IRQHandler /* GPIO interrupt IRQ function name */
+#define WIZNET_INTERRUPT_NVIC    			GPIO_IRQn   	/* GPIO interrupt NVIC interrupt name */
 
 /* SSP Constants */
 #define LPC_SSP           					LPC_SSP1
@@ -130,11 +132,22 @@ Chip_SSP_DATA_SETUP_T xf_setup;
 static volatile uint8_t  isXferCompleted = 0;
 uint8_t dmaChSSPTx, dmaChSSPRx;
 uint8_t wizIntFlag;
+uint8_t sendDataFlag;
+uint8_t activeSockets;
 static volatile uint8_t isDmaTxfCompleted = 0;
 static volatile uint8_t isDmaRxfCompleted = 0;
 
+// DATA_BUF_SIZE is the size of a packet which we don't expect to excede
+uint8_t Net_Tx_Data[DATA_BUF_SIZE];
+uint8_t Net_Rx_Data[DATA_BUF_SIZE];
+
+#define SOCKET_ID 0
+
 void SSPIRQHANDLER(void);
 void WIZNET_IRQ_HANDLER(void);
+void wizIntFunction();
+void rec_method(char *method, char *val, int *val_len);
+void send_method(char *method, char* val, int val_len);
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 void Wiz_Restart();
 void Wiz_Init();

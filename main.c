@@ -14,50 +14,13 @@
 #include "ethernet.h"
 #include "gpio.h"
 
-
-// DATA_BUF_SIZE is the size of a packet which we don't expect to excede
-uint8_t Net_Tx_Data[DATA_BUF_SIZE] = {0};
-uint8_t Net_Rx_Data[DATA_BUF_SIZE] = {0};
-
-#define SOCKET_ID 0
-
-void send_method(char *method, char* val, int val_len) {
-
-	memset(Net_Tx_Data, 0, DATA_BUF_SIZE);
-	memcpy(Net_Tx_Data, method, 3);
-	Net_Tx_Data[3] = ':';
-	memcpy(Net_Tx_Data + 4, val, val_len);
-	Net_Tx_Data[4 + val_len] = '\n';
-	int i;
-	//for (i = 0; i < 5 + val_len; i++) {printf("%i:%c\n", i, Net_Tx_Data[i]);}
-	Wiz_Send(SOCKET_ID, Net_Tx_Data);
-
-}
-
-// Singular, will change to multiple, or do an interrupt or something
-void rec_method(char *method, char *val, int *val_len) {
-
-	memset (Net_Rx_Data, 0, DATA_BUF_SIZE);
-	if(Wiz_Check_Socket(SOCKET_ID)) {
-		Wiz_Recv(SOCKET_ID, Net_Rx_Data);
-		memcpy(method, Net_Rx_Data, 3);
-		method[3] = '\0';
-		*val_len = 0;
-		while(Net_Rx_Data[*val_len] != '\n') (*val_len)++;
-		memcpy(val, Net_Rx_Data + 4, *val_len);
-		val[*val_len] = '\0';
-	}
-}
-
 int main(void)
 {
-	uint8_t socket_int;
-
     /* Initialize the board and clock */
     SystemCoreClockUpdate();
     Board_Init();
 //
-    i2c_app_init(I2C0, SPEED_100KHZ);
+//    i2c_app_init(I2C0, SPEED_100KHZ);
 //    initTempPressCalibrationData();
 //
 //    timer0Init();
@@ -72,44 +35,36 @@ int main(void)
 
 //    printf("send: AUT:gaucholoop\n");
 //    send_method(AUT, "gaucholoop", 10);
-//    int val_len;
-//    char method[4] = {0};
-//    char value[30] = {0};
-//    rec_method(method, value, &val_len);
-//    printf("rec: %s:%s\n", method, value);
+    int val_len;
+    char method[4] = {0};
+    char value[30] = {0};
+    rec_method(method, value, &val_len);
+    printf("rec: %s:%s\n", method, value);
+    printf("-----------------\n");
 
-    /* Interrupt Mask Registers */
-    uint16_t offset = 0x0010*0;
-	Tx_Buf[4] = 0x00; // Data
-	spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
-	printf("0x%u\n", Rx_Buf[4]);
-
+    sendDataFlag = 1;
 
     while(1) {
-//    	if(sendData) {
-//
-//    		sendData = 0;
-//    		send_method(AUT, "BMP:69\nBMP:1.1\n"
-//    				"BMP:25\nBMP:37\nBMP:0\n"
-//    				"BMP:1000\nBMP:30\nBMP:1\n"
-//    				"BMP:4.20\nBMP:666\n", 10);
-//
-//    	} else if(Wiz_Int_Check()) {
-//    		printf("Interrupt Detected: ");
-//			socket_int = Wiz_Int_Clear(SOCKET_ID);
-//			printf("0x%x\n", socket_int);
-////			if(socket_int & SEND_OK) {	 // Send Completed
-////				printf("Send Completed\n");
-////			} if(socket_int & TIMEOUT) { // Timeout Occurred
-////				printf("Timeout Occured\n");
-////			} if(socket_int & RECV_PKT) {	 // Packet Received
-////				printf("Packet Received\n");
-////			} if(socket_int & DISCON_SKT) {	 // FIN/FIN ACK Received
-////				printf("Connection Closed\n");
-////			} if(socket_int & Sn_CON) {	 // Socket Connection Completed
-////				printf("Connected\n");
-////			}
-//    	}
+    	if(sendDataFlag) {
+    		// sendData();
+
+    		sendDataFlag = 0;
+    		send_method(BMP, "100.0", 5);
+    		send_method(BMP, "101.1", 5);
+    		send_method(BMP, "102.2", 5);
+    		send_method(BMP, "103.3", 5);
+    		send_method(BMP, "104.4", 5);
+    		send_method(BMP, "105.5", 5);
+    		send_method(BMP, "106.6", 5);
+    		send_method(BMP, "107.7", 5);
+    		send_method(BMP, "108.8", 5);
+    		send_method(BMP, "109.9", 5);
+
+    	} if(wizIntFlag) {
+
+    		wizIntFunction();
+
+    	}
     }
 
 //    DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");

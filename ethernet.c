@@ -230,6 +230,91 @@ uint8_t Wiz_Int_Check() {
 	return 1;
 }
 
+void send_method(char *method, char* val, int val_len) {
+
+	memset(Net_Tx_Data, 0, DATA_BUF_SIZE);
+	memcpy(Net_Tx_Data, method, 3);
+	Net_Tx_Data[3] = ':';
+	memcpy(Net_Tx_Data + 4, val, val_len);
+	Net_Tx_Data[4 + val_len] = '\n';
+	int i;
+	//for (i = 0; i < 5 + val_len; i++) {printf("%i:%c\n", i, Net_Tx_Data[i]);}
+	Wiz_Send(SOCKET_ID, Net_Tx_Data);
+
+}
+
+// Singular, will change to multiple, or do an interrupt or something
+void rec_method(char *method, char *val, int *val_len) {
+
+	memset (Net_Rx_Data, 0, DATA_BUF_SIZE);
+	if(Wiz_Check_Socket(SOCKET_ID)) {
+		Wiz_Recv(SOCKET_ID, Net_Rx_Data);
+		memcpy(method, Net_Rx_Data, 3);
+		method[3] = '\0';
+		*val_len = 0;
+		while(Net_Rx_Data[*val_len] != '\n') (*val_len)++;
+		memcpy(val, Net_Rx_Data + 4, *val_len);
+		val[*val_len] = '\0';
+	}
+}
+
+/* Handle Wiznet Interrupt */
+void wizIntFunction() {
+	uint16_t offset;
+	uint8_t socket_int, n;
+	static char method[4];
+	static char value[DATA_BUF_SIZE - 4]; // Method name is 4 characters
+	int val_len;
+
+	/* Read Socket Interrupts */
+	printf("Interrupt Detected:\n");
+
+	for(n = 0; n < 8; n++) {
+		if(activeSockets >> n & 0x01) {
+			offset = 0x0010 * n;
+
+			/* Read Socket n Interrupt Register */
+			Tx_Buf[4] = 0xFF;
+			spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
+			socket_int = Rx_Buf[4];
+			printf("Socket %u: 0x%x\n", n, socket_int);
+
+			/* Handle Interrupt Request */
+			if( socket_int & SEND_OK ) {	 // Send Completed
+				printf("Send Completed\n");
+			}
+			if( socket_int & TIMEOUT ) { // Timeout Occurred
+				printf("Timeout Occurred\n");
+			}
+			if( socket_int & RECV_PKT ) {	 // Packet Received
+				printf("Packet Received\n");
+				rec_method(method, value, &val_len);
+				// Now we have the method, the value, and the value length
+				printf("%s:%s\n", method, value);
+				// Processing
+					// e break
+					// authetication
+					// service propulsion
+					// levitation
+			}
+			if( socket_int & DISCON_SKT ) {	 // FIN/FIN ACK Received
+				printf("Connection Closed\n");
+			}
+			if( socket_int & Sn_CON ) {	 // Socket Connection Completed
+				printf("Connected\n");
+			}
+
+			/* Clear Socket n Interrupt Register */
+			Tx_Buf[4] = socket_int;
+			spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
+
+			printf("-----------------\n");
+		}
+	}
+
+	wizIntFlag = 0;
+}
+
 uint8_t Wiz_Int_Clear(uint8_t n) {
 	uint16_t offset = 0x0100*n;
 
@@ -247,7 +332,26 @@ uint8_t Wiz_Int_Clear(uint8_t n) {
 	Tx_Buf[4] = result;
 	spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
 
+	wizIntFlag = 0;
 	return result;
+}
+
+/* Memory Initialization */
+void Wiz_Memory_Init() {
+	uint16_t offset;
+	uint8_t n;
+
+	for(n = 0; n < 8; n++) {
+		offset = 0x0100*n;
+
+		/* Rx Buffer Init */
+		Tx_Buf[4] = 0x02;	// 2K
+		spi_Send_Blocking(Sn_RXMEM_SIZE + offset, 0x0001);
+
+		/* Tx Buffer Init */
+		Tx_Buf[4] = 0x02;	// 2K
+		spi_Send_Blocking(Sn_TXMEM_SIZE + offset, 0x0001);
+	}
 }
 
 /* TCP Initialization */
@@ -277,28 +381,11 @@ void Wiz_TCP_Init(uint8_t n) {
 	/* Read Socket n Status Register (Sn_SR) */
 	Tx_Buf[4] = 0xFF;
 	spi_Recv_Blocking(Sn_SR_BASE + offset, 0x0001);
-	if(Rx_Buf[4] == 0x13)
+	if(Rx_Buf[4] == 0x13) {
 		printf("Socket %u TCP Initialized Successfully\n", n);
-	else
+		activeSockets |= 1 << n;
+	} else
 		printf("Socket %u TCP Initialization Failed\n", n);
-}
-
-/* Memory Initialization */
-void Wiz_Memory_Init() {
-	uint16_t offset;
-	uint8_t n;
-
-	for(n = 0; n < 8; n++) {
-		offset = 0x0100*n;
-
-		/* Rx Buffer Init */
-		Tx_Buf[4] = 0x02;	// 2K
-		spi_Send_Blocking(Sn_RXMEM_SIZE + offset, 0x0001);
-
-		/* Tx Buffer Init */
-		Tx_Buf[4] = 0x02;	// 2K
-		spi_Send_Blocking(Sn_TXMEM_SIZE + offset, 0x0001);
-	}
 }
 
 /* UDP Initialization */
@@ -328,9 +415,10 @@ void Wiz_UDP_Init(uint8_t n) {
 	/* Read Socket n Status Register (Sn_SR) */
 	Tx_Buf[4] = 0xFF;
 	spi_Recv_Blocking(Sn_SR_BASE + offset, 0x0001);
-	if(Rx_Buf[4] == 0x22)
+	if(Rx_Buf[4] == 0x22) {
 		printf("Socket %u UDP Initialized Successfully\n", n);
-	else
+		activeSockets |= 1 << n;
+	} else
 		printf("Socket %u UDP Initialization Failed\n", n);
 }
 
@@ -416,8 +504,6 @@ void Wiz_TCP_Close(uint8_t n) {
 		spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
 	} while((Rx_Buf[4] & 0x02) != 0x02);
 
-	print("TCP connection closed\n");
-
 	/* Clear Socket Interrupts */
 	Tx_Buf[4] = 0xFF;
 	spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
@@ -468,9 +554,9 @@ uint16_t Wiz_Send(uint8_t n, uint8_t* message) {
 	/* Setup data and length for send */
 	sprintf(((char *)Tx_Buf) + 4, (char *)message);
 	length = strlen((char *)message);
-	Tx_Buf[4 + length++] = '\r';
-	Tx_Buf[4 + length++] = '\n';
-	Tx_Buf[4 + length++] = '\0';
+//	Tx_Buf[4 + length++] = '\r';
+//	Tx_Buf[4 + length++] = '\n';
+//	Tx_Buf[4 + length++] = '\0';
 
 	/* Load data into Tx Buffer */
 	if((dst_mask + length) > (TX_MAX_MASK + 1)) {
@@ -586,8 +672,8 @@ void Wiz_Khalifa(uint8_t protocol, uint8_t socket) {
 	Wiz_Clear_Buffer(socket);
 
 	if(protocol) {
-//		Wiz_TCP_Connect(socket);
-//		printf("Established TCP connection\n");
+		Wiz_TCP_Connect(socket);
+		printf("Established TCP connection\n");
 	}
 }
 
