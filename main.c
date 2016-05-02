@@ -34,22 +34,26 @@
     Board_Init();
 
     /* Initialize PWM for motor control. Note, PWM function is commented for usage later.*/
-    Init_PWM(LPC_PWM1);
-    Init_Channel(LPC_PWM1, 1);
-    // Set_Channel_PWM(LPC_PWM1, 1, 0.5);
-
-    /* Initialize timers for the delay function, gathering data, and sending data. */
-    delayTimerInit(LPC_TIMER0, TIMER0_IRQn, 1000);
-    gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 8);
-    sendSensorDataTimerInit(LPC_TIMER2, TIMER2_IRQn, 4);
-
-    /* Initialize I2C and all sensors. */
-    i2cInit(I2C0, SPEED_100KHZ);
-    temperaturePressureInit();
-    photoelectricInit();
-    ethernetInit(PROTO_UDP, 0);
-    rangingSensorsInit();
+//    Init_PWM(LPC_PWM1);
+//    Init_Channel(LPC_PWM1, 1);
+//    // Set_Channel_PWM(LPC_PWM1, 1, 0.5);
+//
+//    /* Initialize timers for the delay function, gathering data, and sending data. */
+//    delayTimerInit(LPC_TIMER0, TIMER0_IRQn, 1000);
+//    gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 8);
+//    sendSensorDataTimerInit(LPC_TIMER2, TIMER2_IRQn, 4);
+//
+//    /* Initialize I2C and all sensors. */
+//    i2cInit(I2C0, SPEED_100KHZ);
+//    temperaturePressureInit();
+//    photoelectricInit();
+//    ethernetInit(PROTO_UDP, 0);
+//    rangingSensorsInit();
+    DEBUGOUT("Printing works!\n");
+    DEBUGOUT("Interrupt status now is: %d\n", Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 2));
     batteryInit();
+
+    while(1);
 
     getBatteryData();
 	DEBUGOUT( "VC1    = %f\n", battery.VC1 );

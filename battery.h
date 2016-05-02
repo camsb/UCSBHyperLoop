@@ -5,6 +5,9 @@
 #include "board.h"
 #include "sensor_data.h"
 
+#define BATT_NVIC			GPIO_IRQn
+#define BATT_IRQ_HANDLER	GPIO_IRQHandler
+
 #define BATT_ADDRESS    0x08
 #define BATT_I2C		I2C0
 #define BATT_GPIO_PORT	2
@@ -63,6 +66,7 @@ typedef struct {
 
 batteries battery; // global, may want to store in sensor_data.h
 
+void 	BATT_IRQ_HANDLER(void);
 void  	batteryInit();
 float 	convertBits14or16( uint8_t msb, uint8_t lsb, uint8_t mask );
 void  	getBatteryData();

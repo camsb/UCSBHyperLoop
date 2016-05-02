@@ -6,8 +6,16 @@
  */
 void batteryInit()
 {
+	DEBUGOUT("Initializing the battery\n");
 	Chip_IOCON_PinMuxSet(    LPC_IOCON, BATT_GPIO_PORT, BATT_GPIO_PIN, IOCON_FUNC0 );
-	Chip_GPIO_SetPinDIRInput( LPC_GPIO, BATT_GPIO_PORT, BATT_GPIO_PORT );
+	Chip_GPIO_SetPinDIRInput( LPC_GPIO, BATT_GPIO_PORT, BATT_GPIO_PIN );
+
+	/* Configure the GPIO interrupt */
+	Chip_GPIOINT_SetIntRising(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
+
+	/* Enable interrupt in the NVIC */
+	NVIC_ClearPendingIRQ(BATT_NVIC);
+	NVIC_EnableIRQ(BATT_NVIC);
 }
 
 /* 
@@ -27,6 +35,14 @@ float convertBits14or16( uint8_t msb, uint8_t lsb, uint8_t mask )
   retValue = retValue | lsb;
   
   return ( battery.GAIN * retValue ) + battery.OFFSET;
+}
+
+void BATT_IRQ_HANDLER(void){
+
+    DEBUGOUT("Interrupt status now is: %d\n", Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 2));
+	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
+	DEBUGOUT("Interrupt received!\n");
+
 }
 
 /*
