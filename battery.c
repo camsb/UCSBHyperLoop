@@ -37,13 +37,13 @@ float convertBits14or16( uint8_t msb, uint8_t lsb, uint8_t mask )
   return ( battery.GAIN * retValue ) + battery.OFFSET;
 }
 
-void BATT_IRQ_HANDLER(void){
+// void BATT_IRQ_HANDLER(void){
 
-    DEBUGOUT("Interrupt status now is: %d\n", Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 2));
-	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
-	DEBUGOUT("Interrupt received!\n");
+//     DEBUGOUT("Interrupt status now is: %d\n", Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 2));
+// 	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
+// 	DEBUGOUT("Interrupt received!\n");
 
-}
+// }
 
 /*
  *  This function will read the register values from the batteries and store
@@ -51,6 +51,7 @@ void BATT_IRQ_HANDLER(void){
  */
 void getBatteryData()
 {
+  batteryFlag = 0;
   uint8_t rBuffer[ 10 ];
   uint8_t wBuffer[ 2 ];
   uint8_t sys_ctrl1_reg;

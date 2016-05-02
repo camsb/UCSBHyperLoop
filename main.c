@@ -10,6 +10,7 @@
  *
  */
 
+#include "pwm.h"
 #include "time.h"
 #include "board.h" 
 #include "temp_press.h"
@@ -20,7 +21,6 @@
 #include "sensor_data.h"
 #include "i2c.h"
 #include "photo_electric.h"
-#include "pwm.h"
 #include "ethernet.h"
 #include "ranging.h"
 #include "braking.h"
@@ -110,6 +110,11 @@
         if(emergencyBrakeFlag){
             emergencyBrake();
         	DEBUGOUT( "Emergency brake signal received!\n" );
+        }
+
+        if(batteryFlag){
+            getBatteryData();
+            DEBUGOUT( "Battery signal received!\n" );
         }
 
     }

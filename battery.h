@@ -65,8 +65,9 @@ typedef struct {
 } batteries;
 
 batteries battery; // global, may want to store in sensor_data.h
+uint8_t batteryFlag;
 
-void 	BATT_IRQ_HANDLER(void);
+// void 	BATT_IRQ_HANDLER(void);
 void  	batteryInit();
 float 	convertBits14or16( uint8_t msb, uint8_t lsb, uint8_t mask );
 void  	getBatteryData();

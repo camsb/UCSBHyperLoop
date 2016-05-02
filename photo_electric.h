@@ -15,7 +15,7 @@ uint8_t regional_strip_count; // Strips in current region
 uint8_t strip_region;     // Current region
 
 void stripDetected();
-void PHOTOELECTRIC_IRQ_HANDLER(void);
+// void PHOTOELECTRIC_IRQ_HANDLER(void);
 void TIMER3_IRQHandler(void);
 void Photoelectric_GPIO_Init();
 void Photoelectric_Interrupt_Enable();
