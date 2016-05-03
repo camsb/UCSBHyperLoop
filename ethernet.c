@@ -17,6 +17,7 @@ uint16_t gSn_TX_BASE[] = {
 
 void TIMER2_IRQHandler(void){
 	sendDataFlag = 1;
+	Chip_TIMER_ClearMatch( LPC_TIMER2, 1 );
 }
 
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
@@ -302,9 +303,13 @@ void wizIntFunction() {
 					// levitation
 			}
 			if( socket_int & DISCON_SKT ) {	 // FIN/FIN ACK Received
+				if(connectionOpen)
+					connectionClosed = 1;
+				connectionOpen = 0;
 				printf("Connection Closed\n");
 			}
 			if( socket_int & Sn_CON ) {	 // Socket Connection Completed
+				connectionOpen = 1;
 				printf("Connected\n");
 			}
 
@@ -662,7 +667,7 @@ void ethernetInit(uint8_t protocol, uint8_t socket) {
 	Wiz_Restart();
 	uint16_t i, j;
 	for (i = 0; i < 60000; i++) {
-		for (j = 0; j < 600; j++) { }
+		for (j = 0; j < 60; j++) { }
 	}
 
 	Wiz_Init();

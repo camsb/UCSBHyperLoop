@@ -34,92 +34,121 @@ int main(void)
     Board_Init();
 
     /* Initialize PWM for motor control. Note, PWM function is commented for usage later.*/
-    Init_PWM(LPC_PWM1);
-    Init_Channel(LPC_PWM1, 1);
+//    Init_PWM(LPC_PWM1);
+//    Init_Channel(LPC_PWM1, 1);
     // Set_Channel_PWM(LPC_PWM1, 1, 0.5);
 
     /* Initialize timers for the delay function, gathering data, and sending data. */
-    delayTimerInit(LPC_TIMER0, TIMER0_IRQn, 1000);
-    gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 8);
+//    delayTimerInit(LPC_TIMER0, TIMER0_IRQn, 1000);
+//    gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 8);
     sendSensorDataTimerInit(LPC_TIMER2, TIMER2_IRQn, 4);
 
     /* Initialize I2C and all sensors. */
-    i2cInit(I2C0, SPEED_100KHZ);
-    temperaturePressureInit();
-    photoelectricInit();
+//    i2cInit(I2C0, SPEED_100KHZ);
+//    temperaturePressureInit();
+//    photoelectricInit();
     ethernetInit(PROTO_TCP, 0);
-    rangingSensorsInit();
+//    rangingSensorsInit();
 
     DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
-	sendDataFlag = 1;
+//	sendDataFlag = 1;
 
 	int val_len;
 	char method[4] = {0};
 	char value[30] = {0};
-	rec_method(method, value, &val_len);
-	printf("rec: %s:%s\n", method, value);
-	printf("-----------------\n");
+//	rec_method(method, value, &val_len);
+//	printf("rec: %s:%s\n", method, value);
+//	printf("-----------------\n");
 
     /* Enable GPIO Interrupts */
     GPIO_Interrupt_Enable();
 
+    /* Handle all Wiznet Interrupts, including RECV */
+    if(wizIntFlag) {
+		wizIntFunction();
+	}
+
+    time_t t;
+    srand((unsigned) time(&t));
     while( 1 )
     {
-
-        if(stripDetectedFlag) {
-            stripDetected();
-        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
-        }
-
-        if(collectDataFlag){
-            collectData();
-            DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
-            DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
-            DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
-            DEBUGOUT( "longRangingJ31 = %f\n", sensorData.longRangingJ31 );
-            DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
-            DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
-            DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
-            DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
-            DEBUGOUT( "temperature = %d\n", sensorData.temp );
-            DEBUGOUT( "pressure = %u\n", sensorData.pressure );
-            DEBUGOUT( "accelX = %f\t", sensorData.accelX );
-            DEBUGOUT( "accelY = %f\t", sensorData.accelY );
-            DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
-            DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
-            DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
-            DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
-        }
-
-    	if(sendDataFlag) {
-    		//sendData();
-    		DEBUGOUT( "Sending Data!\n" );
-
+    	/* Need to do this cleanly, on a timer to prevent multiple attempts before a response */
+    	if(!connectionOpen && !connectionClosed && sendDataFlag) {
     		sendDataFlag = 0;
-    		send_method(BMP, "100.0", 5);
-    		send_method(BMP, "101.1", 5);
-    		send_method(BMP, "102.2", 5);
-    		send_method(BMP, "103.3", 5);
-    		send_method(BMP, "104.4", 5);
-    		send_method(BMP, "105.5", 5);
-    		send_method(BMP, "106.6", 5);
-    		send_method(BMP, "107.7", 5);
-    		send_method(BMP, "108.8", 5);
-    		send_method(BMP, "109.9", 5);
-
+    		ethernetInit(PROTO_TCP, 0);
     	}
+
+//        if(stripDetectedFlag) {
+//            stripDetected();
+//        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
+//        }
+//
+//        if(collectDataFlag){
+//            collectData();
+//            DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
+//            DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
+//            DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
+//            DEBUGOUT( "longRangingJ31 = %f\n", sensorData.longRangingJ31 );
+//            DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
+//            DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
+//            DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
+//            DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
+//            DEBUGOUT( "temperature = %d\n", sensorData.temp );
+//            DEBUGOUT( "pressure = %u\n", sensorData.pressure );
+//            DEBUGOUT( "accelX = %f\t", sensorData.accelX );
+//            DEBUGOUT( "accelY = %f\t", sensorData.accelY );
+//            DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
+//            DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
+//            DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
+//            DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
+//        }
 
     	/* Handle all Wiznet Interrupts, including RECV */
         if(wizIntFlag) {
     		wizIntFunction();
     	}
 
-        if(emergencyBrakeFlag){
-            emergencyBrake();
-        	DEBUGOUT( "Emergency brake signal received!\n" );
-        }
+    	if(sendDataFlag && connectionOpen) {
+    		//sendData();
+    		DEBUGOUT( "Sending Data!\n" );
+
+    		/* Intializes random number generator */
+    		char data[4] = {0};
+
+    		sendDataFlag = 0;
+
+    		sprintf(data, "%03d", rand() % 500);
+    		send_method(BMP, data, 5);
+
+    		sprintf(data, "%03d", rand() % 300);
+    		send_method(TMP, data, 5);
+
+    		sprintf(data, "%03d", rand() % 1000);
+    		send_method(POS, data, 5);
+
+    		sprintf(data, "%03d", rand() % 130);
+    		send_method(VEL, data, 5);
+
+    		sprintf(data, "%03d", rand() % 50);
+    		send_method(ACC, data, 5);
+
+    		sprintf(data, "%03d", (rand() % 12) - 6);
+    		send_method(ROL, data, 5);
+
+    		sprintf(data, "%03d", (rand() % 12) - 6);
+    		send_method(PIT, data, 5);
+
+    		sprintf(data, "%03d", (rand() % 12) - 6);
+    		send_method(YAW, data, 5);
+    	}
+
+
+//        if(emergencyBrakeFlag){
+//            emergencyBrake();
+//        	DEBUGOUT( "Emergency brake signal received!\n" );
+//        }
 
     }
 
