@@ -61,7 +61,6 @@ typedef struct {
   
   float GAIN;
   float OFFSET;
-  float BATSUM;
 } batteries;
 
 batteries battery; // global, may want to store in sensor_data.h

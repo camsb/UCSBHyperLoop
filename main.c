@@ -2,7 +2,7 @@
  *
  * UCSB Hyperloop Controller
  *
- * Celeste Bean
+ * Celeste Bean (minimal participation)
  * TV's Connor Buckland
  * Ben Hartl
  * TV's Cameron McCarthy
@@ -44,7 +44,7 @@
 //    sendSensorDataTimerInit(LPC_TIMER2, TIMER2_IRQn, 4);
 //
 //    /* Initialize I2C and all sensors. */
-//    i2cInit(I2C0, SPEED_100KHZ);
+    i2cInit(I2C0, SPEED_100KHZ);
 //    temperaturePressureInit();
 //    photoelectricInit();
 //    ethernetInit(PROTO_UDP, 0);
@@ -52,19 +52,6 @@
     DEBUGOUT("Printing works!\n");
     DEBUGOUT("Interrupt status now is: %d\n", Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 2));
     batteryInit();
-
-    while(1);
-
-    getBatteryData();
-	DEBUGOUT( "VC1    = %f\n", battery.VC1 );
-	DEBUGOUT( "VC2    = %f\n", battery.VC2 );
-	DEBUGOUT( "VC3    = %f\n", battery.VC3 );
-	DEBUGOUT( "VC4    = %f\n", battery.VC4 );
-	DEBUGOUT( "VC5    = %f\n", battery.VC5 );
-	DEBUGOUT( "GAIN   = %f\n", battery.GAIN );
-	DEBUGOUT( "OFFSET = %f\n", battery.OFFSET );
-	DEBUGOUT( "BATSUM = %f\n", battery.BATSUM );
-
 
     DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
@@ -114,7 +101,15 @@
 
         if(batteryFlag){
             getBatteryData();
-            DEBUGOUT( "Battery signal received!\n" );
+            DEBUGOUT( "Battery signal received!, total voltage = %f\n",
+            		battery.VC1 + battery.VC2 + battery.VC3 + battery.VC4 + battery.VC5  );
+//        	DEBUGOUT( "VC1    = %f volts\n", battery.VC1 );
+//        	DEBUGOUT( "VC2    = %f volts\n", battery.VC2 );
+//        	DEBUGOUT( "VC3    = %f volts\n", battery.VC3 );
+//        	DEBUGOUT( "VC4    = %f volts\n", battery.VC4 );
+//        	DEBUGOUT( "VC5    = %f volts\n", battery.VC5 );
+//        	DEBUGOUT( "GAIN   = %d micro volts\n", ( int ) ( battery.GAIN * 1000000 ) );
+//        	DEBUGOUT( "OFFSET = %d milli volts\n", ( int ) ( battery.OFFSET * 1000 ) );
         }
 
     }

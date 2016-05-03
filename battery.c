@@ -6,6 +6,12 @@
  */
 void batteryInit()
 {
+	uint8_t rBuffer[ 1 ];
+	uint8_t wBuffer[ 2 ];
+	uint8_t sys_ctrl1_reg;
+	uint8_t overVoltageThreshold;
+	uint8_t underVoltageThreshold;
+
 	DEBUGOUT("Initializing the battery\n");
 	Chip_IOCON_PinMuxSet(    LPC_IOCON, BATT_GPIO_PORT, BATT_GPIO_PIN, IOCON_FUNC0 );
 	Chip_GPIO_SetPinDIRInput( LPC_GPIO, BATT_GPIO_PORT, BATT_GPIO_PIN );
@@ -16,6 +22,55 @@ void batteryInit()
 	/* Enable interrupt in the NVIC */
 	NVIC_ClearPendingIRQ(BATT_NVIC);
 	NVIC_EnableIRQ(BATT_NVIC);
+
+	battery.GAIN   = getGain();
+	battery.OFFSET = getOffset();
+
+	// read the msb and lsb for the sum of the batteries
+	// TODO: STUB, BATSUM is not correct
+	battery.BATSUM = -1;
+	//  Chip_I2C_MasterCmdRead( I2C0, BATT_ADDRESS, BAT_HI, rBuffer, 2 );
+	//  battery.BATSUM = convertBits14or16( rBuffer[ 0 ], rBuffer[ 1 ], MASK_8_BIT );
+
+	overVoltageThreshold  = getVoltageThreshold( VOLTAGE_MAX );
+	DEBUGOUT( "8-bit overVoltageThreshold in Hex  = 0x%X\n", overVoltageThreshold );
+
+	underVoltageThreshold = getVoltageThreshold( VOLTAGE_MIN );
+	DEBUGOUT( "8-bit underVoltageThreshold in Hex = 0x%X\n", underVoltageThreshold );
+
+//	TODO: want to make sure these values are correct before we set them in the registers.
+//	send these values to their corresponding registers
+	wBuffer[ 0 ] = OV_TRIP;
+	wBuffer[ 1 ] = overVoltageThreshold;
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+	wBuffer[ 0 ] = UV_TRIP;
+	wBuffer[ 1 ] = underVoltageThreshold;
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+//	TODO: set the ADC_EN bit to 1 to activate these thresholds
+//	to set the ADC_EN bit, need to pull the register value out before performing bit operation
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, SYS_CTRL1, rBuffer, 1 );
+	sys_ctrl1_reg = rBuffer[ 0 ];
+	sys_ctrl1_reg = sys_ctrl1_reg | ADC_EN_BIT;
+
+	wBuffer[ 0 ] = SYS_CTRL1;
+	wBuffer[ 1 ] = sys_ctrl1_reg;
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, SYS_STAT, rBuffer, 1 );
+	wBuffer[ 0 ] = SYS_STAT;
+	wBuffer[ 1 ] = rBuffer[ 0 ];
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, SYS_STAT, rBuffer, 1 );
+//	DEBUGOUT( "batteryInit. SYS_STAT = %d\n", rBuffer[ 0 ] );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, PROTECT3, rBuffer, 1 );
+	wBuffer[ 0 ] = PROTECT3;
+	wBuffer[ 1 ] = rBuffer[ 0 ] & 0x0F;
+//	wBuffer[ 1 ] = wBuffer[ 1 ] | 0x00;
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
 }
 
 /* 
@@ -37,14 +92,6 @@ float convertBits14or16( uint8_t msb, uint8_t lsb, uint8_t mask )
   return ( battery.GAIN * retValue ) + battery.OFFSET;
 }
 
-// void BATT_IRQ_HANDLER(void){
-
-//     DEBUGOUT("Interrupt status now is: %d\n", Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 2));
-// 	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
-// 	DEBUGOUT("Interrupt received!\n");
-
-// }
-
 /*
  *  This function will read the register values from the batteries and store
  *  them into the batteries struct located in battery.h.
@@ -54,40 +101,12 @@ void getBatteryData()
   batteryFlag = 0;
   uint8_t rBuffer[ 10 ];
   uint8_t wBuffer[ 2 ];
-  uint8_t sys_ctrl1_reg;
-  uint8_t overVoltageThreshold;
-  uint8_t underVoltageThreshold;
 
-  // TODO: may want to divide up this function into the init function
-
-  battery.GAIN   = getGain();
-  battery.OFFSET = getOffset();
-
-  overVoltageThreshold  = getVoltageThreshold( VOLTAGE_MAX );
-  DEBUGOUT( "8-bit overVoltageThreshold in Hex  = 0x%X\n", overVoltageThreshold );
-
-  underVoltageThreshold = getVoltageThreshold( VOLTAGE_MIN );
-  DEBUGOUT( "8-bit underVoltageThreshold in Hex = 0x%X\n", underVoltageThreshold );
-
-  //  TODO: want to make sure these values are correct before we set them in the registers.
-  //  send these values to their corresponding registers
-  //  wBuffer[ 0 ] = OV_TRIP;
-  //  wBuffer[ 1 ] = overVoltageThreshold;
-  //  Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
-
-  //  wBuffer[ 0 ] = UV_TRIP;
-  //  wBuffer[ 1 ] = underVoltageThreshold;
-  //  Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
-
-  //  TODO: set the ADC_EN bit to 1 to activate these thresholds
-  //  to set the ADC_EN bit, need to pull the register value out before performing bit operation
-  //  Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, SYS_CTRL1, rBuffer, 1 );
-  //  sys_ctrl1_reg = rBuffer[ 0 ];
-  //  sys_ctrl1_reg = sys_ctrl1_reg | ADC_EN_BIT;
-
-  //  wBuffer[ 0 ] = SYS_CTRL1;
-  //  wBuffer[ 1 ] = sys_ctrl1_reg;
-  //  Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+  // extracting the interrupt value to reset it.
+  Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, SYS_STAT, rBuffer, 1 );
+  wBuffer[ 0 ] = SYS_STAT;
+  wBuffer[ 1 ] = rBuffer[ 0 ];
+  Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
 
   // read the msb and lsb for the 5 batteries. 10 total registers to read from
   Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, VC1_HI, rBuffer, 10 );
@@ -99,11 +118,6 @@ void getBatteryData()
   battery.VC4 = convertBits14or16( rBuffer[ 6 ], rBuffer[ 7 ], MASK_6_BIT );
   battery.VC5 = convertBits14or16( rBuffer[ 8 ], rBuffer[ 9 ], MASK_6_BIT );
 
-  // read the msb and lsb for the sum of the batteries
-  // TODO: STUB, BATSUM is not correct
-  battery.BATSUM = -1;
-  //  Chip_I2C_MasterCmdRead( I2C0, BATT_ADDRESS, BAT_HI, rBuffer, 2 );
-  //  battery.BATSUM = convertBits14or16( rBuffer[ 0 ], rBuffer[ 1 ], MASK_8_BIT );
 }
 
 /*
@@ -167,6 +181,6 @@ uint8_t getVoltageThreshold( float v )
 	fullVoltageThreshold = ( v - battery.OFFSET ) / battery.GAIN;
 	DEBUGOUT( "fullVoltageThreshold = %f\n", fullVoltageThreshold );
 
-	return ( ( uint8_t ) fullVoltageThreshold ) >> 4;
+	return ( uint8_t )( ( ( uint16_t ) fullVoltageThreshold ) >> 4 );
 }
 
