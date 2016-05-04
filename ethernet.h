@@ -118,7 +118,29 @@
 #define PWR 			"PWR"
 #define PASSWORD 		"gaucholoop"
 
-#define SOCKET_ID 0
+#define SOCKET_ID 		0
+
+
+enum Wiz_State {
+
+	WIZ_IDLE,
+
+	/* Message Send */
+	START_SEND,
+	TX_WP_READ,
+	DATA_TRANSFER,
+	TX_WP_WRITE,
+	SEND_CMD,
+
+	/* Message Receive */
+	START_RECV,
+	RX_RSR_READ,
+	RX_ADDR_READ,
+	DATA_RECV,
+	RX_ADDR_WRITE,
+	RECV_CMD
+
+};
 
 extern uint16_t gSn_RX_BASE[];
 extern uint16_t gSn_TX_BASE[];
@@ -130,9 +152,10 @@ uint8_t Tx_Buf[BUFFER_SIZE];
 uint8_t Tx_Data[DATA_BUF_SIZE];
 uint8_t Rx_Buf[BUFFER_SIZE];
 uint8_t Rx_Data[DATA_BUF_SIZE];
-uint8_t activeSockets;
-uint8_t connectionOpen;
-uint8_t connectionClosed;
+uint8_t activeSockets, connectionOpen, connectionClosed, wiznetState;
+uint16_t int_length;
+uint16_t int_dst_mask, int_dst_ptr, int_wr_base, int_rd_ptr0, int_rd_ptr1;
+uint16_t int_src_mask, int_src_ptr, int_rd_base;
 volatile uint8_t isXferCompleted;
 volatile uint8_t sendDataFlag;
 volatile uint8_t wizIntFlag;
@@ -167,16 +190,16 @@ void Wiz_Clear_Buffer(uint8_t n);
 void ethernetInit(uint8_t protocol, uint8_t socket);
 void Wiz_Deinit(uint8_t protocol, uint8_t socket);
 void spi_Send_Int(uint16_t address, uint16_t length);
-void spi_Recv_Int(uint16_t address);
+void spi_Recv_Int(uint16_t address, uint16_t length);
 void spi_Send_Blocking(uint16_t address, uint16_t length);
 void spi_Recv_Blocking(uint16_t address, uint16_t length);
 void TIMER2_IRQHandler(void);
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
+void Wiz_Xfer_Int(uint8_t n);
 
 uint8_t Wiz_Check_Socket(uint8_t n);
-uint8_t Wiz_Int_Check();
 uint8_t Wiz_Int_Clear(uint8_t n);
-uint16_t Wiz_Send(uint8_t n, uint8_t* message);
-uint16_t Wiz_Recv(uint8_t n, uint8_t* message);
+uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message);
+uint16_t Wiz_Recv_Blocking(uint8_t n, uint8_t* message);
 
 #endif

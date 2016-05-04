@@ -50,7 +50,7 @@ int main(void)
     ethernetInit(PROTO_TCP, 0);
 //    rangingSensorsInit();
 
-    DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
+    DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
 //	sendDataFlag = 1;
@@ -105,45 +105,47 @@ int main(void)
 //            DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
 //        }
 
-    	/* Handle all Wiznet Interrupts, including RECV */
-        if(wizIntFlag) {
-    		wizIntFunction();
+//    	/* Handle all Wiznet Interrupts, including RECV */
+//        if(wizIntFlag) {
+//    		wizIntFunction();
+//    	}
+
+    	if(wizIntFlag || isXferCompleted || sendDataFlag && connectionOpen) {
+
+    		wizStateHandler();
+
+//    		//sendData();
+//    		DEBUGOUT( "Sending Data!\n" );
+//
+//    		/* Intializes random number generator */
+//    		char data[4] = {0};
+//
+//    		sendDataFlag = 0;
+//
+//    		sprintf(data, "%03d", rand() % 500);
+//    		send_method(BMP, data, 5);
+//
+//    		sprintf(data, "%03d", rand() % 300);
+//    		send_method(TMP, data, 5);
+//
+//    		sprintf(data, "%03d", rand() % 1000);
+//    		send_method(POS, data, 5);
+//
+//    		sprintf(data, "%03d", rand() % 130);
+//    		send_method(VEL, data, 5);
+//
+//    		sprintf(data, "%03d", rand() % 50);
+//    		send_method(ACC, data, 5);
+//
+//    		sprintf(data, "%03d", (rand() % 12) - 6);
+//    		send_method(ROL, data, 5);
+//
+//    		sprintf(data, "%03d", (rand() % 12) - 6);
+//    		send_method(PIT, data, 5);
+//
+//    		sprintf(data, "%03d", (rand() % 12) - 6);
+//    		send_method(YAW, data, 5);
     	}
-
-    	if(sendDataFlag && connectionOpen) {
-    		//sendData();
-    		DEBUGOUT( "Sending Data!\n" );
-
-    		/* Intializes random number generator */
-    		char data[4] = {0};
-
-    		sendDataFlag = 0;
-
-    		sprintf(data, "%03d", rand() % 500);
-    		send_method(BMP, data, 5);
-
-    		sprintf(data, "%03d", rand() % 300);
-    		send_method(TMP, data, 5);
-
-    		sprintf(data, "%03d", rand() % 1000);
-    		send_method(POS, data, 5);
-
-    		sprintf(data, "%03d", rand() % 130);
-    		send_method(VEL, data, 5);
-
-    		sprintf(data, "%03d", rand() % 50);
-    		send_method(ACC, data, 5);
-
-    		sprintf(data, "%03d", (rand() % 12) - 6);
-    		send_method(ROL, data, 5);
-
-    		sprintf(data, "%03d", (rand() % 12) - 6);
-    		send_method(PIT, data, 5);
-
-    		sprintf(data, "%03d", (rand() % 12) - 6);
-    		send_method(YAW, data, 5);
-    	}
-
 
 //        if(emergencyBrakeFlag){
 //            emergencyBrake();
