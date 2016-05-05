@@ -1,4 +1,4 @@
-#include "time.h"
+#include "timer.h"
 #include "sensor_data.h"
 #include "ethernet.h"
 
@@ -22,7 +22,7 @@ void timerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
 	Chip_TIMER_MatchEnableInt( timer, 1 );
 
 	// TODO: get rates for ms
-	Chip_TIMER_SetMatch( timer, 1, ( 2 * timerFreq / tickRate ) );
+	Chip_TIMER_SetMatch( timer, 1, ( (2 * timerFreq) / (tickRate) ) );
 	Chip_TIMER_ResetOnMatchEnable( timer, 1 );
 	Chip_TIMER_Enable( timer );
 

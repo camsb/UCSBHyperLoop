@@ -10,6 +10,8 @@
  *
  */
 
+#include <stdlib.h>		// Used for rand()
+#include <time.h>		// Used for rand()
 #include "time.h"
 #include "board.h"
 #include "temp_press.h"
@@ -55,9 +57,9 @@ int main(void)
 
 //	sendDataFlag = 1;
 
-	int val_len;
-	char method[4] = {0};
-	char value[30] = {0};
+//	int val_len;
+//	char method[4] = {0};
+//	char value[30] = {0};
 //	rec_method(method, value, &val_len);
 //	printf("rec: %s:%s\n", method, value);
 //	printf("-----------------\n");
@@ -72,8 +74,8 @@ int main(void)
 
     time_t t;
     srand((unsigned) time(&t));
-    while( 1 )
-    {
+    while( 1 ) {
+
     	/* Need to do this cleanly, on a timer to prevent multiple attempts before a response */
     	if(!connectionOpen && !connectionClosed && sendDataFlag) {
     		sendDataFlag = 0;
@@ -106,45 +108,28 @@ int main(void)
 //        }
 
 //    	/* Handle all Wiznet Interrupts, including RECV */
-//        if(wizIntFlag) {
-//    		wizIntFunction();
-//    	}
+        if(wizIntFlag) {
+    		wizIntFunction();
+    	}
 
-    	if(wizIntFlag || isXferCompleted || sendDataFlag && connectionOpen) {
+    	if(/*wizIntFlag || isXferCompleted || */(sendDataFlag && connectionOpen)) {
 
-    		wizStateHandler();
+//    		wizStateHandler(); Used for interrupt driven
 
 //    		//sendData();
 //    		DEBUGOUT( "Sending Data!\n" );
-//
-//    		/* Intializes random number generator */
-//    		char data[4] = {0};
-//
-//    		sendDataFlag = 0;
-//
-//    		sprintf(data, "%03d", rand() % 500);
-//    		send_method(BMP, data, 5);
-//
-//    		sprintf(data, "%03d", rand() % 300);
-//    		send_method(TMP, data, 5);
-//
-//    		sprintf(data, "%03d", rand() % 1000);
-//    		send_method(POS, data, 5);
-//
-//    		sprintf(data, "%03d", rand() % 130);
-//    		send_method(VEL, data, 5);
-//
-//    		sprintf(data, "%03d", rand() % 50);
-//    		send_method(ACC, data, 5);
-//
-//    		sprintf(data, "%03d", (rand() % 12) - 6);
-//    		send_method(ROL, data, 5);
-//
-//    		sprintf(data, "%03d", (rand() % 12) - 6);
-//    		send_method(PIT, data, 5);
-//
-//    		sprintf(data, "%03d", (rand() % 12) - 6);
-//    		send_method(YAW, data, 5);
+
+    		sendDataFlag = 0;
+
+    		sprintf(DataPacket.bmp, "%03d.00", rand() % 500);
+    		sprintf(DataPacket.tmp, "%03d.00", rand() % 300);
+    		sprintf(DataPacket.pos, "%03d.00", rand() % 1000);
+    		sprintf(DataPacket.vel, "%03d.00", rand() % 130);
+    		sprintf(DataPacket.acc, "%03d.00", rand() % 50);
+    		sprintf(DataPacket.rol, "%03d.00", (rand() % 12) - 6);
+    		sprintf(DataPacket.pit, "%03d.00", (rand() % 12) - 6);
+    		sprintf(DataPacket.yaw, "%03d.00", (rand() % 12) - 6);
+    		send_data_packet();
     	}
 
 //        if(emergencyBrakeFlag){

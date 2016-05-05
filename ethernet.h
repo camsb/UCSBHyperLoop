@@ -103,8 +103,6 @@
 #define REMOTE_PORT1 	0x12
 
 /* Protocol methods */
-#define AUT 			"AUT"
-#define ACK 			"ACK"
 #define BMP 			"BMP"
 #define TMP 			"TMP"
 #define POS 			"POS"
@@ -142,6 +140,24 @@ enum Wiz_State {
 
 };
 
+struct data_packet {
+	// all pointers are ini
+	// pass in pointer to null terminated data string
+	// packet construction will be taken care of by function
+	// format with ###.## zero padded
+	char bmp[6];
+	char tmp[6];
+	char pos[6];
+	char vel[6];
+	char acc[6];
+	char rol[6];
+	char pit[6];
+	char yaw[6];
+
+};
+
+struct data_packet DataPacket;
+
 extern uint16_t gSn_RX_BASE[];
 extern uint16_t gSn_TX_BASE[];
 
@@ -171,6 +187,7 @@ void WIZNET_IRQ_HANDLER(void);
 void wizIntFunction();
 void rec_method(char *method, char *val, int *val_len);
 void send_method(char *method, char* val, int val_len);
+void send_data_packet();
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 void Wiz_Restart();
 void Wiz_Init();
@@ -196,6 +213,7 @@ void spi_Recv_Blocking(uint16_t address, uint16_t length);
 void TIMER2_IRQHandler(void);
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 void Wiz_Xfer_Int(uint8_t n);
+void send_data_packet_helper(char *method, char *val, int *position);
 
 uint8_t Wiz_Check_Socket(uint8_t n);
 uint8_t Wiz_Int_Clear(uint8_t n);

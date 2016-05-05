@@ -357,6 +357,39 @@ void send_method(char *method, char* val, int val_len) {
 
 }
 
+void send_data_packet_helper(char *method, char *val, int *position) {
+	if (val != 0) {
+		memcpy(Net_Tx_Data + *position, method, 3);
+		*position += 3;
+		memcpy(Net_Tx_Data + *position, ":", 1);
+		*position += 1;
+		memcpy(Net_Tx_Data + *position, val, 6);
+		*position += 6;
+		memcpy(Net_Tx_Data + *position, "\n", 1);
+		*position += 1;
+	}
+}
+
+void send_data_packet() {
+
+	memset(Net_Tx_Data, 0, DATA_BUF_SIZE);
+
+	// Copy strings to Net_Tx_Data
+	int pos = 0;
+
+	send_data_packet_helper(BMP, DataPacket.bmp, &pos);
+	send_data_packet_helper(TMP, DataPacket.tmp, &pos);
+	send_data_packet_helper(POS, DataPacket.pos, &pos);
+	send_data_packet_helper(VEL, DataPacket.vel, &pos);
+	send_data_packet_helper(ACC, DataPacket.acc, &pos);
+	send_data_packet_helper(ROL, DataPacket.rol, &pos);
+	send_data_packet_helper(PIT, DataPacket.pit, &pos);
+	send_data_packet_helper(YAW, DataPacket.yaw, &pos);
+
+	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+
+}
+
 // Singular, will change to multiple, or do an interrupt or something
 void rec_method(char *method, char *val, int *val_len) {
 
@@ -386,7 +419,7 @@ void wizIntFunction() {
 	int val_len;
 
 	/* Read Socket Interrupts */
-	printf("Interrupt Detected:\n");
+//	printf("Interrupt Detected:\n");
 
 	for(n = 0; n < 8; n++) {
 		if(activeSockets >> n & 0x01) {
@@ -396,11 +429,11 @@ void wizIntFunction() {
 			Tx_Buf[4] = 0xFF;
 			spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
 			socket_int = Rx_Buf[4];
-			printf("Socket %u: 0x%x\n", n, socket_int);
+//			printf("Socket %u: 0x%x\n", n, socket_int);
 
 			/* Handle Interrupt Request */
 			if( socket_int & SEND_OK ) {	 // Send Completed
-				printf("Send Completed\n");
+//				printf("Send Completed\n");
 			}
 			if( socket_int & TIMEOUT ) { // Timeout Occurred
 				printf("Timeout Occurred\n");
@@ -431,7 +464,7 @@ void wizIntFunction() {
 			Tx_Buf[4] = socket_int;
 			spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
 
-			printf("-----------------\n");
+//			printf("-----------------\n");
 		}
 	}
 
@@ -599,6 +632,7 @@ void Wiz_TCP_Connect(uint8_t n) {
 	Tx_Buf[4] = CONNECT;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
 
+	/* TODO: If this fails, try to establish connection once more */
 	printf("Establishing TCP connection...\n");
 	do {
 		/* Wait for connection */
@@ -659,10 +693,16 @@ uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message) {
 	uint16_t length;
 	uint16_t offset = 0x0100*n;
 	uint16_t dst_mask, dst_ptr, wr_base, rd_ptr0, rd_ptr1;
+	uint16_t free_size;
+
+	/* Read current free size register */
+	Tx_Buf[4] = Tx_Buf[5] = 0xFF;
+	spi_Recv_Blocking(Sn_TX_FSR_BASE + offset, 0x0002);
+	free_size = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
+//	printf("Free size: %u\n", free_size);
 
 	/* Read current Tx Write Pointer */
-	Tx_Buf[4] = 0xFF;
-	Tx_Buf[5] = 0xFF;
+	Tx_Buf[4] = Tx_Buf[5] = 0xFF;
 	spi_Recv_Blocking(Sn_TX_WR_BASE + offset, 0x0002);
 	wr_base = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
 
@@ -679,7 +719,12 @@ uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message) {
 
 	/* Load data into Tx Buffer */
 	if((dst_mask + length) > (TX_MAX_MASK + 1)) {
-		printf("Overflow!\n");
+		printf("\n");
+		printf("Send Buffer Overflow!\n");
+		printf("Free Size: %u\n", free_size);
+		printf("Write Base: %u\n", wr_base);
+		printf("Destination Mask: %u\n", dst_mask);
+		printf("Length: %u\n", length);
 		// TODO: Handle overflow
 		// Do stuff (In W5200 datasheet)
 	} else {
@@ -692,19 +737,19 @@ uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message) {
 	Tx_Buf[5] = ((uint8_t)(wr_base & 0x00FF));
 	spi_Send_Blocking(Sn_TX_WR_BASE + offset, 0x0002);
 
-	/* Read Tx Read Pointer */
-	Rx_Buf[4] = Rx_Buf[5] = 0xFF;
-	spi_Recv_Blocking(Sn_TX_RD_BASE + offset, 0x0002);
-	rd_ptr0 = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
+//	/* Read Tx Read Pointer */
+//	Rx_Buf[4] = Rx_Buf[5] = 0xFF;
+//	spi_Recv_Blocking(Sn_TX_RD_BASE + offset, 0x0002);
+//	rd_ptr0 = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
 
 	/* SEND Command */
 	Tx_Buf[4] = SEND;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
 
-	/* Read Tx Read Pointer */
-	Rx_Buf[4] = Rx_Buf[5] = 0xFF;
-	spi_Recv_Blocking(Sn_TX_RD_BASE + offset, 0x0002);
-	rd_ptr1 = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
+//	/* Read Tx Read Pointer */
+//	Rx_Buf[4] = Rx_Buf[5] = 0xFF;
+//	spi_Recv_Blocking(Sn_TX_RD_BASE + offset, 0x0002);
+//	rd_ptr1 = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
 
 	return rd_ptr1 - rd_ptr0;
 }
