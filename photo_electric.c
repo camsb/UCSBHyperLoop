@@ -1,4 +1,10 @@
 #include "photo_electric.h"
+#include "time.h"
+
+void stripDetected(){
+  stripDetectedFlag = 0;
+  // Rest of function here.
+}
 
 void PHOTOELECTRIC_IRQ_HANDLER(void)
 {
@@ -6,7 +12,7 @@ void PHOTOELECTRIC_IRQ_HANDLER(void)
   Chip_TIMER_Disable(LPC_TIMER3);
 
   Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, PHOTOELECTRIC_INT_PORT, 1 << PHOTOELECTRIC_INT_PIN);
-  strip_detected = 1;
+  stripDetectedFlag = 1;
   strip_count++;
   regional_strip_count++;
 
@@ -41,7 +47,6 @@ void TIMER3_IRQHandler(void)
     Chip_TIMER_Disable(LPC_TIMER3);
     Reset_Timer_Counter(LPC_TIMER3);
   }
-
   strip_region++;
   regional_strip_count = 0;
 }
@@ -67,8 +72,4 @@ void photoelectricInit() {
   Photoelectric_GPIO_Init();      // Initialize photoelectric GPIO Pin
   Photoelectric_Interrupt_Enable(); // Initialize photoelectric interrupts
   Photoelectric_Timer_Init();     // Initialize photoelectric timer
-  strip_detected = 0;         // Initialize photoelectric interrupt flag
-  strip_count = 0;
-  regional_strip_count = 0;
-  strip_region = 0;
 }

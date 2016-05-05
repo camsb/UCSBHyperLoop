@@ -32,8 +32,10 @@ void convertVoltageLong(uint8_t sensor)
 	}
 }
 
-void getShortDistance(void)
+rangingData getShortDistance(void)
 {
+	rangingData short_data;
+
 	/* Read ADC value */
 	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH4, &ShortRangingDataRaw[0]);
 	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH5, &ShortRangingDataRaw[1]);
@@ -45,10 +47,19 @@ void getShortDistance(void)
 	convertVoltageShort(1);
 	convertVoltageShort(2);
 	convertVoltageShort(3);
+
+	/* Return rangingData structure */
+	short_data.sensor0 = ShortRangingMovingAverage[0];
+	short_data.sensor1 = ShortRangingMovingAverage[1];
+	short_data.sensor2 = ShortRangingMovingAverage[2];
+	short_data.sensor3 = ShortRangingMovingAverage[3];
+	return short_data;
 }
 
-void getLongDistance(void)
+rangingData getLongDistance(void)
 {
+	rangingData long_data;
+
 	/* Read ADC value */
 	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH0, &LongRangingDataRaw[0]);
 	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH1, &LongRangingDataRaw[1]);
@@ -60,6 +71,13 @@ void getLongDistance(void)
 	convertVoltageLong(1);
 	convertVoltageLong(2);
 	convertVoltageLong(3);
+
+	/* Return rangingData structure */
+	long_data.sensor0 = LongRangingMovingAverage[0];
+	long_data.sensor1 = LongRangingMovingAverage[1];
+	long_data.sensor2 = LongRangingMovingAverage[2];
+	long_data.sensor3 = LongRangingMovingAverage[3];
+	return long_data;
 }
 
 void initADCChannel(uint8_t channel, uint8_t port, uint8_t pin, uint8_t func, float init_val){

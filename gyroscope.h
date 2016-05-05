@@ -1,9 +1,6 @@
 #ifndef GYROSCOPE_H_
 #define GYROSCOPE_H_
 
-#include "time.h"
-#include "i2c.h"
-#include "board.h"
 #include "sensor_data.h"
 
 #define GYRO_ADDRESS                      0x6B
@@ -32,7 +29,6 @@ typedef enum
   GYRO_RANGE_2000DPS = 2000
 } gyroRange_t;
 
-gyroAccelXYZ   getGyroscopeData();
-gyroAccelXYZ   calculateRotAcc( int16_t* uncalcRotAcc );
+gyroAccelXYZ  getGyroscopeData();
 
 #endif

@@ -1,4 +1,6 @@
 #include "accelerometer.h"
+#include "i2c.h"
+#include "board.h"
 
 gyroAccelXYZ getAccelerometerData(){
 	uint8_t  		wBuffer[ 2 ];
