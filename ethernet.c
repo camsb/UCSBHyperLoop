@@ -693,13 +693,7 @@ uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message) {
 	uint16_t length;
 	uint16_t offset = 0x0100*n;
 	uint16_t dst_mask, dst_ptr, wr_base, rd_ptr0, rd_ptr1;
-	uint16_t free_size;
-
-	/* Read current free size register */
-	Tx_Buf[4] = Tx_Buf[5] = 0xFF;
-	spi_Recv_Blocking(Sn_TX_FSR_BASE + offset, 0x0002);
-	free_size = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
-//	printf("Free size: %u\n", free_size);
+	uint16_t upper_size, left_size;
 
 	/* Read current Tx Write Pointer */
 	Tx_Buf[4] = Tx_Buf[5] = 0xFF;
@@ -709,25 +703,24 @@ uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message) {
 	/* Calculate Tx Buffer Address */
 	dst_mask = wr_base & (TX_MAX_MASK);
 	dst_ptr = gSn_TX_BASE[n] + dst_mask;
-
-	/* Setup data and length for send */
-	sprintf(((char *)Tx_Buf) + 4, (char *)message);
 	length = strlen((char *)message);
-//	Tx_Buf[4 + length++] = '\r';
-//	Tx_Buf[4 + length++] = '\n';
-//	Tx_Buf[4 + length++] = '\0';
 
 	/* Load data into Tx Buffer */
 	if((dst_mask + length) > (TX_MAX_MASK + 1)) {
-		printf("\n");
-		printf("Send Buffer Overflow!\n");
-		printf("Free Size: %u\n", free_size);
-		printf("Write Base: %u\n", wr_base);
-		printf("Destination Mask: %u\n", dst_mask);
-		printf("Length: %u\n", length);
-		// TODO: Handle overflow
-		// Do stuff (In W5200 datasheet)
+
+		/* Copy upper_size bytes of src_addr to dest_addr */
+		upper_size = (TX_MAX_MASK + 1) - dst_mask;
+		memcpy((uint8_t *)Tx_Buf + 4, (char *)message, upper_size);
+		spi_Send_Blocking(dst_ptr, upper_size);
+
+		/* Copy left_size bytes of src_addr to gSn_TX_BASE */
+		left_size = length - upper_size;
+		memcpy((uint8_t *)Tx_Buf + 4, (char *)message + upper_size, left_size);
+		spi_Send_Blocking(gSn_TX_BASE[n], left_size);
+
 	} else {
+		/* Setup, send data to Wiznet */
+		sprintf(((char *)Tx_Buf) + 4, (char *)message);
 		spi_Send_Blocking(dst_ptr, length);
 	}
 
@@ -737,19 +730,9 @@ uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message) {
 	Tx_Buf[5] = ((uint8_t)(wr_base & 0x00FF));
 	spi_Send_Blocking(Sn_TX_WR_BASE + offset, 0x0002);
 
-//	/* Read Tx Read Pointer */
-//	Rx_Buf[4] = Rx_Buf[5] = 0xFF;
-//	spi_Recv_Blocking(Sn_TX_RD_BASE + offset, 0x0002);
-//	rd_ptr0 = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
-
 	/* SEND Command */
 	Tx_Buf[4] = SEND;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
-
-//	/* Read Tx Read Pointer */
-//	Rx_Buf[4] = Rx_Buf[5] = 0xFF;
-//	spi_Recv_Blocking(Sn_TX_RD_BASE + offset, 0x0002);
-//	rd_ptr1 = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
 
 	return rd_ptr1 - rd_ptr0;
 }
@@ -759,6 +742,7 @@ uint16_t Wiz_Recv_Blocking(uint8_t n, uint8_t *message) {
 	uint16_t length;
 	uint16_t offset = 0x0100*n;
 	uint16_t src_mask, src_ptr, rd_base;
+	uint16_t upper_size, left_size;
 
 	/* Read Socket Received Size */
 	Tx_Buf[4] = Tx_Buf[5] = 0xFF;
@@ -775,17 +759,26 @@ uint16_t Wiz_Recv_Blocking(uint8_t n, uint8_t *message) {
 	src_mask = rd_base & (RX_MAX_MASK);
 	src_ptr = gSn_RX_BASE[n] + src_mask;
 
+	/* Clear output buffer (may not be necessary) */
+	memset(message, '\0', DATA_BUF_SIZE);
+
 	/* Load data into Tx Buffer */
 	if((src_mask + length) > (RX_MAX_MASK + 1)) {
-		printf("Overflow!\n");
-		// TODO: Handle overflow
-		// Do stuff (In W5200 datasheet)
+
+		/* Copy upper_size bytes of src_addr to dest_addr */
+		upper_size = (TX_MAX_MASK + 1) - src_mask;
+		spi_Recv_Blocking(src_ptr, upper_size);
+		memcpy((char *)message, (uint8_t *)Rx_Buf + 4, upper_size);
+
+		/* Copy left_size bytes of src_addr to gSn_TX_BASE */
+		left_size = length - upper_size;
+		spi_Recv_Blocking(gSn_RX_BASE[n], left_size);
+		memcpy((char *)message + upper_size, (uint8_t *)Rx_Buf + 4, left_size);
+
 	} else {
 		spi_Recv_Blocking(src_ptr, length);
+		memcpy(message, &Rx_Buf[4], length);	// SPI HDR 4B, TCP HDR 8B
 	}
-	memset(message, '\0', DATA_BUF_SIZE);
-	memcpy(message, &Rx_Buf[4], length);	// SPI HDR 4B, TCP HDR 8B
-//	Rx_Data[length-4] = '\0';
 
 	rd_base += length;
 	Tx_Buf[4] = ((uint8_t)((rd_base & 0xFF00) >> 8));
