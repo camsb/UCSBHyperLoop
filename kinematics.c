@@ -1,15 +1,25 @@
 #include "kinematics.h"
 
+/* Derive velocity from accelerometer's data */
+XYZ getInertialVelocity(){
+	float Ts = .1;  // Sampling time.
+	XYZ			velocity;
 
-XYZ getVelocity(){
-//	DEBUGOUT( "accelX = %f\t", sensorData.accelX );
-//	DEBUGOUT( "accelY = %f\t", sensorData.accelY );
-//	DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
-	XYZ		velocity;
-	static XYZ previousVelocity;
+	velocity.x = sensorData.accelX*Ts + sensorData.velocityX;
+	velocity.y = sensorData.accelY*Ts + sensorData.velocityY;
+	velocity.z = sensorData.accelZ*Ts + sensorData.velocityZ;
 
-	// Need to subtract calibration?
-	velocity.x = sensorData.accelX*1;
-	velocity.z = sensorData.accelY;
-	velocity.z = sensorData.accelZ;
+	return velocity;
+}
+
+/* Derive velocity from accelerometer's data */
+XYZ getInertialPosition(){
+	float Ts = .1;  // Sampling time.
+	XYZ			position;
+
+	position.x = sensorData.velocityX*Ts + sensorData.positionX;
+	position.y = sensorData.velocityY*Ts + sensorData.positionY;
+	position.z = sensorData.velocityZ*Ts + sensorData.positionZ;
+
+	return position;
 }

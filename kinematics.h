@@ -3,6 +3,8 @@
 
 #include "sensor_data.h"
 
-XYZ getVelocity();
+XYZ getInertialVelocity();
+XYZ getInertialPosition();
+
 
 #endif

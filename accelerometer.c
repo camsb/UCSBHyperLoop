@@ -9,7 +9,7 @@ XYZ getAccelerometerData(){
 	static XYZ 			rawAcceleration;
 	XYZ 		acceleration;
 
-	float alpha = 0.8;
+	float alpha = 0.3;
 	float beta = 1 - alpha;
 
 	float LSM303ACCEL_MG_LSB = (0.00093F); 	// 1, 2, 4 or 12 mg per lsb
@@ -42,10 +42,10 @@ XYZ getInitialAccelMatrix(){
 	XYZ intermediateAccel;
 	XYZ initialAccel;
 
-	float alpha = 0.8;
+	float alpha = 0.3;
 	float beta = 1 - alpha;
 
-	for (i = 0; i < 10; i++){
+	for (i = 0; i < 20; i++){
 		intermediateAccel = getAccelerometerData();
 		initialAccel.x = intermediateAccel.x*alpha + initialAccel.x*beta;
 		initialAccel.y = intermediateAccel.y*alpha + initialAccel.y*beta;

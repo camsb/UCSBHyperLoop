@@ -39,8 +39,7 @@
 
     /* Initialize timers for the delay function, gathering data, and sending data. */
     delayTimerInit(LPC_TIMER0, TIMER0_IRQn, 1000);
-    gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 1);
-//    sendSensorDataTimerInit(LPC_TIMER2, TIMER2_IRQn, 4);
+    gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 10);
 
     /* Initialize I2C and all sensors. */
     i2cInit(I2C1, SPEED_100KHZ);
@@ -64,6 +63,8 @@
 
         if(collectDataFlag){
             collectData();
+
+            if (sensorData.dataPrintFlag == 20) { // Print every 20/10 = 2 seconds.
 //            DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
 //            DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
 //            DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
@@ -72,15 +73,23 @@
 //            DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
 //            DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
 //            DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
-//            DEBUGOUT( "temperature = %d\n", sensorData.temp );
-//            DEBUGOUT( "pressure = %u\n", sensorData.pressure );
+            DEBUGOUT( "temperature = %f\n", sensorData.temp );
+            DEBUGOUT( "pressure = %f\n", sensorData.pressure );
             DEBUGOUT( "accelX = %f\t", sensorData.accelX );
             DEBUGOUT( "accelY = %f\t", sensorData.accelY );
             DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
+            DEBUGOUT( "velocityX = %f\t", sensorData.velocityX );
+            DEBUGOUT( "velocityY = %f\t", sensorData.velocityY );
+            DEBUGOUT( "velocityZ = %f\n", sensorData.velocityZ );
+            DEBUGOUT( "positionX = %f\t", sensorData.positionX );
+            DEBUGOUT( "positionY = %f\t", sensorData.positionY );
+            DEBUGOUT( "positionZ = %f\n", sensorData.positionZ );
 //            DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
 //            DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
 //            DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
 
+            sensorData.dataPrintFlag = 0;
+            }
         }
 
 //        if(sendDataFlag){

@@ -79,7 +79,7 @@ uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8
   return returnVal;
 }
 
-uint32_t calculatePressure( uint32_t uncalcPressure )
+float calculatePressure( uint32_t uncalcPressure )
 {
   uint32_t  pressure;
   int32_t   X1;
@@ -112,10 +112,10 @@ uint32_t calculatePressure( uint32_t uncalcPressure )
   X2 = ( -7357 * pressure ) >> 16;
   pressure = pressure + ( ( X1 + X2 + 3791 ) >> 4 );
 
-  return pressure;
+  return ((float)pressure)/1000.0; // Need to divide by 1000 to return in kPa.
 }
 
-uint32_t getPressure()
+float getPressure()
 {
   uint32_t  uncalcPressure;
   uint8_t   wBuffer[ 2 ];
@@ -136,7 +136,7 @@ uint32_t getPressure()
   return calculatePressure( uncalcPressure );
 }
 
-int32_t calculateTemperature( uint32_t uncalcTemperature )
+float calculateTemperature( uint32_t uncalcTemperature )
 {
   int32_t  temperature;
   int32_t   X1;
@@ -147,10 +147,10 @@ int32_t calculateTemperature( uint32_t uncalcTemperature )
   c->B5 = X1 + X2;
   temperature = ( c->B5 + 8 ) >> 4;
 
-  return temperature;
+  return ((float)temperature)/10.0; // Need to divide by 10 to return units in C.
 }
 
-int32_t getTemperature()
+float getTemperature()
 {
   uint32_t  uncalcTemperature;
   uint8_t   wBuffer[ 2 ];

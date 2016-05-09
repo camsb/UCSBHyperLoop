@@ -4,6 +4,7 @@
 #include "time.h"
 #include "ranging.h"
 #include "temp_press.h"
+#include "kinematics.h"
 
 void collectCalibrationData(){
 	XYZ initialAccel;
@@ -17,8 +18,9 @@ void collectCalibrationData(){
 
 void collectData(){
   collectDataFlag = 0;
+  sensorData.dataPrintFlag += 1;
 
-  XYZ acceleration, rotation, velocity;
+  XYZ acceleration, rotation, velocity, position;
 //  rangingData shortRangingData, longRangingData;
 
   sensorData.temp = getTemperature();
@@ -47,8 +49,15 @@ void collectData(){
   sensorData.gyroY = rotation.y;
   sensorData.gyroZ = rotation.z;
 
-  getVelocity();
-//  sensorData.velocityX = velocity.x;
+  velocity = getInertialVelocity();
+  sensorData.velocityX = velocity.x;
+  sensorData.velocityY = velocity.y;
+  sensorData.velocityZ = velocity.z;
+
+  position = getInertialPosition();
+  sensorData.positionX = position.x;
+  sensorData.positionY = position.y;
+  sensorData.positionZ = position.z;
 
 }
 

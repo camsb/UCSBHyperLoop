@@ -3,6 +3,7 @@
 
 #include "board.h"
 
+void 	collectCalibrationData();
 void    collectData();
 void    TIMER1_IRQHandler(void);
 void    gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
@@ -17,17 +18,11 @@ typedef struct{
 
 typedef struct{
 
+  uint32_t dataPrintFlag;
+
   float gyroX;
   float gyroY;
   float gyroZ;
-
-  float initialAccelX;
-  float initialAccelY;
-  float initialAccelZ;
-
-  float accelX;
-  float accelY;
-  float accelZ;
 
   float longRangingJ22;
   float longRangingJ25;
@@ -39,12 +34,24 @@ typedef struct{
   float shortRangingJ36;
   float shortRangingJ37;
 
+  float initialAccelX;
+  float initialAccelY;
+  float initialAccelZ;
+
+  float accelX;
+  float accelY;
+  float accelZ;
+
   float velocityX;
   float velocityY;
   float velocityZ;
 
-  int32_t temp;
-  uint32_t pressure;
+  float positionX;
+  float positionY;
+  float positionZ;
+
+  float temp;
+  float pressure;
 
 } sensor;
 

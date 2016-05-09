@@ -22,14 +22,14 @@ typedef struct {
 
 constants *c;
 
-uint32_t  calculatePressure( uint32_t uncalcPres );
-int32_t  	calculateTemperature( uint32_t uncalcTemp );
-uint32_t  getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph );
-int32_t  	getTemperature();
-uint32_t  getPressure();
+float  		calculatePressure( uint32_t uncalcPres );
+float  		calculateTemperature( uint32_t uncalcTemp );
+uint32_t  	getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph );
+float  		getTemperature();
+float  		getPressure();
 void    	initCalibrationData();
 void    	printConstants();
-uint16_t  readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg );
-void 		  temperaturePressureInit();
+uint16_t  	readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg );
+void 		temperaturePressureInit();
 
 #endif
