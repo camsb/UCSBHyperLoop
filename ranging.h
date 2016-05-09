@@ -3,6 +3,21 @@
 
 #include "board.h"
 
+#define SHORT_FRONT_DIST			1
+#define SHORT_BACK_DIST				1
+#define SHORT_FRONT_LEFT_DIST		1
+#define SHORT_FRONT_RIGHT_DIST		1
+#define SHORT_BACK_LEFT_DIST		1
+#define SHORT_BACK_RIGHT_DIST		1
+
+#define LONG_FRONT_DIST				1
+#define LONG_BACK_DIST				1
+#define LONG_FRONT_LEFT_DIST		1
+#define LONG_FRONT_RIGHT_DIST		1
+#define LONG_BACK_LEFT_DIST			1
+#define LONG_BACK_RIGHT_DIST		1
+
+
 #define _LPC_ADC_ID 		LPC_ADC
 #define _LPC_ADC_IRQ 		ADC_IRQn
 #define LONG_FRONT_INITIAL	45.0	// cm

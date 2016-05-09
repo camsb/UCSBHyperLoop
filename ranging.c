@@ -1,5 +1,10 @@
 #include "ranging.h"
 
+void compute_pod_attitude_ranging() {
+	/* y Position */
+	y_a =
+}
+
 /* Convert voltage */
 void convertVoltageShort(uint8_t sensor)
 {
