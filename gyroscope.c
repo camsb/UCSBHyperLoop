@@ -3,33 +3,33 @@
 #include "i2c.h"
 #include "board.h"
 
-gyroAccelXYZ getGyroscopeData(){
+XYZ getGyroscopeData(){
   //Sample code has options for controlling resolution.
 
   uint8_t     wBuffer[ 2 ];
   uint8_t     rBuffer[ 6 ];
-  gyroAccelXYZ rotAcceleration;
+  XYZ 		  rotAcceleration;
 
   wBuffer[ 0 ] = GYRO_REGISTER_CTRL_REG1; // Control register initializes all
   wBuffer[ 1 ] = 0x00;
-  Chip_I2C_MasterSend( I2C0, GYRO_ADDRESS, wBuffer, 2 );
+  Chip_I2C_MasterSend( I2C1, GYRO_ADDRESS, wBuffer, 2 );
 
   delay( 1 );
   wBuffer[ 1 ] = 0x0F;
-  Chip_I2C_MasterSend( I2C0, GYRO_ADDRESS, wBuffer, 2 );
+  Chip_I2C_MasterSend( I2C1, GYRO_ADDRESS, wBuffer, 2 );
 
   // adjustments for resolution
   wBuffer[ 0 ] = GYRO_REGISTER_CTRL_REG4; // Control register initializes all
   wBuffer[ 1 ] = 0x00; // range 250  DPS
 //  wBuffer[ 1 ] = 0x10; // range 500  DPS
 //  wBuffer[ 1 ] = 0x20; // range 2000 DPS
-  Chip_I2C_MasterSend( I2C0, GYRO_ADDRESS, wBuffer, 2 );
+  Chip_I2C_MasterSend( I2C1, GYRO_ADDRESS, wBuffer, 2 );
 
   wBuffer[ 0 ] = GYRO_REGISTER_CTRL_REG5; // Control register initializes all
   wBuffer[ 1 ] = 0x80; // range 250  DPS
 
-  Chip_I2C_MasterSend( I2C0, GYRO_ADDRESS, wBuffer, 2 );
-  Chip_I2C_MasterCmdRead( I2C0, GYRO_ADDRESS, GYRO_REGISTER_OUT_X_L, rBuffer, 6);
+  Chip_I2C_MasterSend( I2C1, GYRO_ADDRESS, wBuffer, 2 );
+  Chip_I2C_MasterCmdRead( I2C1, GYRO_ADDRESS, GYRO_REGISTER_OUT_X_L, rBuffer, 6);
 
   // Not sure what shifting right by 4 bits does, we may want to take this out for increased
   // accuracy

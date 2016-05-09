@@ -21,6 +21,6 @@
 #define LSM303_REGISTER_ACCEL_OUT_Z_L_A            0x2C
 #define LSM303_REGISTER_ACCEL_OUT_Z_H_A            0x2D
 
-gyroAccelXYZ getAccelerometerData();
+XYZ getAccelerometerData();
 
 #endif /* ACCELEROMETER_H_ */

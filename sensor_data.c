@@ -3,28 +3,29 @@
 #include "accelerometer.h"
 #include "time.h"
 #include "ranging.h"
+#include "temp_press.h"
 
 void collectData(){
   collectDataFlag = 0;
 
-  gyroAccelXYZ acceleration, rotation;
-  rangingData shortRangingData, longRangingData;
+  XYZ acceleration, rotation, velocity;
+//  rangingData shortRangingData, longRangingData;
 
   sensorData.temp = getTemperature();
 
   sensorData.pressure = getPressure();
 
-  longRangingData = getLongDistance();
-  sensorData.longRangingJ25 = longRangingData.sensor0;
-  sensorData.longRangingJ30 = longRangingData.sensor1;
-  sensorData.longRangingJ22 = longRangingData.sensor2;
-  sensorData.longRangingJ31 = longRangingData.sensor3;
-
-  shortRangingData = getShortDistance();
-  sensorData.shortRangingJ36 = shortRangingData.sensor0;
-  sensorData.shortRangingJ37 = shortRangingData.sensor1;
-  sensorData.shortRangingJ34 = shortRangingData.sensor2;
-  sensorData.shortRangingJ35 = shortRangingData.sensor3;
+//  longRangingData = getLongDistance();
+//  sensorData.longRangingJ25 = longRangingData.sensor0;
+//  sensorData.longRangingJ30 = longRangingData.sensor1;
+//  sensorData.longRangingJ22 = longRangingData.sensor2;
+//  sensorData.longRangingJ31 = longRangingData.sensor3;
+//
+//  shortRangingData = getShortDistance();
+//  sensorData.shortRangingJ36 = shortRangingData.sensor0;
+//  sensorData.shortRangingJ37 = shortRangingData.sensor1;
+//  sensorData.shortRangingJ34 = shortRangingData.sensor2;
+//  sensorData.shortRangingJ35 = shortRangingData.sensor3;
 
   acceleration = getAccelerometerData();
   sensorData.accelX = acceleration.x;
@@ -35,12 +36,17 @@ void collectData(){
   sensorData.gyroX = rotation.x;
   sensorData.gyroY = rotation.y;
   sensorData.gyroZ = rotation.z;
+
+  getVelocity();
+//  sensorData.velocityX = velocity.x;
+
 }
 
 void TIMER1_IRQHandler(void){
   collectDataFlag = 1;
+  Chip_TIMER_ClearMatch( LPC_TIMER1, 1 );
 }
 
 void gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
-  timerInit(timer, timerInterrupt, tickRate);
+  	timerInit(timer, timerInterrupt, tickRate);
 }

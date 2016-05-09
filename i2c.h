@@ -11,6 +11,7 @@
 
 int mode_poll;   /* Poll/Interrupt mode flag */
 
+void Hyperloop_I2C_Init(I2C_ID_T id);
 void i2cInit(I2C_ID_T id, int speed);
 void I2C0_IRQHandler(void);
 void i2c_state_handling(I2C_ID_T id);

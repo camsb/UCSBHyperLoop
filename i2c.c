@@ -1,5 +1,29 @@
 #include "i2c.h"
 
+/* Sets up board specific I2C interface */
+void Hyperloop_I2C_Init(I2C_ID_T id)
+{
+	switch (id) {
+	case I2C0:
+		Chip_IOCON_PinMuxSet(LPC_IOCON, 5, 2, (IOCON_FUNC5));
+		Chip_IOCON_PinMuxSet(LPC_IOCON, 5, 3, (IOCON_FUNC5));
+		break;
+
+	case I2C1:
+		Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 0, (IOCON_FUNC3 | IOCON_MODE_PULLUP | IOCON_OPENDRAIN_EN));
+		Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 1, (IOCON_FUNC3 | IOCON_MODE_PULLUP | IOCON_OPENDRAIN_EN));
+		break;
+
+	case I2C2:
+		Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 10, (IOCON_FUNC2 | IOCON_MODE_PULLUP | IOCON_OPENDRAIN_EN));
+		Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 11, (IOCON_FUNC2 | IOCON_MODE_PULLUP | IOCON_OPENDRAIN_EN));
+		break;
+
+	default:
+		return;
+	}
+}
+
 void i2cInit(I2C_ID_T id, int speed){
 	i2c_app_init(id, speed);
 }
@@ -28,7 +52,7 @@ void i2c_set_mode(I2C_ID_T id, int polling) {
 
 /* Initialize the I2C bus */
 void i2c_app_init(I2C_ID_T id, int speed) {
-  Board_I2C_Init(id);
+  Hyperloop_I2C_Init(id);
 
   /* Initialize I2C */
   Chip_I2C_Init(id);

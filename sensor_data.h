@@ -13,7 +13,7 @@ typedef struct{
   float y;
   float z;
 
-} gyroAccelXYZ;
+} XYZ;
 
 typedef struct{
 
@@ -31,6 +31,9 @@ typedef struct{
   float shortRangingJ35;
   float shortRangingJ36;
   float shortRangingJ37;
+  float velocityX;
+  float velocityY;
+  float velocityZ;
   int32_t temp;
   uint32_t pressure;
 

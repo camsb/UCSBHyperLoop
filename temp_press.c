@@ -13,11 +13,11 @@ uint16_t readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
   value = 0;
 
   // get MSB
-  Chip_I2C_MasterCmdRead( I2C0, slaveAddr, msbReg, &buffer, 1 );
+  Chip_I2C_MasterCmdRead( I2C1, slaveAddr, msbReg, &buffer, 1 );
   value = ( ( uint16_t ) buffer ) << 8;
 
   // get LSB
-  Chip_I2C_MasterCmdRead( I2C0, slaveAddr, lsbReg, &buffer, 1 );
+  Chip_I2C_MasterCmdRead( I2C1, slaveAddr, lsbReg, &buffer, 1 );
   value = value | ( uint16_t ) buffer;
 
   return value;
@@ -64,7 +64,7 @@ uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8
 
   returnVal = 0;
 
-  Chip_I2C_MasterSend( I2C0, periph, writeBuf, len );
+  Chip_I2C_MasterSend( I2C1, periph, writeBuf, len );
 
   // delay to allow time for data to be set in correct registers
   delay( 10 ); /* TODO We will have to change the delay function here to be interrupt based */
@@ -72,7 +72,7 @@ uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8
   for( i = 0; i < len; i++ )
   {
     readVal   = 0;
-    Chip_I2C_MasterCmdRead( I2C0, periph, readBuf[ i ], &readVal, 1 );
+    Chip_I2C_MasterCmdRead( I2C1, periph, readBuf[ i ], &readVal, 1 );
     returnVal = returnVal | ( ((uint32_t)readVal) << ( 8 * ( len - i - 1 ) ) );
   }
 

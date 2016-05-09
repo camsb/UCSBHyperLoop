@@ -2,25 +2,35 @@
 #include "i2c.h"
 #include "board.h"
 
-gyroAccelXYZ getAccelerometerData(){
+XYZ getAccelerometerData(){
 	uint8_t  		wBuffer[ 2 ];
 	uint8_t 		rBuffer[ 6 ];
 	int16_t 		concAcceleration[3];
-	gyroAccelXYZ 	acceleration;
+	static XYZ 			rawAcceleration;
+	XYZ 		acceleration;
+
+	float alpha = 0.8;
+	float beta = 1 - alpha;
+
 	float LSM303ACCEL_MG_LSB = (0.00093F); 	// 1, 2, 4 or 12 mg per lsb
 
 	wBuffer[ 0 ] = ( LSM303_REGISTER_ACCEL_CTRL_REG1_A ); // Control register initializes all
 	wBuffer[ 1 ] = 0x57;
 
-	Chip_I2C_MasterSend( I2C0, ACC_ADDRESS, wBuffer, 2 );
-	Chip_I2C_MasterCmdRead( I2C0, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, rBuffer, 6 );
+	Chip_I2C_MasterSend( I2C1, ACC_ADDRESS, wBuffer, 2 );
+	Chip_I2C_MasterCmdRead( I2C1, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, rBuffer, 6 );
 
 	concAcceleration[0] = (int16_t)(rBuffer[0] | (((uint16_t)rBuffer[1]) << 8)) >> 4;
 	concAcceleration[1] = (int16_t)(rBuffer[2] | (((uint16_t)rBuffer[3]) << 8)) >> 4;
 	concAcceleration[2] = (int16_t)(rBuffer[4] | (((uint16_t)rBuffer[5]) << 8)) >> 4;
 
-	acceleration.x = ((float)concAcceleration[0]) * LSM303ACCEL_MG_LSB * SENSORS_GRAVITY_STANDARD;
-	acceleration.y = ((float)concAcceleration[1]) * LSM303ACCEL_MG_LSB * SENSORS_GRAVITY_STANDARD;
-	acceleration.z = ((float)concAcceleration[2]) * LSM303ACCEL_MG_LSB * SENSORS_GRAVITY_STANDARD;
+	rawAcceleration.x = ((float)concAcceleration[0]) * LSM303ACCEL_MG_LSB * SENSORS_GRAVITY_STANDARD;
+	rawAcceleration.y = ((float)concAcceleration[1]) * LSM303ACCEL_MG_LSB * SENSORS_GRAVITY_STANDARD;
+	rawAcceleration.z = ((float)concAcceleration[2]) * LSM303ACCEL_MG_LSB * SENSORS_GRAVITY_STANDARD;
+
+	acceleration.x = rawAcceleration.x*alpha + sensorData.accelX*beta;
+	acceleration.y = rawAcceleration.y*alpha + sensorData.accelY*beta;
+	acceleration.z = rawAcceleration.z*alpha + sensorData.accelZ*beta;
+
 	return acceleration;
 }

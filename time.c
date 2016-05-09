@@ -7,7 +7,8 @@ void Reset_Timer_Counter(LPC_TIMER_T *pTMR) {
 //  pTMR->PC = 0; // Reset Prescale Counter
 }
 
-/* Pass in the timer (E.g. LPC_TIMER0), timer interrupt (E.g. TIMER0_IRQn), and a tickRate (E.g. 2000) */
+/* Pass in the timer (E.g. LPC_TIMER0), timer interrupt (E.g. TIMER0_IRQn), and a tickRate (E.g. 2000)
+
 /* tickRate is the frequency you desire. */
 void timerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
 
@@ -21,8 +22,7 @@ void timerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
 	Chip_TIMER_Reset( timer );
 	Chip_TIMER_MatchEnableInt( timer, 1 );
 
-	// TODO: get rates for ms
-	Chip_TIMER_SetMatch( timer, 1, ( 2 * timerFreq / tickRate ) );
+	Chip_TIMER_SetMatch( timer, 1, ( timerFreq / (tickRate * 2) ) );
 	Chip_TIMER_ResetOnMatchEnable( timer, 1 );
 	Chip_TIMER_Enable( timer );
 
