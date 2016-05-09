@@ -412,7 +412,7 @@ void sendData(){
 
 /* Handle Wiznet Interrupt */
 void wizIntFunction() {
-	uint16_t offset;
+	uint16_t offset = 0;// 0x0100*n;
 	uint8_t socket_int, n;
 	static char method[4];
 	static char value[DATA_BUF_SIZE - 4]; // Method name is 4 characters
@@ -780,11 +780,13 @@ uint16_t Wiz_Recv_Blocking(uint8_t n, uint8_t *message) {
 		memcpy(message, &Rx_Buf[4], length);	// SPI HDR 4B, TCP HDR 8B
 	}
 
+	/* Update the Rx Read Pointer */
 	rd_base += length;
 	Tx_Buf[4] = ((uint8_t)((rd_base & 0xFF00) >> 8));
 	Tx_Buf[5] = ((uint8_t)(rd_base & 0x00FF));
 	spi_Send_Blocking(Sn_RX_RD_BASE + offset, 0x0002);
 
+	/* Send RECV Command */0
 	Tx_Buf[4] = RECV;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
 
