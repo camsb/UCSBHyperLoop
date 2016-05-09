@@ -1,5 +1,6 @@
 #include "kinematics.h"
 
+
 XYZ getVelocity(){
 //	DEBUGOUT( "accelX = %f\t", sensorData.accelX );
 //	DEBUGOUT( "accelY = %f\t", sensorData.accelY );

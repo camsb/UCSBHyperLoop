@@ -28,9 +28,29 @@ XYZ getAccelerometerData(){
 	rawAcceleration.y = ((float)concAcceleration[1]) * LSM303ACCEL_MG_LSB * SENSORS_GRAVITY_STANDARD;
 	rawAcceleration.z = ((float)concAcceleration[2]) * LSM303ACCEL_MG_LSB * SENSORS_GRAVITY_STANDARD;
 
-	acceleration.x = rawAcceleration.x*alpha + sensorData.accelX*beta;
-	acceleration.y = rawAcceleration.y*alpha + sensorData.accelY*beta;
-	acceleration.z = rawAcceleration.z*alpha + sensorData.accelZ*beta;
+	acceleration.x = rawAcceleration.x*alpha + sensorData.accelX*beta - sensorData.initialAccelX;
+	acceleration.y = rawAcceleration.y*alpha + sensorData.accelY*beta - sensorData.initialAccelY;
+	acceleration.z = rawAcceleration.z*alpha + sensorData.accelZ*beta - sensorData.initialAccelZ;
 
 	return acceleration;
+}
+
+/* Finds the initial values of the accelerometer to calibrate accelerometer values. */
+XYZ getInitialAccelMatrix(){
+	uint8_t i;
+
+	XYZ intermediateAccel;
+	XYZ initialAccel;
+
+	float alpha = 0.8;
+	float beta = 1 - alpha;
+
+	for (i = 0; i < 10; i++){
+		intermediateAccel = getAccelerometerData();
+		initialAccel.x = intermediateAccel.x*alpha + initialAccel.x*beta;
+		initialAccel.y = intermediateAccel.y*alpha + initialAccel.y*beta;
+		initialAccel.z = intermediateAccel.z*alpha + initialAccel.z*beta;
+	}
+
+	return initialAccel;
 }

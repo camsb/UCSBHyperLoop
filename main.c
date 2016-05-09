@@ -52,6 +52,8 @@
     DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
+    collectCalibrationData();
+
     while( 1 )
     {
 //    	collectDataFlag = 1;

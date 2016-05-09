@@ -5,6 +5,16 @@
 #include "ranging.h"
 #include "temp_press.h"
 
+void collectCalibrationData(){
+	XYZ initialAccel;
+
+	initialAccel = getInitialAccelMatrix();
+	sensorData.initialAccelX = initialAccel.x;
+	sensorData.initialAccelY = initialAccel.y;
+	sensorData.initialAccelZ = initialAccel.z;
+
+}
+
 void collectData(){
   collectDataFlag = 0;
 
