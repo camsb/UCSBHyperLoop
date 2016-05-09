@@ -102,19 +102,30 @@
 #define REMOTE_PORT0 	0xA1 // 41234
 #define REMOTE_PORT1 	0x12
 
-/* Protocol methods */
-#define BMP 			"BMP"
-#define TMP 			"TMP"
-#define POS 			"POS"
-#define VEL 			"VEL"
-#define ACC 			"ACC"
-#define ROL 			"ROL"
-#define PIT 			"PIT"
-#define YAW 			"YAW"
-#define PWR 			"PWR"
-#define MSG 			"MSG"
-#define PWR 			"PWR"
-#define PASSWORD 		"gaucholoop"
+/* Protocol Methods */
+/* Atmospheric data */
+#define BMP 			"BMP"	// Pressure
+#define TMP 			"TMP"	// Temperature
+/* Positional Data */
+#define POX 			"POX"	// x Position
+#define POY 			"POY"	// y Position
+#define POZ 			"POZ"	// z Position
+/* Velocity Data */
+#define VEX 			"VEX"	// x Velocity
+#define VEY 			"VEY"	// y Velocity
+#define VEZ 			"VEZ"	// z Velocity
+/* Acceleration Data */
+#define ACX 			"ACX"	// x Acceleration
+#define ACY 			"ACY"	// y Acceleration
+#define ACZ 			"ACZ"	// z Acceleration
+/* Attitudinal Data */
+#define ROL 			"ROL"	// Roll
+#define PIT 			"PIT"	// Pitch
+#define YAW 			"YAW"	// Yaw
+/* Miscellaneous */
+#define MSG 			"MSG"	// Message
+#define PWR 			"PWR"	// Power
+#define PASSWORD 		"gaucholoop" // Default Password
 
 #define SOCKET_ID 		0
 
@@ -145,14 +156,27 @@ struct data_packet {
 	// pass in pointer to null terminated data string
 	// packet construction will be taken care of by function
 	// format with ###.## zero padded
-	char bmp[6];
-	char tmp[6];
-	char pos[6];
-	char vel[6];
-	char acc[6];
-	char rol[6];
-	char pit[6];
-	char yaw[6];
+
+	/* Atmospheric Data */
+	char bmp[6];	// Pressure
+	char tmp[6];	// Temperature
+	char pwr[6];	// Power Consumption
+	/* Positional Data */
+	char pox[6];	// x Position
+	char poy[6];	// y Position
+	char poz[6];	// z Position
+	/* Velocity Data */
+	char vex[6];	// x Velocity
+	char vey[6];	// y Velocity
+	char vez[6];	// z Velocity
+	/* Acceleration Data */
+	char acx[6];	// x Acceleration
+	char acy[6];	// y Acceleration
+	char acz[6];	// z Acceleration
+	/* Attitudinal Data */
+	char rol[6];	// Roll
+	char pit[6];	// Pitch
+	char yaw[6];	// Yaw
 
 };
 

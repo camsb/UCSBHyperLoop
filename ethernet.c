@@ -1,4 +1,5 @@
 #include "ethernet.h"
+#include "sensor_data.h"
 #include <string.h>
 #include "stdio.h"
 #include "time.h"
@@ -377,11 +378,44 @@ void send_data_packet() {
 	// Copy strings to Net_Tx_Data
 	int pos = 0;
 
+	/* Atmospheric, Miscellaneous Data */
+	sprintf(DataPacket.bmp, "%06.2f", sensorData.pressure);
+	sprintf(DataPacket.tmp, "%06.2f", sensorData.temp);
+	sprintf(DataPacket.pwr, "%06.2f", sensorData.power);
+	/* Positional Data */
+	sprintf(DataPacket.pox, "%06.2f", sensorData.posX);
+	sprintf(DataPacket.poy, "%06.2f", sensorData.posY);
+	sprintf(DataPacket.poz, "%06.2f", sensorData.posZ);
+	/* Velocity Data */
+	sprintf(DataPacket.vex, "%06.2f", sensorData.velX);
+	sprintf(DataPacket.vey, "%06.2f", sensorData.velY);
+	sprintf(DataPacket.vez, "%06.2f", sensorData.velZ);
+	/* Acceleration Data */
+	sprintf(DataPacket.acx, "%06.2f", sensorData.accelX);
+	sprintf(DataPacket.acy, "%06.2f", sensorData.accelY);
+	sprintf(DataPacket.acz, "%06.2f", sensorData.accelZ);
+	/* Attitudinal Data */
+	sprintf(DataPacket.rol, "%06.2f", sensorData.roll);
+	sprintf(DataPacket.pit, "%06.2f", sensorData.pitch);
+	sprintf(DataPacket.yaw, "%06.2f", sensorData.yaw);
+
+	/* Atmospheric, Miscellaneous Data */
 	send_data_packet_helper(BMP, DataPacket.bmp, &pos);
 	send_data_packet_helper(TMP, DataPacket.tmp, &pos);
-	send_data_packet_helper(POS, DataPacket.pos, &pos);
-	send_data_packet_helper(VEL, DataPacket.vel, &pos);
-	send_data_packet_helper(ACC, DataPacket.acc, &pos);
+	send_data_packet_helper(PWR, DataPacket.pwr, &pos);
+	/* Positional Data */
+	send_data_packet_helper(POX, DataPacket.pox, &pos);
+	send_data_packet_helper(POY, DataPacket.poy, &pos);
+	send_data_packet_helper(POZ, DataPacket.poz, &pos);
+	/* Velocity Data */
+	send_data_packet_helper(VEX, DataPacket.vex, &pos);
+	send_data_packet_helper(VEY, DataPacket.vey, &pos);
+	send_data_packet_helper(VEZ, DataPacket.vez, &pos);
+	/* Acceleration Data */
+	send_data_packet_helper(ACX, DataPacket.acx, &pos);
+	send_data_packet_helper(ACY, DataPacket.acy, &pos);
+	send_data_packet_helper(ACZ, DataPacket.acz, &pos);
+	/* Attitudinal Data */
 	send_data_packet_helper(ROL, DataPacket.rol, &pos);
 	send_data_packet_helper(PIT, DataPacket.pit, &pos);
 	send_data_packet_helper(YAW, DataPacket.yaw, &pos);
@@ -786,7 +820,7 @@ uint16_t Wiz_Recv_Blocking(uint8_t n, uint8_t *message) {
 	Tx_Buf[5] = ((uint8_t)(rd_base & 0x00FF));
 	spi_Send_Blocking(Sn_RX_RD_BASE + offset, 0x0002);
 
-	/* Send RECV Command */0
+	/* Send RECV Command */
 	Tx_Buf[4] = RECV;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
 

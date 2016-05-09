@@ -86,28 +86,28 @@ int main(void)
 //            stripDetected();
 //        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
 //        }
-//
-//        if(collectDataFlag){
-//            collectData();
-//            DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
-//            DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
-//            DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
-//            DEBUGOUT( "longRangingJ31 = %f\n", sensorData.longRangingJ31 );
-//            DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
-//            DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
-//            DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
-//            DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
-//            DEBUGOUT( "temperature = %d\n", sensorData.temp );
-//            DEBUGOUT( "pressure = %u\n", sensorData.pressure );
-//            DEBUGOUT( "accelX = %f\t", sensorData.accelX );
-//            DEBUGOUT( "accelY = %f\t", sensorData.accelY );
-//            DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
-//            DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
-//            DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
-//            DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
-//        }
 
-//    	/* Handle all Wiznet Interrupts, including RECV */
+        if(collectDataFlag){
+            collectData();
+            DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
+            DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
+            DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
+            DEBUGOUT( "longRangingJ31 = %f\n", sensorData.longRangingJ31 );
+            DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
+            DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
+            DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
+            DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
+            DEBUGOUT( "temperature = %d\n", sensorData.temp );
+            DEBUGOUT( "pressure = %u\n", sensorData.pressure );
+            DEBUGOUT( "accelX = %f\t", sensorData.accelX );
+            DEBUGOUT( "accelY = %f\t", sensorData.accelY );
+            DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
+            DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
+            DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
+            DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
+        }
+
+    	/* Handle all Wiznet Interrupts, including RECV */
         if(wizIntFlag) {
     		wizIntFunction();
     	}
@@ -121,14 +121,36 @@ int main(void)
 
     		sendDataFlag = 0;
 
-    		sprintf(DataPacket.bmp, "%03d.00", rand() % 500);
-    		sprintf(DataPacket.tmp, "%03d.00", rand() % 300);
-    		sprintf(DataPacket.pos, "%03d.00", rand() % 1000);
-    		sprintf(DataPacket.vel, "%03d.00", rand() % 130);
-    		sprintf(DataPacket.acc, "%03d.00", rand() % 50);
-    		sprintf(DataPacket.rol, "%03d.00", (rand() % 12) - 6);
-    		sprintf(DataPacket.pit, "%03d.00", (rand() % 12) - 6);
-    		sprintf(DataPacket.yaw, "%03d.00", (rand() % 12) - 6);
+    		sensorData.pressure = ((float)(rand() % 5000)) 	/ 10.0;
+    		sensorData.temp 	= ((float)(rand() % 3000)) 	/ 10.0;
+    		sensorData.power 	= ((float)(rand() % 6000)) 	/ 10.0;
+
+    		sensorData.posX 	= ((float)(rand() % 20000)-10000)/ 10.0;
+    		sensorData.posY 	= ((float)(rand() % 20)-10) / 10.0;
+    		sensorData.posZ 	= ((float)(rand() % 20)-10) / 10.0;
+
+    		sensorData.velX 	= ((float)(rand() % 2000)-1000)/ 10.0;
+			sensorData.velY 	= ((float)(rand() % 20)-10) / 10.0;
+			sensorData.velZ 	= ((float)(rand() % 20)-10)	/ 10.0;
+
+    		sensorData.accelX 	= ((float)(rand() % 200)-100)/ 10.0;
+			sensorData.accelY 	= ((float)(rand() % 20)-10) / 10.0;
+			sensorData.accelZ 	= ((float)(rand() % 20)-10) / 10.0;
+
+			sensorData.roll 	= ((float)(rand() % 100)-50)/ 10.0;
+			sensorData.pitch 	= ((float)(rand() % 100)-50)/ 10.0;
+			sensorData.yaw 		= ((float)(rand() % 100)-50)/ 10.0;
+
+//    		sprintf(sensorData.bmp, "%03d.00", rand() % 500);
+//    		sprintf(DataPacket.tmp, "%03d.00", rand() % 300);
+//    		sprintf(DataPacket.bat, "%03d.00", rand() % 400);
+//    		sprintf(DataPacket.pos, "%03d.00", rand() % 1000);
+//    		sprintf(DataPacket.vel, "%03d.00", rand() % 130);
+//    		sprintf(DataPacket.acc, "%03d.00", rand() % 50);
+//    		sprintf(DataPacket.rol, "%03d.00", (rand() % 12) - 6);
+//    		sprintf(DataPacket.pit, "%03d.00", (rand() % 12) - 6);
+//    		sprintf(DataPacket.yaw, "%03d.00", (rand() % 12) - 6);
+
     		send_data_packet();
     	}
 
