@@ -43,6 +43,7 @@
 
     /* Initialize I2C and all sensors. */
     i2cInit(I2C1, SPEED_100KHZ);
+    i2cInit(I2C2, SPEED_100KHZ);
     temperaturePressureInit();
 //    photoelectricInit();
 //    ethernetInit(PROTO_UDP, 0);
@@ -73,7 +74,8 @@
 //            DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
 //            DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
 //            DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
-            DEBUGOUT( "temperature = %f\n", sensorData.temp );
+            DEBUGOUT( "temperature = %f\n", sensorData.temp1 );
+            DEBUGOUT( "temperature = %f\n", sensorData.temp2 );
             DEBUGOUT( "pressure = %f\n", sensorData.pressure );
             DEBUGOUT( "accelX = %f\t", sensorData.accelX );
             DEBUGOUT( "accelY = %f\t", sensorData.accelY );

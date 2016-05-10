@@ -23,7 +23,8 @@ void collectData(){
   XYZ acceleration, rotation, velocity, position;
 //  rangingData shortRangingData, longRangingData;
 
-  sensorData.temp = getTemperature();
+  sensorData.temp1 = getTemperature(I2C1);
+  sensorData.temp2 = getTemperature(I2C2);
 
   sensorData.pressure = getPressure();
 

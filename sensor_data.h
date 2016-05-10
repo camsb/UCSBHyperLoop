@@ -50,7 +50,8 @@ typedef struct{
   float positionY;
   float positionZ;
 
-  float temp;
+  float temp1;
+  float temp2;
   float pressure;
 
 } sensor;

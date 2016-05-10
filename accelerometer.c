@@ -42,7 +42,7 @@ XYZ getInitialAccelMatrix(){
 	XYZ intermediateAccel;
 	XYZ initialAccel;
 
-	float alpha = 0.3;
+	float alpha = 0.2;
 	float beta = 1 - alpha;
 
 	for (i = 0; i < 20; i++){

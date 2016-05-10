@@ -56,7 +56,7 @@ void printConstants()
   DEBUGOUT( "%i\n", c->MD );
 }
 
-uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph )
+uint32_t getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph )
 {
   int8_t   i;
   uint8_t  readVal;
@@ -64,7 +64,7 @@ uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8
 
   returnVal = 0;
 
-  Chip_I2C_MasterSend( I2C1, periph, writeBuf, len );
+  Chip_I2C_MasterSend( id, periph, writeBuf, len );
 
   // delay to allow time for data to be set in correct registers
   delay( 10 ); /* TODO We will have to change the delay function here to be interrupt based */
@@ -72,7 +72,7 @@ uint32_t getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8
   for( i = 0; i < len; i++ )
   {
     readVal   = 0;
-    Chip_I2C_MasterCmdRead( I2C1, periph, readBuf[ i ], &readVal, 1 );
+    Chip_I2C_MasterCmdRead( id, periph, readBuf[ i ], &readVal, 1 );
     returnVal = returnVal | ( ((uint32_t)readVal) << ( 8 * ( len - i - 1 ) ) );
   }
 
@@ -128,7 +128,7 @@ float getPressure()
   rBuffer[ 1 ] = 0xF7; //(just an explicit declaration of memory)
   rBuffer[ 2 ] = 0xF8;
 
-  uncalcPressure = getDataValue( wBuffer, rBuffer, 3, BMP_ADDRESS );
+  uncalcPressure = getDataValue( I2C1, wBuffer, rBuffer, 3, BMP_ADDRESS );
 
   // TODO: set to 0 precision
   // bit shift back, for precision
@@ -150,7 +150,7 @@ float calculateTemperature( uint32_t uncalcTemperature )
   return ((float)temperature)/10.0; // Need to divide by 10 to return units in C.
 }
 
-float getTemperature()
+float getTemperature(I2C_ID_T id)
 {
   uint32_t  uncalcTemperature;
   uint8_t   wBuffer[ 2 ];
@@ -162,7 +162,7 @@ float getTemperature()
   rBuffer[ 0 ] = 0xF6;
   rBuffer[ 1 ] = 0xF7;
 
-  uncalcTemperature = getDataValue( wBuffer, rBuffer, 2, BMP_ADDRESS );
+  uncalcTemperature = getDataValue( id, wBuffer, rBuffer, 2, BMP_ADDRESS );
 
   return calculateTemperature( uncalcTemperature );
 }

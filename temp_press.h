@@ -24,8 +24,8 @@ constants *c;
 
 float  		calculatePressure( uint32_t uncalcPres );
 float  		calculateTemperature( uint32_t uncalcTemp );
-uint32_t  	getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph );
-float  		getTemperature();
+uint32_t  	getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph );
+float  		getTemperature(I2C_ID_T id);
 float  		getPressure();
 void    	initCalibrationData();
 void    	printConstants();
