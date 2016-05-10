@@ -125,15 +125,15 @@ int main(void)
     		sensorData.temp 	= ((float)(rand() % 3000)) 	/ 10.0;
     		sensorData.power 	= ((float)(rand() % 6000)) 	/ 10.0;
 
-    		sensorData.posX 	= ((float)(rand() % 20000)-10000)/ 10.0;
+    		sensorData.posX 	= ((float)(rand() % 10000))/ 10.0;
     		sensorData.posY 	= ((float)(rand() % 20)-10) / 10.0;
     		sensorData.posZ 	= ((float)(rand() % 20)-10) / 10.0;
 
-    		sensorData.velX 	= ((float)(rand() % 2000)-1000)/ 10.0;
+    		sensorData.velX 	= ((float)(rand() % 1000))/ 10.0;
 			sensorData.velY 	= ((float)(rand() % 20)-10) / 10.0;
 			sensorData.velZ 	= ((float)(rand() % 20)-10)	/ 10.0;
 
-    		sensorData.accelX 	= ((float)(rand() % 200)-100)/ 10.0;
+    		sensorData.accelX 	= ((float)(rand() % 100))/ 10.0;
 			sensorData.accelY 	= ((float)(rand() % 20)-10) / 10.0;
 			sensorData.accelZ 	= ((float)(rand() % 20)-10) / 10.0;
 
