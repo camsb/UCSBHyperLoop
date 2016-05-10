@@ -1,4 +1,54 @@
 #include "ranging.h"
+#include "math.h"
+
+/*
+ *  Left-front long J25
+ *  Right-front long J30
+ *  Left-back long J22
+ *  Right-back long J31
+ *
+ *  Left-front short J36
+ *  Right-front short J37
+ *  Left-back short J34
+ *  Right-back short J35
+ */
+
+float sin_inv(float x) {
+	return 0;
+}
+
+void computePositionAttitudeRanging() {
+	/* Compute Constants */
+//	static const short_front_left_pyth 	= sqrt((SHORT_FRONT_LEFT_DIST^2.0) + (SHORT_FRONT_DIST^2.0));
+	static const short_front_right_pyth = sqrt((SHORT_FRONT_RIGHT_DIST^2.0) + (SHORT_FRONT_DIST^2.0));
+//	static const short_back_left_pyth 	= sqrt((SHORT_BACK_LEFT_DIST^2.0) + (SHORT_BACK_DIST^2.0));
+	static const short_back_right_pyth 	= sqrt((SHORT_BACK_RIGHT_DIST^2.0) + (SHORT_BACK_DIST^2.0));
+//	static const short_left_pyth_inv 	= (0.5 / (short_front_left_pyth + short_back_left_pyth));
+	static const short_right_pyth_inv 	= (0.5 / (short_front_right_pyth + short_back_right_pyth));
+
+	/* y Position */
+	float y_front = (sensorData.longRangingJ30 - sensorData.longRangingJ25) * 0.5;
+	float y_back  = (sensorData.longRangingJ31 - sensorData.longRangingJ22) * 0.5;
+	float y_com   = (y_front*LONG_FRONT_DIST + y_back*LONG_BACK_DIST) * LONG_AXIS_SUM_INV;
+
+	/* Yaw */
+	float yaw     = sin_inv((y_front - y_com) / LONG_FRONT_DIST);
+
+	/* z Position */
+	float z_front = ((sensorData.shortRangingJ36 + SHORT_FRONT_HEIGHT) + (sensorData.shortRangingJ37 + SHORT_BACK_HEIGHT)) * 0.5;
+	float z_back  = ((sensorData.shortRangingJ34 + SHORT_FRONT_HEIGHT) + (sensorData.shortRangingJ35 + SHORT_BACK_HEIGHT)) * 0.5;
+	float z_com   = (z_front*SHORT_FRONT_DIST + z_back*SHORT_BACK_DIST) * SHORT_AXIS_SUM_INV;
+
+	/* Pitch */
+	float pitch   = sin_inv((z_back - z_com) * SHORT_BACK_DIST_INV);
+
+	/* Roll */
+	float z_right = (short_front_right_pyth*(sensorData.shortRangingJ37 + SHORT_FRONT_HEIGHT) +
+					 short_back_right_pyth*(sensorData.shortRangingJ35 + SHORT_BACK_HEIGHT)) *
+					 short_right_pyth_inv;
+	float roll	  = sin_inv((z_right - z_com)*SHORT_RIGHT_AVG_INV);
+
+}
 
 /* Convert voltage */
 void convertVoltageShort(uint8_t sensor)
@@ -94,14 +144,14 @@ void rangingSensorsInit(void)  {
 	uint32_t _bitRate = ADC_MAX_SAMPLE_RATE;
 
 	/* Enable all ranging sensor channels */
-	initADCChannel(ADC_CH0, 0, 23, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Port-front long J25
-	initADCChannel(ADC_CH1, 0, 24, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Starboard-front long J30
-	initADCChannel(ADC_CH2, 0, 25, IOCON_FUNC1, LONG_BACK_INITIAL);		// Port-back long J22
-	initADCChannel(ADC_CH3, 0, 26, IOCON_FUNC1, LONG_BACK_INITIAL);		// Starboard-back long J31
-	initADCChannel(ADC_CH4, 1, 30, IOCON_FUNC3, SHORT_FRONT_INITIAL);	// Port-front short J36
-	initADCChannel(ADC_CH5, 1, 31, IOCON_FUNC3, SHORT_FRONT_INITIAL);	// Starboard-front short J37
-	initADCChannel(ADC_CH6, 0, 12, IOCON_FUNC3, SHORT_BACK_INITIAL);	// Port-back short J34
-	initADCChannel(ADC_CH7, 0, 13, IOCON_FUNC3, SHORT_BACK_INITIAL);	// Starboard-back short J35
+	initADCChannel(ADC_CH0, 0, 23, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Left-front long J25
+	initADCChannel(ADC_CH1, 0, 24, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Right-front long J30
+	initADCChannel(ADC_CH2, 0, 25, IOCON_FUNC1, LONG_BACK_INITIAL);		// Left-back long J22
+	initADCChannel(ADC_CH3, 0, 26, IOCON_FUNC1, LONG_BACK_INITIAL);		// Right-back long J31
+	initADCChannel(ADC_CH4, 1, 30, IOCON_FUNC3, SHORT_FRONT_INITIAL);	// Left-front short J36
+	initADCChannel(ADC_CH5, 1, 31, IOCON_FUNC3, SHORT_FRONT_INITIAL);	// Right-front short J37
+	initADCChannel(ADC_CH6, 0, 12, IOCON_FUNC3, SHORT_BACK_INITIAL);	// Left-back short J34
+	initADCChannel(ADC_CH7, 0, 13, IOCON_FUNC3, SHORT_BACK_INITIAL);	// Right-back short J35
 
 	Chip_ADC_SetSampleRate(_LPC_ADC_ID, &ADCSetup, _bitRate);
 	Chip_ADC_SetBurstCmd(_LPC_ADC_ID, ENABLE);
