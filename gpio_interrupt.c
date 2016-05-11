@@ -22,6 +22,7 @@ void GPIO_IRQHandler(void)
 
   if(interrupt_bits & (1 << BATT_GPIO_PIN)){
     batteryFlag = 1;
+
     DEBUGOUT( "battery interrupt!\n" );
 
 //    uint8_t rBuffer[ 1 ];

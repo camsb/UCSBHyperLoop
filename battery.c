@@ -28,7 +28,7 @@ void batteryInit()
 
 	// read the msb and lsb for the sum of the batteries
 	// TODO: STUB, BATSUM is not correct
-	battery.BATSUM = -1;
+//	battery.BATSUM = -1;
 	//  Chip_I2C_MasterCmdRead( I2C0, BATT_ADDRESS, BAT_HI, rBuffer, 2 );
 	//  battery.BATSUM = convertBits14or16( rBuffer[ 0 ], rBuffer[ 1 ], MASK_8_BIT );
 
@@ -71,6 +71,19 @@ void batteryInit()
 	wBuffer[ 1 ] = rBuffer[ 0 ] & 0x0F;
 //	wBuffer[ 1 ] = wBuffer[ 1 ] | 0x00;
 	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, SYS_CTRL2, rBuffer, 1 );
+	wBuffer[0] = SYS_CTRL2;
+	wBuffer[1] = rBuffer[0] | (0x1 << 6);
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, CC_CFG, rBuffer, 1 );
+	wBuffer[0] = CC_CFG;
+	rBuffer[0] &= 0xc0;
+	wBuffer[1] = rBuffer[1] | 0x19;
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+
 }
 
 /* 

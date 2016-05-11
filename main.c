@@ -56,6 +56,8 @@
     DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
+    uint8_t rBuffer[2];
+
     while( 1 )
     {
 
@@ -100,7 +102,16 @@
         }
 
         if(batteryFlag){
-            getBatteryData();
+        	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, SYS_STAT, rBuffer, 1 );
+        	DEBUGOUT("Interrupt register reads: %x\n", rBuffer[0]);
+
+        	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, CC_HI, rBuffer, 2 );
+
+        	int16_t cc_out = ((uint16_t)rBuffer[0] << 8) | rBuffer[1];
+        	float v_out = 8.44 * cc_out;
+        	DEBUGOUT("Voltage across sense resistor is: %f\t LSB is: %d\t MSB is: %d\n", v_out, rBuffer[1], rBuffer[0]);
+
+        	getBatteryData();
             DEBUGOUT( "Battery signal received!, total voltage = %f\n",
             		battery.VC1 + battery.VC2 + battery.VC3 + battery.VC4 + battery.VC5  );
 //        	DEBUGOUT( "VC1    = %f volts\n", battery.VC1 );
