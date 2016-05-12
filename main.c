@@ -112,6 +112,10 @@
 //        	DEBUGOUT( "OFFSET = %d milli volts\n", ( int ) ( battery.OFFSET * 1000 ) );
         }
 
+        if( batteryInterruptFlag ){
+        	processBatteryInterrupt();
+        }
+
     }
 
     return 0;

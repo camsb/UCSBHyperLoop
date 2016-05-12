@@ -21,13 +21,7 @@ void GPIO_IRQHandler(void)
   }
 
   if(interrupt_bits & (1 << BATT_GPIO_PIN)){
-    batteryFlag = 1;
-    DEBUGOUT( "battery interrupt!\n" );
-
-//    uint8_t rBuffer[ 1 ];
-//	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, SYS_STAT, rBuffer, 1 );
-//	DEBUGOUT( "gpio_interrupt. SYS_STAT = %d\n", rBuffer[ 0 ] );
-
+    batteryInterruptFlag = 1;
     Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
   }
 
