@@ -3,6 +3,30 @@
 
 #include "board.h"
 
+#define SHORT_FRONT_DIST		1.0
+#define SHORT_BACK_DIST			1.0
+#define SHORT_FRONT_HEIGHT		1.0
+#define SHORT_BACK_HEIGHT		1.0
+#define SHORT_FRONT_LEFT_DIST	1.0
+#define SHORT_FRONT_RIGHT_DIST	1.0
+#define SHORT_BACK_LEFT_DIST	1.0
+#define SHORT_BACK_RIGHT_DIST	1.0
+#define SHORT_RIGHT_DIST_AVG	(0.5*(SHORT_FRONT_LEFT_DIST + SHORT_FRONT_RIGHT_DIST))
+#define SHORT_RIGHT_AVG_INV		(1.0 / SHORT_RIGHT_DIST_AVG)
+#define SHORT_FRONT_DIST_INV	(1.0 / SHORT_FRONT_DIST)
+#define SHORT_BACK_DIST_INV		(1.0 / SHORT_BACK_DIST)
+#define SHORT_AXIS_SUM_INV		(1.0 / (SHORT_FRONT_DIST + SHORT_BACK_DIST))
+
+#define LONG_FRONT_DIST			1.0
+#define LONG_BACK_DIST			1.0
+#define LONG_FRONT_LEFT_DIST	1.0
+#define LONG_FRONT_RIGHT_DIST	1.0
+#define LONG_BACK_LEFT_DIST		1.0
+#define LONG_BACK_RIGHT_DIST	1.0
+#define LONG_FRONT_DIST_INV		(1.0 / LONG_FRONT_DIST)
+#define LONG_BACK_DIST_INV		(1.0 / LONG_BACK_DIST)
+#define LONG_AXIS_SUM_INV		(1.0 / (LONG_FRONT_DIST + LONG_BACK_DIST))
+
 #define _LPC_ADC_ID 		LPC_ADC
 #define _LPC_ADC_IRQ 		ADC_IRQn
 #define LONG_FRONT_INITIAL	45.0	// cm
@@ -81,6 +105,9 @@ static const float longRangingDistanceLUT[] =
      19.491, 19.362, 19.234, 19.107, 18.981, 18.855, 18.731, 18.607, 18.484, 18.362,
      18.241, 18.120, 18.000, 17.882, 17.764 };
 
+
+float sin_inv(float x);
+void computePositionAttitudeRanging();
 rangingData getLongDistance();
 void convertVoltage(uint16_t data, uint8_t sensor);
 rangingData getShortDistance();
