@@ -67,7 +67,6 @@ uint32_t getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8
   Chip_I2C_MasterSend( id, periph, writeBuf, len );
 
   // delay to allow time for data to be set in correct registers
-  delay( 10 ); /* TODO We will have to change the delay function here to be interrupt based */
 
   for( i = 0; i < len; i++ )
   {

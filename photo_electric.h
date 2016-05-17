@@ -10,9 +10,18 @@
 #define PHOTOELECTRIC_INTERRUPT_NVIC  GPIO_IRQn   /* GPIO interrupt NVIC interrupt name */
 
 uint8_t stripDetectedFlag;     // Photoelectric interrupt flag
-uint8_t strip_count;      // Total strips detected
-uint8_t regional_strip_count; // Strips in current region
-uint8_t strip_region;     // Current region
+uint8_t stripCount;      // Total strips detected
+uint8_t regionalStripCount; // Strips in current region
+uint8_t stripRegion;     // Current region
+float	timeBetweenInterrupts;
+
+//typedef struct{
+//
+//  float stripCount;
+//  float regionalStripCount;
+//  float stripRegion;
+//
+//} photoelectricData;
 
 void stripDetected();
 void PHOTOELECTRIC_IRQ_HANDLER(void);

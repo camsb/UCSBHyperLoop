@@ -43,7 +43,7 @@
 
     /* Initialize I2C and all sensors. */
     i2cInit(I2C1, SPEED_100KHZ);
-    i2cInit(I2C2, SPEED_100KHZ);
+//    i2cInit(I2C2, SPEED_100KHZ);
     temperaturePressureInit();
 //    photoelectricInit();
 //    ethernetInit(PROTO_UDP, 0);
@@ -54,16 +54,23 @@
 
     collectCalibrationData();
 
+    uint32_t currTime;
+    uint32_t endTime;
     while( 1 )
     {
-//    	collectDataFlag = 1;
+    	collectDataFlag = 1;
 //        if(stripDetectedFlag) {
 //            stripDetected();
-//        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
+//        	DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
 //        }
 
         if(collectDataFlag){
+
+//        	currTime = Chip_TIMER_ReadCount(LPC_TIMER1);
             collectData();
+//            endTime = Chip_TIMER_ReadCount(LPC_TIMER1);
+//            printf("It took %d cycles to collect all data.\n", endTime - currTime);
+
 
             if (sensorData.dataPrintFlag == 20) { // Print every 20/10 = 2 seconds.
 //            DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
@@ -86,6 +93,7 @@
             DEBUGOUT( "positionX = %f\t", sensorData.positionX );
             DEBUGOUT( "positionY = %f\t", sensorData.positionY );
             DEBUGOUT( "positionZ = %f\n", sensorData.positionZ );
+//            DEBUGOUT( "strip position = %f\n", stripCount);
 //            DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
 //            DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
 //            DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );

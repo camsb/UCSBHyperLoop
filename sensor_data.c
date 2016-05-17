@@ -17,16 +17,24 @@ void collectCalibrationData(){
 }
 
 void collectData(){
+  uint32_t currTime, endTime;
+
   collectDataFlag = 0;
   sensorData.dataPrintFlag += 1;
 
   XYZ acceleration, rotation, velocity, position;
 //  rangingData shortRangingData, longRangingData;
 
+//  currTime = Chip_TIMER_ReadCount(LPC_TIMER1);
   sensorData.temp1 = getTemperature(I2C1);
-  sensorData.temp2 = getTemperature(I2C2);
+//  sensorData.temp2 = getTemperature(I2C2);
+//  endTime = Chip_TIMER_ReadCount(LPC_TIMER1);
+//  printf("Gathering the temperature data took: %d\n", endTime - currTime);
 
+//  currTime = Chip_TIMER_ReadCount(LPC_TIMER1);
   sensorData.pressure = getPressure();
+//  endTime = Chip_TIMER_ReadCount(LPC_TIMER1);
+//  printf("Gathering the pressure data took: %d\n", endTime - currTime);
 
 //  longRangingData = getLongDistance();
 //  sensorData.longRangingJ25 = longRangingData.sensor0;
@@ -40,25 +48,37 @@ void collectData(){
 //  sensorData.shortRangingJ34 = shortRangingData.sensor2;
 //  sensorData.shortRangingJ35 = shortRangingData.sensor3;
 
+//  currTime = Chip_TIMER_ReadCount(LPC_TIMER1);
   acceleration = getAccelerometerData();
   sensorData.accelX = acceleration.x;
   sensorData.accelY = acceleration.y;
   sensorData.accelZ = acceleration.z;
+//  endTime = Chip_TIMER_ReadCount(LPC_TIMER1);
+//  printf("Gathering the accelerometer data took: %d\n", endTime - currTime);
 
+  currTime = Chip_TIMER_ReadCount(LPC_TIMER1);
   rotation = getGyroscopeData();
   sensorData.gyroX = rotation.x;
   sensorData.gyroY = rotation.y;
   sensorData.gyroZ = rotation.z;
+  endTime = Chip_TIMER_ReadCount(LPC_TIMER1);
+//  printf("Gathering the gyroscope data took: %d\n", endTime - currTime);
 
+  currTime = Chip_TIMER_ReadCount(LPC_TIMER1);
   velocity = getInertialVelocity();
   sensorData.velocityX = velocity.x;
   sensorData.velocityY = velocity.y;
   sensorData.velocityZ = velocity.z;
+  endTime = Chip_TIMER_ReadCount(LPC_TIMER1);
+//  printf("Calculating the velocity data took: %d\n", endTime - currTime);
 
+  currTime = Chip_TIMER_ReadCount(LPC_TIMER1);
   position = getInertialPosition();
   sensorData.positionX = position.x;
   sensorData.positionY = position.y;
   sensorData.positionZ = position.z;
+  endTime = Chip_TIMER_ReadCount(LPC_TIMER1);
+//  printf("Calculating the positional data took: %d\n", endTime - currTime);
 
 }
 

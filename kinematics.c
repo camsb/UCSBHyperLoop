@@ -1,4 +1,5 @@
 #include "kinematics.h"
+#include "photo_electric.h"
 
 /* Derive velocity from accelerometer's data */
 XYZ getInertialVelocity(){
@@ -41,3 +42,11 @@ XYZ getInertialPosition(){
 
 	return position;
 }
+
+//void combineAccelerations(){
+//	/* Overwrite position with fiducial data */
+//	sensorData.positionX = 100*regionCount;
+//
+//	/* Need to overwrite position with photoelectric data */
+//	sensorData.velocityX = 100/(timeBetweenInterrupts);
+//}

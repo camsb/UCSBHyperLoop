@@ -1,6 +1,7 @@
 #include "accelerometer.h"
 #include "i2c.h"
 #include "board.h"
+#include "stdio.h"
 
 XYZ getAccelerometerData(){
 	uint8_t  		wBuffer[ 2 ];
@@ -18,7 +19,12 @@ XYZ getAccelerometerData(){
 	wBuffer[ 1 ] = 0x57;
 
 	Chip_I2C_MasterSend( I2C1, ACC_ADDRESS, wBuffer, 2 );
+
+
+//	uint32_t currTime = Chip_TIMER_ReadCount(LPC_TIMER1);
 	Chip_I2C_MasterCmdRead( I2C1, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, rBuffer, 6 );
+//	uint32_t endTime = Chip_TIMER_ReadCount(LPC_TIMER1);
+//	printf("The MasterCmdRead function took: %d\n", endTime - currTime);
 
 	concAcceleration[0] = (int16_t)(rBuffer[0] | (((uint16_t)rBuffer[1]) << 8)) >> 4;
 	concAcceleration[1] = (int16_t)(rBuffer[2] | (((uint16_t)rBuffer[3]) << 8)) >> 4;
