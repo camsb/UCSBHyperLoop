@@ -4,7 +4,13 @@
 #define ON 1
 #define OFF 0
 
-#define PWM_ACTIVE			ON
-#define GATHER_DATA_ACTIVE	ON
+#define PWM_ACTIVE				0
+#define GATHER_DATA_ACTIVE		1
+#define ACCEL_ACTIVE			1
+#define ETHERNET_ACTIVE			0
+#define PHOTO_ELECTRIC_ACTIVE	1
+#define RANGING_SENSORS_ACTIVE	0
+#define SMOOSHED_ONE_ACTIVE		1
+#define SMOOSHED_TWO_ACTIVE		0
 
 #endif

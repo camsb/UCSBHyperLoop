@@ -21,7 +21,7 @@
 #define LSM303_REGISTER_ACCEL_OUT_Z_L_A            0x2C
 #define LSM303_REGISTER_ACCEL_OUT_Z_H_A            0x2D
 
-XYZ getAccelerometerData( I2C id );
-XYZ getInitialAccelMatrix( I2C id );
+XYZ getAccelerometerData( I2C_ID_T id );
+XYZ getInitialAccelMatrix( I2C_ID_T id );
 
 #endif /* ACCELEROMETER_H_ */

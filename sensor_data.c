@@ -6,7 +6,7 @@
 #include "temp_press.h"
 #include "kinematics.h"
 
-void collectCalibrationData( I2C id ){
+void collectCalibrationData( I2C_ID_T id ){
 	XYZ initialAccel;
 
 	initialAccel = getInitialAccelMatrix(id);
@@ -16,17 +16,17 @@ void collectCalibrationData( I2C id ){
 
 }
 
-void collectData(){
+void collectData(I2C_ID_T id){
   collectDataFlag = 0;
   sensorData.dataPrintFlag += 1;
 
   XYZ acceleration, rotation, velocity, position;
   rangingData shortRangingData, longRangingData;
 
-  sensorData.temp1 = getTemperature(smooshedOne, I2C1);
+  sensorData.temp1 = getTemperature(smooshedOne, id);
 //  sensorData.temp2 = getTemperature(smooshedTwo, I2C2);
 
-  sensorData.pressure = getPressure(smooshedOne, I2C1);
+  sensorData.pressure = getPressure(smooshedOne, id);
 
   longRangingData = getLongDistance();
   sensorData.longRangingJ25 = longRangingData.sensor0;
@@ -40,7 +40,7 @@ void collectData(){
   sensorData.shortRangingJ34 = shortRangingData.sensor2;
   sensorData.shortRangingJ35 = shortRangingData.sensor3;
 
-  acceleration = getAccelerometerData();
+  acceleration = getAccelerometerData(id);
   sensorData.accelX = acceleration.x;
   sensorData.accelY = acceleration.y;
   sensorData.accelZ = acceleration.z;

@@ -74,7 +74,7 @@
         }
 
         if(collectDataFlag){
-            collectData();
+            collectData(I2C0);
             if (sensorData.dataPrintFlag == 20) { // Print every 20/10 = 2 seconds.
 				DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
 				DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );

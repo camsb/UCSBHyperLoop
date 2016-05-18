@@ -36,7 +36,7 @@ XYZ getAccelerometerData( I2C_ID_T id ){
 }
 
 /* Finds the initial values of the accelerometer to calibrate accelerometer values. */
-XYZ getInitialAccelMatrix( I2C id ){
+XYZ getInitialAccelMatrix( I2C_ID_T id ){
 	uint8_t i;
 
 	XYZ intermediateAccel;
