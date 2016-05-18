@@ -114,13 +114,3 @@ void Chip_PWM_LatchEnable(LPC_PWM_T *pTMR, uint8_t pwmChannel, PWM_OUT_CMD pwmCm
 		pTMR->LER &= ~(1<<(pwmChannel));
 	}
 }
-
-/* Sets the PWM Control Register */
-void Chip_TIMER_PWMWrite(LPC_TIMER_T *pTMR, uint32_t pwmval) {
-    pTMR->PWMC = pwmval;
-}
-
-/* Returns the PWMC Register */
-uint32_t Chip_TIMER_PWMRead(LPC_TIMER_T *pTMR) {
-    return pTMR->PWMC;
-}

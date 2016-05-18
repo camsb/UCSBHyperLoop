@@ -2,11 +2,11 @@
  *
  * UCSB Hyperloop Controller
  *
- * Celeste "is the Coolest" Bean
- * Connor "The Gooblet" Buckland
- * Ben "Super Weenie Hut Jr" Hartl
- * Cameron "Frat Star" McCarthy
- * Connor "Leg Exploding" Mulcahey
+ * Celeste "Bean Bag" Bean
+ * Connor "She Sucks ^^^" Buckland
+ * Benoit "Balls" Hartl
+ * Cameron "Future Billionaire, TV star, etc." McCarthy
+ * Connor.js Mulcahey
  *
  */
 
@@ -16,7 +16,6 @@
 #include "temp_press.h"
 #include "stdlib.h"
 #include "accelerometer.h"
-#include "gyroscope.h"
 #include "stdio.h"
 #include "sensor_data.h"
 #include "i2c.h"
@@ -44,6 +43,7 @@
     if(SMOOSHED_ONE_ACTIVE){
     	i2cInit(I2C1, SPEED_100KHZ);
     	smooshedOne = temperaturePressureInit(I2C1);
+    	collectCalibrationData(I2C1);
     }
     if(SMOOSHED_TWO_ACTIVE){
     	i2cInit(I2C2, SPEED_100KHZ);
@@ -62,10 +62,6 @@
     DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
-    if(ACCEL_ACTIVE){
-    	collectCalibrationData(I2C1);
-    }
-
     while( 1 )
     {
         if(stripDetectedFlag) {
@@ -74,7 +70,7 @@
         }
 
         if(collectDataFlag){
-            collectData(I2C0);
+            collectData();
             if (sensorData.dataPrintFlag == 20) { // Print every 20/10 = 2 seconds.
 				DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
 				DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
@@ -83,7 +79,7 @@
 				DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
 				DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
 				DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
-				DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
+				DEBUGOUT( "shortRangingJ37 = %f\n", sensorData.shortRangingJ37 );
 				DEBUGOUT( "temperature = %f\n", sensorData.temp1 );
 				DEBUGOUT( "temperature = %f\n", sensorData.temp2 );
 				DEBUGOUT( "pressure = %f\n", sensorData.pressure );
@@ -96,9 +92,7 @@
 				DEBUGOUT( "positionX = %f\t", sensorData.positionX );
 				DEBUGOUT( "positionY = %f\t", sensorData.positionY );
 				DEBUGOUT( "positionZ = %f\n", sensorData.positionZ );
-				DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
-				DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
-				DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );
+				DEBUGOUT( "\n" );
 				sensorData.dataPrintFlag = 0;
             }
         }

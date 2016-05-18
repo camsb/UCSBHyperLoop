@@ -1,5 +1,5 @@
+#include "initialization.h"
 #include "sensor_data.h"
-#include "gyroscope.h"
 #include "accelerometer.h"
 #include "time.h"
 #include "ranging.h"
@@ -16,55 +16,57 @@ void collectCalibrationData( I2C_ID_T id ){
 
 }
 
-void collectData(I2C_ID_T id){
-  collectDataFlag = 0;
-  sensorData.dataPrintFlag += 1;
+void collectData(){
+	collectDataFlag = 0;
+	sensorData.dataPrintFlag += 1;
 
-  XYZ acceleration, rotation, velocity, position;
-  rangingData shortRangingData, longRangingData;
+	XYZ acceleration, velocity, position;
+	rangingData shortRangingData, longRangingData;
 
-  sensorData.temp1 = getTemperature(smooshedOne, id);
-//  sensorData.temp2 = getTemperature(smooshedTwo, I2C2);
 
-  sensorData.pressure = getPressure(smooshedOne, id);
+	if (SMOOSHED_ONE_ACTIVE) {
+		sensorData.pressure = getPressure(smooshedOne, I2C1);
+		sensorData.temp1 = getTemperature(smooshedOne, I2C1);
 
-  longRangingData = getLongDistance();
-  sensorData.longRangingJ25 = longRangingData.sensor0;
-  sensorData.longRangingJ30 = longRangingData.sensor1;
-  sensorData.longRangingJ22 = longRangingData.sensor2;
-  sensorData.longRangingJ31 = longRangingData.sensor3;
+		acceleration = getAccelerometerData(I2C1);
+		sensorData.accelX = acceleration.x;
+		sensorData.accelY = acceleration.y;
+		sensorData.accelZ = acceleration.z;
 
-  shortRangingData = getShortDistance();
-  sensorData.shortRangingJ36 = shortRangingData.sensor0;
-  sensorData.shortRangingJ37 = shortRangingData.sensor1;
-  sensorData.shortRangingJ34 = shortRangingData.sensor2;
-  sensorData.shortRangingJ35 = shortRangingData.sensor3;
+		velocity = getInertialVelocity();
+		sensorData.velocityX = velocity.x;
+		sensorData.velocityY = velocity.y;
+		sensorData.velocityZ = velocity.z;
 
-  acceleration = getAccelerometerData(id);
-  sensorData.accelX = acceleration.x;
-  sensorData.accelY = acceleration.y;
-  sensorData.accelZ = acceleration.z;
+		position = getInertialPosition();
+		sensorData.positionX = position.x;
+		sensorData.positionY = position.y;
+		sensorData.positionZ = position.z;
+	}
 
-  rotation = getGyroscopeData();
-  sensorData.gyroX = rotation.x;
-  sensorData.gyroY = rotation.y;
-  sensorData.gyroZ = rotation.z;
+	if (SMOOSHED_TWO_ACTIVE) {
+		sensorData.temp2 = getTemperature(smooshedTwo, I2C2);
+	}
 
-  velocity = getInertialVelocity();
-  sensorData.velocityX = velocity.x;
-  sensorData.velocityY = velocity.y;
-  sensorData.velocityZ = velocity.z;
+	if(RANGING_SENSORS_ACTIVE) {
+		longRangingData = getLongDistance();
+		sensorData.longRangingJ25 = longRangingData.sensor0;
+		sensorData.longRangingJ30 = longRangingData.sensor1;
+		sensorData.longRangingJ22 = longRangingData.sensor2;
+		sensorData.longRangingJ31 = longRangingData.sensor3;
 
-  position = getInertialPosition();
-  sensorData.positionX = position.x;
-  sensorData.positionY = position.y;
-  sensorData.positionZ = position.z;
+		shortRangingData = getShortDistance();
+		sensorData.shortRangingJ36 = shortRangingData.sensor0;
+		sensorData.shortRangingJ37 = shortRangingData.sensor1;
+		sensorData.shortRangingJ34 = shortRangingData.sensor2;
+		sensorData.shortRangingJ35 = shortRangingData.sensor3;
+	}
 
 }
 
 void TIMER1_IRQHandler(void){
-  collectDataFlag = 1;
-  Chip_TIMER_ClearMatch( LPC_TIMER1, 1 );
+	collectDataFlag = 1;
+	Chip_TIMER_ClearMatch( LPC_TIMER1, 1 );
 }
 
 void gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){

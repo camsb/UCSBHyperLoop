@@ -2,6 +2,7 @@
 #include "time.h"
 #include "i2c.h"
 #include "stdlib.h"
+#include "stdio.h"
 
 #define SAMPLE_SETTING 0
 
@@ -127,10 +128,14 @@ float calculateTemperature( constants* c, uint32_t uncalcTemperature )
   int32_t   X1;
   int32_t   X2;
 
+//  printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", c->AC1, c->AC2, c->AC3, c->AC4, c->AC5, c->AC6, c->B1, c->B2);
+
   X1 = ( ( uncalcTemperature - c->AC6 ) * c->AC5 ) >> 15;
   X2 = ( c->MC << 11 ) / ( X1 + c->MD );
   c->B5 = X1 + X2;
   temperature = ( c->B5 + 8 ) >> 4;
+
+//  printf("temperature is: %d\n", temperature);
 
   return ((float)temperature)/10.0; // Need to divide by 10 to return units in C.
 }
