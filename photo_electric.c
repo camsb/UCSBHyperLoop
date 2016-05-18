@@ -1,14 +1,15 @@
 #include "photo_electric.h"
 #include "time.h"
+#include "kinematics.h"
 
 // Do we need this function?
 void stripDetected(){
   stripDetectedFlag = 0;
 
-  uint32_t cyclesBetweenInterrupts = Chip_TIMER_ReadCount(LPC_TIMER3);
-//  timeBetweenInterrupts = ((float) Chip_TIMER_ReadCount(LPC_TIMER3)/120000000.0);
+//  uint32_t cyclesBetweenInterrupts = Chip_TIMER_ReadCount(LPC_TIMER3);
+//  timeBetweenInterrupts = ((float) cyclesBetweenInterrupts/120000000.0);
 
-  combineAccelerations();
+//  combineAccelerations();
 
 }
 

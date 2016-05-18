@@ -59,9 +59,10 @@
     while( 1 )
     {
     	collectDataFlag = 1;
-        if(stripDetectedFlag) {
-            stripDetected();
-        	DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
+
+    	if(stripDetectedFlag) {
+//            stripDetected();
+//        	DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
         }
 
         if(collectDataFlag){
@@ -116,6 +117,7 @@
 //            emergencyBrake();
 //        	DEBUGOUT( "Emergency brake signal received!\n" );
 //        }
+
 
     }
 
