@@ -14,7 +14,6 @@ XYZ getGyroscopeData(){
   wBuffer[ 1 ] = 0x00;
   Chip_I2C_MasterSend( I2C1, GYRO_ADDRESS, wBuffer, 2 );
 
-  delay( 1 );
   wBuffer[ 1 ] = 0x0F;
   Chip_I2C_MasterSend( I2C1, GYRO_ADDRESS, wBuffer, 2 );
 

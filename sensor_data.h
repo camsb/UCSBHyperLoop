@@ -3,7 +3,7 @@
 
 #include "board.h"
 
-void 	collectCalibrationData();
+void 	collectCalibrationData(I2C id);
 void    collectData();
 void    TIMER1_IRQHandler(void);
 void    gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);

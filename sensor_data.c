@@ -6,10 +6,10 @@
 #include "temp_press.h"
 #include "kinematics.h"
 
-void collectCalibrationData(){
+void collectCalibrationData( I2C id ){
 	XYZ initialAccel;
 
-	initialAccel = getInitialAccelMatrix();
+	initialAccel = getInitialAccelMatrix(id);
 	sensorData.initialAccelX = initialAccel.x;
 	sensorData.initialAccelY = initialAccel.y;
 	sensorData.initialAccelZ = initialAccel.z;
@@ -21,24 +21,24 @@ void collectData(){
   sensorData.dataPrintFlag += 1;
 
   XYZ acceleration, rotation, velocity, position;
-//  rangingData shortRangingData, longRangingData;
+  rangingData shortRangingData, longRangingData;
 
-  sensorData.temp1 = getTemperature(I2C1);
-  sensorData.temp2 = getTemperature(I2C2);
+  sensorData.temp1 = getTemperature(smooshedOne, I2C1);
+//  sensorData.temp2 = getTemperature(smooshedTwo, I2C2);
 
-  sensorData.pressure = getPressure();
+  sensorData.pressure = getPressure(smooshedOne, I2C1);
 
-//  longRangingData = getLongDistance();
-//  sensorData.longRangingJ25 = longRangingData.sensor0;
-//  sensorData.longRangingJ30 = longRangingData.sensor1;
-//  sensorData.longRangingJ22 = longRangingData.sensor2;
-//  sensorData.longRangingJ31 = longRangingData.sensor3;
-//
-//  shortRangingData = getShortDistance();
-//  sensorData.shortRangingJ36 = shortRangingData.sensor0;
-//  sensorData.shortRangingJ37 = shortRangingData.sensor1;
-//  sensorData.shortRangingJ34 = shortRangingData.sensor2;
-//  sensorData.shortRangingJ35 = shortRangingData.sensor3;
+  longRangingData = getLongDistance();
+  sensorData.longRangingJ25 = longRangingData.sensor0;
+  sensorData.longRangingJ30 = longRangingData.sensor1;
+  sensorData.longRangingJ22 = longRangingData.sensor2;
+  sensorData.longRangingJ31 = longRangingData.sensor3;
+
+  shortRangingData = getShortDistance();
+  sensorData.shortRangingJ36 = shortRangingData.sensor0;
+  sensorData.shortRangingJ37 = shortRangingData.sensor1;
+  sensorData.shortRangingJ34 = shortRangingData.sensor2;
+  sensorData.shortRangingJ35 = shortRangingData.sensor3;
 
   acceleration = getAccelerometerData();
   sensorData.accelX = acceleration.x;
