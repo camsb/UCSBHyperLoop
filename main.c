@@ -45,7 +45,7 @@
     i2cInit(I2C1, SPEED_100KHZ);
 //    i2cInit(I2C2, SPEED_100KHZ);
     temperaturePressureInit();
-//    photoelectricInit();
+    photoelectricInit();
 //    ethernetInit(PROTO_UDP, 0);
 //    rangingSensorsInit();
 
@@ -59,10 +59,10 @@
     while( 1 )
     {
     	collectDataFlag = 1;
-//        if(stripDetectedFlag) {
-//            stripDetected();
-//        	DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
-//        }
+        if(stripDetectedFlag) {
+            stripDetected();
+        	DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
+        }
 
         if(collectDataFlag){
 

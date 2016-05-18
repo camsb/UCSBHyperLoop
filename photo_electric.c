@@ -2,14 +2,15 @@
 #include "time.h"
 
 // Do we need this function?
-//void stripDetected(){
-//  stripDetectedFlag = 0;
-//
-//  Chip_TIMER_ReadCount(LPC_TIMER3);
-//
-//  combineAccelerations();
-//
-//}
+void stripDetected(){
+  stripDetectedFlag = 0;
+
+  uint32_t cyclesBetweenInterrupts = Chip_TIMER_ReadCount(LPC_TIMER3);
+//  timeBetweenInterrupts = ((float) Chip_TIMER_ReadCount(LPC_TIMER3)/120000000.0);
+
+  combineAccelerations();
+
+}
 
 void PHOTOELECTRIC_IRQ_HANDLER(void)
 {
