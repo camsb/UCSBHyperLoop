@@ -2,7 +2,7 @@
 #include "sensor_data.h"
 #include <string.h>
 #include "stdio.h"
-#include "time.h"
+#include "timer.h"
 
 /* Rx Buffer Addresses */
 uint16_t gSn_RX_BASE[] = {
@@ -27,152 +27,11 @@ void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32
 	 timerInit(timer, timerInterrupt, tickRate);
 }
 
-/* Handle SPI Interrupt */
-void SSPIRQHANDLER(void)
-{
-	Chip_SSP_Int_Disable(LPC_SSP1);	/* Disable SPI Interrupts */
-	Chip_SSP_Int_RWFrames8Bits(LPC_SSP1, &xf_setup);
-
-	if ((xf_setup.rx_cnt != xf_setup.length) || (xf_setup.tx_cnt != xf_setup.length)) {
-		Chip_SSP_Int_Enable(LPC_SSP1);	/* Enable SPI Interrupts */
-	} else {
-		isXferCompleted = 1;
-	}
-}
-
 /* Wiznet GPIO Interrupt Handler */
 void WIZNET_IRQ_HANDLER(void) {
 	/* Clear GPIO Interrupt, Set Wiznet Interrupt Flag */
 	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, WIZNET_INT_PORT, 1 << WIZNET_INT_PIN);
 	wizIntFlag = 1;
-}
-
-void wizStateHandler(uint8_t n) {
-	if(isXferCompleted) {
-		Wiz_Xfer_Int(n);
-	} else if(wizIntFlag) {
-		wizIntFunction(); // Shouldn't quite do this
-	} else if(sendDataFlag && connectionOpen && wiznetState == WIZ_IDLE) {
-		wiznetState = START_SEND;
-		Wiz_Xfer_Int(n);
-	}
-}
-
-/* Send Outgoing Data Via SPI Interrupts */
-void Wiz_Xfer_Int(uint8_t n) {
-	uint16_t offset = 0x0100*n;
-	isXferCompleted = 0;
-
-	switch(wiznetState) {
-	case START_SEND:		// Initialize Wiznet Send
-		spi_Recv_Int(Sn_TX_WR_BASE + offset, 0x0002);
-
-		wiznetState = TX_WP_READ;
-		break;
-
-	case TX_WP_READ:		// Read Tx Write Pointer
-		/* Calculate Destination Pointer */
-		int_wr_base = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
-		int_dst_mask = int_wr_base & (TX_MAX_MASK);
-		int_dst_ptr = gSn_TX_BASE[n] + int_dst_mask;
-
-		/* Setup data and length for send */
-		sprintf(((char *)Tx_Buf) + 4, (char *)Tx_Data);
-		int_length = strlen((char *)Tx_Data);
-
-		/* Load data into Tx Buffer */
-		if((int_dst_mask + int_length) > (TX_MAX_MASK + 1)) {
-			printf("Overflow!\n");
-			// TODO: Handle overflow
-			// Do stuff (In W5200 datasheet)
-		} else {
-			spi_Send_Int(int_dst_ptr, int_length);
-		}
-
-		wiznetState = DATA_TRANSFER;
-		break;
-
-	case DATA_TRANSFER:		// Send Data to Wiznet
-		/* Update Tx Write Pointer */
-		int_wr_base += int_length;
-		Tx_Buf[4] = ((uint8_t)((int_wr_base & 0xFF00) >> 8));
-		Tx_Buf[5] = ((uint8_t)(int_wr_base & 0x00FF));
-		spi_Send_Int(Sn_TX_WR_BASE + offset, 0x0002);
-
-		wiznetState = TX_WP_WRITE;
-		break;
-
-	case TX_WP_WRITE:		// Update Tx Write Pointer
-		/* SEND Command */
-		Tx_Buf[4] = SEND;
-		spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
-
-		wiznetState = SEND_CMD;
-		break;
-
-	case SEND_CMD:			// Send Data from Wiznet
-		wiznetState = WIZ_IDLE;
-
-
-	/* Data Received */
-	case START_RECV:		// Initialize Wiznet Read
-		spi_Recv_Int(Sn_RX_RSR_BASE + offset, 0x0002);
-
-		wiznetState = RX_RSR_READ;
-		break;
-
-	case RX_RSR_READ:		// Read Received Size
-		int_length = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
-		spi_Recv_Blocking(Sn_RX_RD_BASE + offset, 0x0002);	// Read Rx Descriptor
-
-		wiznetState = RX_ADDR_READ;
-		break;
-
-	case RX_ADDR_READ:		// Read Rx Address
-		int_rd_base = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
-
-		/* Calculate Tx Buffer Address */
-		int_src_mask = int_rd_base & (RX_MAX_MASK);
-		int_src_ptr = gSn_RX_BASE[n] + int_src_mask;
-
-		/* Load data into Tx Buffer */
-		if((int_src_mask + int_length) > (RX_MAX_MASK + 1)) {
-			printf("Overflow!\n");
-			// TODO: Handle overflow
-			// Do stuff (In W5200 datasheet)
-		} else {
-			spi_Recv_Int(int_src_ptr, int_length);
-		}
-
-		wiznetState = DATA_RECV;
-		break;
-	case DATA_RECV:			// Receive Data
-		memset((char *)Rx_Data, '\0', DATA_BUF_SIZE);
-		memcpy((char *)Rx_Data, &Rx_Buf[4], int_length);	// SPI HDR 4B, TCP HDR 8B
-
-		/* Update Rx Address */
-		int_rd_base += int_length;
-		Tx_Buf[4] = ((uint8_t)((int_rd_base & 0xFF00) >> 8));
-		Tx_Buf[5] = ((uint8_t)(int_rd_base & 0x00FF));
-		spi_Send_Int(Sn_RX_RD_BASE + offset, 0x0002);
-
-		wiznetState = RX_ADDR_WRITE;
-		break;
-	case RX_ADDR_WRITE:		// Update Rx Address
-		/* Send RECV Command */
-		Tx_Buf[4] = RECV;
-		spi_Send_Int(Sn_CR_BASE + offset, 0x0001);
-
-		wiznetState = RECV_CMD;
-		break;
-
-	case RECV_CMD:			// Send RECV command
-		wiznetState = WIZ_IDLE;
-		break;
-
-	default:
-		wiznetState = WIZ_IDLE;
-	}
 }
 
 /* SSP Initialization */
@@ -187,47 +46,6 @@ void Wiz_SSP_Init() {
 
 	Chip_SSP_Enable(LPC_SSP1);
 	Chip_SSP_SetMaster(LPC_SSP1, 1);
-}
-
-/* Interrupt based write */
-void spi_Send_Int(uint16_t address, uint16_t length) {
-	isXferCompleted = 0;
-	xf_setup.length = length + 4;
-	xf_setup.tx_data = Tx_Buf;
-	xf_setup.rx_data = Rx_Buf;
-	xf_setup.rx_cnt = xf_setup.tx_cnt = 0;
-	Chip_SSP_Int_FlushData(LPC_SSP1); /* flush data from SSP FiFO */
-
-	Tx_Buf[0] = (address & 0xFF00) >> 8;		// Address MSB
-	Tx_Buf[1] = (address & 0x00FF);				// Address LSB
-	Tx_Buf[2] = (length  & 0xFF00) >> 8 | 0x80; // OP Code (R/W) | Length MSB
-	Tx_Buf[3] = (length  & 0x00FF);				// Data length LSB
-
-	Chip_SSP_Int_RWFrames8Bits(LPC_SSP1, &xf_setup);
-	Chip_SSP_Int_Enable(LPC_SSP1);	/* enable interrupt */
-}
-
-/* Interrupt based read */
-void spi_Recv_Int(uint16_t address, uint16_t length) {
-	uint16_t i;
-	isXferCompleted = 0;
-	xf_setup.length = length + 4;
-	xf_setup.tx_data = Tx_Buf;
-	xf_setup.rx_data = Rx_Buf;
-	xf_setup.rx_cnt = xf_setup.tx_cnt = 0;
-	Chip_SSP_Int_FlushData(LPC_SSP1); /* flush data from SSP1 FiFO */
-
-	Tx_Buf[0] = (address & 0xFF00) >> 8;		// Address MSB
-	Tx_Buf[1] = (address & 0x00FF);				// Address LSB
-	Tx_Buf[2] = (length  & 0xFF00) >> 8;		// OP Code (R/W) | Length MSB
-	Tx_Buf[3] = (length  & 0x00FF);				// Data length LSB
-
-	for(i = 0; i < length; i++) {
-		Tx_Buf[i + 4] = 0xFF;					// Dummy Data
-	}
-
-	Chip_SSP_Int_RWFrames8Bits(LPC_SSP1, &xf_setup);
-	Chip_SSP_Int_Enable(LPC_SSP1);	/* enable interrupt */
 }
 
 /* Write 'length' bytes sequentially to address (blocking) */
@@ -726,7 +544,7 @@ void Wiz_Clear_Buffer(uint8_t n) {
 uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message) {
 	uint16_t length;
 	uint16_t offset = 0x0100*n;
-	uint16_t dst_mask, dst_ptr, wr_base, rd_ptr0, rd_ptr1;
+	uint16_t dst_mask, dst_ptr, wr_base;
 	uint16_t upper_size, left_size;
 
 	/* Read current Tx Write Pointer */
@@ -768,7 +586,7 @@ uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message) {
 	Tx_Buf[4] = SEND;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
 
-	return rd_ptr1 - rd_ptr0;
+	return length;
 }
 
 /* Read Incoming Data */
@@ -845,8 +663,6 @@ void Wiz_Restart() {
 
 /* Initialize Wiznet Device */
 void ethernetInit(uint8_t protocol, uint8_t socket) {
-	isXferCompleted = 0;
-
 	Wiz_SSP_Init();
 	Wiz_Restart();
 	uint16_t i, j;
