@@ -48,11 +48,13 @@ typedef struct{
 
   float temp1;
   float temp2;
-  float pressure;
+  float pressure1;
+  float pressure2;
 
 } sensor;
 
 uint8_t collectDataFlag;
+uint8_t getPressureFlag;
 sensor sensorData;
 
 #endif

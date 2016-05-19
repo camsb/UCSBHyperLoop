@@ -40,7 +40,7 @@ XYZ getInitialAccelMatrix( I2C_ID_T id ){
 	uint8_t i;
 
 	XYZ intermediateAccel;
-	XYZ initialAccel;
+	XYZ initialAccel = {0, 0, 0};
 
 	float alpha = 0.2;
 	float beta = 1 - alpha;

@@ -38,12 +38,14 @@
         Set_Channel_PWM(LPC_PWM1, 1, 0.5);
     }
     if(GATHER_DATA_ACTIVE){
-    	gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 10);
+    	gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 1);
     }
     if(SMOOSHED_ONE_ACTIVE){
     	i2cInit(I2C1, SPEED_100KHZ);
     	smooshedOne = temperaturePressureInit(I2C1);
     	collectCalibrationData(I2C1);
+    	getPressure(smooshedOne, I2C1);
+    	getPressureFlag = 0;
     }
     if(SMOOSHED_TWO_ACTIVE){
     	i2cInit(I2C2, SPEED_100KHZ);
@@ -71,7 +73,7 @@
 
         if(collectDataFlag){
             collectData();
-            if (sensorData.dataPrintFlag == 20) { // Print every 20/10 = 2 seconds.
+            if (sensorData.dataPrintFlag == 2) { // Print every 20/10 = 2 seconds.
 				DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
 				DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
 				DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
@@ -80,9 +82,10 @@
 				DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
 				DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
 				DEBUGOUT( "shortRangingJ37 = %f\n", sensorData.shortRangingJ37 );
-				DEBUGOUT( "temperature = %f\n", sensorData.temp1 );
-				DEBUGOUT( "temperature = %f\n", sensorData.temp2 );
-				DEBUGOUT( "pressure = %f\n", sensorData.pressure );
+				DEBUGOUT( "temperature1 = %f\n", sensorData.temp1 );
+				DEBUGOUT( "temperature2 = %f\n", sensorData.temp2 );
+				DEBUGOUT( "pressure1 = %f\n", sensorData.pressure1 );
+				DEBUGOUT( "pressure2 = %f\n", sensorData.pressure2 );
 				DEBUGOUT( "accelX = %f\t", sensorData.accelX );
 				DEBUGOUT( "accelY = %f\t", sensorData.accelY );
 				DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );

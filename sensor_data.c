@@ -23,10 +23,14 @@ void collectData(){
 	XYZ acceleration, velocity, position;
 	rangingData shortRangingData, longRangingData;
 
-
 	if (SMOOSHED_ONE_ACTIVE) {
-		sensorData.pressure = getPressure(smooshedOne, I2C1);
-		sensorData.temp1 = getTemperature(smooshedOne, I2C1);
+
+		if(getPressureFlag){
+			sensorData.pressure1 = getPressure(smooshedOne, I2C1);
+		}
+		else{
+			sensorData.temp1 = getTemperature(smooshedOne, I2C1);
+		}
 
 		acceleration = getAccelerometerData(I2C1);
 		sensorData.accelX = acceleration.x;
@@ -45,7 +49,14 @@ void collectData(){
 	}
 
 	if (SMOOSHED_TWO_ACTIVE) {
-		sensorData.temp2 = getTemperature(smooshedTwo, I2C2);
+
+		if(getPressureFlag){
+			sensorData.pressure2 = getPressure(smooshedOne, I2C2);
+		}
+		else{
+			sensorData.temp2 = getTemperature(smooshedOne, I2C2);
+		}
+
 	}
 
 	if(RANGING_SENSORS_ACTIVE) {
@@ -61,6 +72,8 @@ void collectData(){
 		sensorData.shortRangingJ34 = shortRangingData.sensor2;
 		sensorData.shortRangingJ35 = shortRangingData.sensor3;
 	}
+
+	getPressureFlag = !getPressureFlag;
 
 }
 

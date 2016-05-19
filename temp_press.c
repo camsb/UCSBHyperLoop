@@ -2,7 +2,6 @@
 #include "time.h"
 #include "i2c.h"
 #include "stdlib.h"
-#include "stdio.h"
 
 #define SAMPLE_SETTING 0
 
@@ -45,7 +44,7 @@ constants* temperaturePressureInit(I2C_ID_T id)
   return c;
 }
 
-uint32_t getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph )
+uint32_t getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8_t recvLen, uint8_t sendLen, uint8_t periph )
 {
   int8_t   i;
   uint8_t  readVal;
@@ -53,14 +52,14 @@ uint32_t getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8
 
   returnVal = 0;
 
-  Chip_I2C_MasterSend( id, periph, writeBuf, len );
-
-  for( i = 0; i < len; i++ )
+  for( i = 0; i < recvLen; i++ )
   {
     readVal   = 0;
     Chip_I2C_MasterCmdRead( id, periph, readBuf[ i ], &readVal, 1 );
-    returnVal = returnVal | ( ((uint32_t)readVal) << ( 8 * ( len - i - 1 ) ) );
+    returnVal = returnVal | ( ((uint32_t)readVal) << ( 8 * ( recvLen - i - 1 ) ) );
   }
+
+  Chip_I2C_MasterSend( id, periph, writeBuf, sendLen );
 
   return returnVal;
 }
@@ -107,14 +106,16 @@ float getPressure( constants * c, I2C_ID_T id )
   uint8_t   wBuffer[ 2 ];
   uint8_t   rBuffer[ 3 ];
 
-  wBuffer[ 0 ] = 0xF4; // BMP085_REGISTER_CONTROL -- initializes register address
-  wBuffer[ 1 ] = 0x34; // BMP085_REGISTER_READPRESSURECMD -- determine which option by putting data in register
+  /* Requests temperature values to be loaded. */
+  /* This removes the need for a delay. */
+  wBuffer[ 0 ] = 0xF4;
+  wBuffer[ 1 ] = 0x2E;
 
   rBuffer[ 0 ] = 0xF6; // BMP085_REGISTER_PRESSUREDATA
-  rBuffer[ 1 ] = 0xF7; //(just an explicit declaration of memory)
+  rBuffer[ 1 ] = 0xF7;
   rBuffer[ 2 ] = 0xF8;
 
-  uncalcPressure = getDataValue( id, wBuffer, rBuffer, 3, BMP_ADDRESS );
+  uncalcPressure = getDataValue( id, wBuffer, rBuffer, 3, 2, BMP_ADDRESS );
 
   // TODO: set to 0 precision
   // bit shift back, for precision
@@ -128,32 +129,29 @@ float calculateTemperature( constants* c, uint32_t uncalcTemperature )
   int32_t   X1;
   int32_t   X2;
 
-//  printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", c->AC1, c->AC2, c->AC3, c->AC4, c->AC5, c->AC6, c->B1, c->B2);
-
   X1 = ( ( uncalcTemperature - c->AC6 ) * c->AC5 ) >> 15;
   X2 = ( c->MC << 11 ) / ( X1 + c->MD );
   c->B5 = X1 + X2;
   temperature = ( c->B5 + 8 ) >> 4;
-
-//  printf("temperature is: %d\n", temperature);
 
   return ((float)temperature)/10.0; // Need to divide by 10 to return units in C.
 }
 
 float getTemperature( constants * c, I2C_ID_T id )
 {
-  uint32_t  uncalcTemperature;
-  uint8_t   wBuffer[ 2 ];
-  uint8_t   rBuffer[ 2 ];
+	uint32_t  uncalcTemperature;
+	uint8_t   wBuffer[ 2 ];
+	uint8_t   rBuffer[ 2 ];
 
-  wBuffer[ 0 ] = 0xF4;
-  wBuffer[ 1 ] = 0x2E;
+	/* Requests pressure values to be loaded. */
+	wBuffer[ 0 ] = 0xF4; // BMP085_REGISTER_CONTROL -- initializes register address
+	wBuffer[ 1 ] = 0x34; // BMP085_REGISTER_READPRESSURECMD -- determine which option by putting data in register
 
-  rBuffer[ 0 ] = 0xF6;
-  rBuffer[ 1 ] = 0xF7;
+	rBuffer[ 0 ] = 0xF6;
+	rBuffer[ 1 ] = 0xF7;
 
-  uncalcTemperature = getDataValue( id, wBuffer, rBuffer, 2, BMP_ADDRESS );
+	uncalcTemperature = getDataValue( id, wBuffer, rBuffer, 2, 2, BMP_ADDRESS );
 
-  return calculateTemperature( c, uncalcTemperature );
+	return calculateTemperature( c, uncalcTemperature );
 }
 
