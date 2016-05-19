@@ -31,37 +31,3 @@ void timerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
 
 	return;
 }
-
-void delayTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
-  timerInit(timer, timerInterrupt, tickRate);
-}
-
-/* Used for the delay function */
-void TIMER0_IRQHandler(void){
-  if ( Chip_TIMER_MatchPending( LPC_TIMER0, 1 ) ){
-    if( NumOfMS > 0 ){ // means timer is running
-      Timer0Count++;
-      if( Timer0Count == NumOfMS ){
-        // reset the timer count
-        Timer0Count = 0;
-        // release delay function while loop
-        Timer0Running = FALSE;
-      }
-    }
-    Chip_TIMER_ClearMatch( LPC_TIMER0, 1 );
-  }
-}
-
-/* Needs to be changed to be interrupt based. */
-void delay( uint32_t ms )
-{
-
- Timer0Running = TRUE;
- NumOfMS = ms;
-
- // wait for set amount of ms
- while( Timer0Running == TRUE );
-
- NumOfMS = 0;
-
-}
