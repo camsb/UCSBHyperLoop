@@ -43,10 +43,10 @@ XYZ getInertialPosition(){
 	return position;
 }
 
-void combineAccelerations(){
+void combinePositions(){
 	/* Overwrite position with fiducial data */
 	sensorData.positionX = 100*stripRegion;
 
 	/* Need to overwrite position with photoelectric data */
-//	sensorData.velocityX = 100/(timeBetweenInterrupts);
+	sensorData.velocityX = 100/(timeBetweenInterrupts);
 }

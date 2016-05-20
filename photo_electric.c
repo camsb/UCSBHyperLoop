@@ -6,11 +6,11 @@
 void stripDetected(){
   stripDetectedFlag = 0;
 
-//  uint32_t cyclesBetweenInterrupts = Chip_TIMER_ReadCount(LPC_TIMER3);
-//  timeBetweenInterrupts = ((float) cyclesBetweenInterrupts/120000000.0);
+  uint32_t cyclesBetweenInterrupts;
+  cyclesBetweenInterrupts = Chip_TIMER_ReadCount(LPC_TIMER3);
+  timeBetweenInterrupts = ((float) cyclesBetweenInterrupts)/120000000.0;
 
-//  combineAccelerations();
-
+  combinePositions();
 }
 
 void PHOTOELECTRIC_IRQ_HANDLER(void)
