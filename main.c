@@ -64,16 +64,20 @@
     DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
+
     while( 1 )
     {
         if(stripDetectedFlag) {
             stripDetected();
         	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
+
         }
 
         if(collectDataFlag){
+
             collectData();
-            if (sensorData.dataPrintFlag == 2) { // Print every 20/10 = 2 seconds.
+
+            if (sensorData.dataPrintFlag == 2) { // Print every 2/1 = 2 seconds.
 				DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
 				DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
 				DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
@@ -114,6 +118,7 @@
             emergencyBrake();
         	DEBUGOUT( "Emergency brake signal received!\n" );
         }
+
 
     }
 

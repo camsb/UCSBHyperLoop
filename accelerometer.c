@@ -1,6 +1,7 @@
 #include "accelerometer.h"
 #include "i2c.h"
 #include "board.h"
+#include "stdio.h"
 
 XYZ getAccelerometerData( I2C_ID_T id ){
 	uint8_t  		wBuffer[ 2 ];

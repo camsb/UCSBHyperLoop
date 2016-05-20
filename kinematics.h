@@ -5,6 +5,6 @@
 
 XYZ getInertialVelocity();
 XYZ getInertialPosition();
-
+void combinePositions();
 
 #endif

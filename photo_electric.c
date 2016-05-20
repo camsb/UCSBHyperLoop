@@ -1,9 +1,16 @@
 #include "photo_electric.h"
 #include "time.h"
+#include "kinematics.h"
 
+// Do we need this function?
 void stripDetected(){
   stripDetectedFlag = 0;
-  // Rest of function here.
+
+  uint32_t cyclesBetweenInterrupts;
+  cyclesBetweenInterrupts = Chip_TIMER_ReadCount(LPC_TIMER3);
+  timeBetweenInterrupts = ((float) cyclesBetweenInterrupts)/120000000.0;
+
+  combinePositions();
 }
 
 void PHOTOELECTRIC_IRQ_HANDLER(void)
@@ -13,8 +20,8 @@ void PHOTOELECTRIC_IRQ_HANDLER(void)
 
   Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, PHOTOELECTRIC_INT_PORT, 1 << PHOTOELECTRIC_INT_PIN);
   stripDetectedFlag = 1;
-  strip_count++;
-  regional_strip_count++;
+  stripCount++;
+  regionalStripCount++;
 
   Reset_Timer_Counter(LPC_TIMER3);
   Chip_TIMER_Enable(LPC_TIMER3);
@@ -47,8 +54,8 @@ void TIMER3_IRQHandler(void)
     Chip_TIMER_Disable(LPC_TIMER3);
     Reset_Timer_Counter(LPC_TIMER3);
   }
-  strip_region++;
-  regional_strip_count = 0;
+  stripRegion++;
+  regionalStripCount = 0;
 }
 
 /* Setup Photoelectric sensor pin as input */
