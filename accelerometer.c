@@ -18,18 +18,8 @@ XYZ getAccelerometerData( I2C_ID_T id ){
 	wBuffer[ 0 ] = ( LSM303_REGISTER_ACCEL_CTRL_REG1_A ); // Control register initializes all
 	wBuffer[ 1 ] = 0x57;
 
-<<<<<<< HEAD
-	Chip_I2C_MasterSend( I2C1, ACC_ADDRESS, wBuffer, 2 );
-
-
-//	uint32_t currTime = Chip_TIMER_ReadCount(LPC_TIMER1);
-	Chip_I2C_MasterCmdRead( I2C1, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, rBuffer, 6 );
-//	uint32_t endTime = Chip_TIMER_ReadCount(LPC_TIMER1);
-//	printf("The MasterCmdRead function took: %d\n", endTime - currTime);
-=======
 	Chip_I2C_MasterSend( id, ACC_ADDRESS, wBuffer, 2 );
 	Chip_I2C_MasterCmdRead( id, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, rBuffer, 6 );
->>>>>>> master
 
 	concAcceleration[0] = (int16_t)(rBuffer[0] | (((uint16_t)rBuffer[1]) << 8)) >> 4;
 	concAcceleration[1] = (int16_t)(rBuffer[2] | (((uint16_t)rBuffer[3]) << 8)) >> 4;
