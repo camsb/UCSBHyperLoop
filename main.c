@@ -122,30 +122,7 @@ int main(void)
     	}
 
     	if((sendDataFlag && connectionOpen)) {
-
-    		sendDataFlag = 0;
-
-    		sensorData.pressure = ((float)(rand() % 5000)) 	/ 10.0;
-    		sensorData.temp 	= ((float)(rand() % 3000)) 	/ 10.0;
-    		sensorData.power 	= ((float)(rand() % 6000)) 	/ 10.0;
-
-    		sensorData.posX 	= ((float)(rand() % 10000))/ 10.0;
-    		sensorData.posY 	= ((float)(rand() % 20)-10) / 10.0;
-    		sensorData.posZ 	= ((float)(rand() % 20)-10) / 10.0;
-
-    		sensorData.velX 	= ((float)(rand() % 1000))/ 10.0;
-			sensorData.velY 	= ((float)(rand() % 20)-10) / 10.0;
-			sensorData.velZ 	= ((float)(rand() % 20)-10)	/ 10.0;
-
-    		sensorData.accelX 	= ((float)(rand() % 100))/ 10.0;
-			sensorData.accelY 	= ((float)(rand() % 20)-10) / 10.0;
-			sensorData.accelZ 	= ((float)(rand() % 20)-10) / 10.0;
-
-			sensorData.roll 	= ((float)(rand() % 100)-50)/ 10.0;
-			sensorData.pitch 	= ((float)(rand() % 100)-50)/ 10.0;
-			sensorData.yaw 		= ((float)(rand() % 100)-50)/ 10.0;
-
-//    		sendDataPacket();
+    		sendDataPacket();
     	}
 
     }

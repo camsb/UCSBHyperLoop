@@ -214,6 +214,8 @@ void recvDataPacket() {
 
 void sendDataPacket() {
 
+	sendDataFlag = 0;
+
 	memset(Net_Tx_Data, 0, DATA_BUF_SIZE);
 
 	// Copy strings to Net_Tx_Data
