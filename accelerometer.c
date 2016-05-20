@@ -3,7 +3,7 @@
 #include "board.h"
 #include "stdio.h"
 
-XYZ getAccelerometerData(){
+XYZ getAccelerometerData( I2C_ID_T id ){
 	uint8_t  		wBuffer[ 2 ];
 	uint8_t 		rBuffer[ 6 ];
 	int16_t 		concAcceleration[3];
@@ -18,6 +18,7 @@ XYZ getAccelerometerData(){
 	wBuffer[ 0 ] = ( LSM303_REGISTER_ACCEL_CTRL_REG1_A ); // Control register initializes all
 	wBuffer[ 1 ] = 0x57;
 
+<<<<<<< HEAD
 	Chip_I2C_MasterSend( I2C1, ACC_ADDRESS, wBuffer, 2 );
 
 
@@ -25,6 +26,10 @@ XYZ getAccelerometerData(){
 	Chip_I2C_MasterCmdRead( I2C1, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, rBuffer, 6 );
 //	uint32_t endTime = Chip_TIMER_ReadCount(LPC_TIMER1);
 //	printf("The MasterCmdRead function took: %d\n", endTime - currTime);
+=======
+	Chip_I2C_MasterSend( id, ACC_ADDRESS, wBuffer, 2 );
+	Chip_I2C_MasterCmdRead( id, ACC_ADDRESS, LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, rBuffer, 6 );
+>>>>>>> master
 
 	concAcceleration[0] = (int16_t)(rBuffer[0] | (((uint16_t)rBuffer[1]) << 8)) >> 4;
 	concAcceleration[1] = (int16_t)(rBuffer[2] | (((uint16_t)rBuffer[3]) << 8)) >> 4;
@@ -42,17 +47,17 @@ XYZ getAccelerometerData(){
 }
 
 /* Finds the initial values of the accelerometer to calibrate accelerometer values. */
-XYZ getInitialAccelMatrix(){
+XYZ getInitialAccelMatrix( I2C_ID_T id ){
 	uint8_t i;
 
 	XYZ intermediateAccel;
-	XYZ initialAccel;
+	XYZ initialAccel = {0, 0, 0};
 
 	float alpha = 0.2;
 	float beta = 1 - alpha;
 
 	for (i = 0; i < 20; i++){
-		intermediateAccel = getAccelerometerData();
+		intermediateAccel = getAccelerometerData(id);
 		initialAccel.x = intermediateAccel.x*alpha + initialAccel.x*beta;
 		initialAccel.y = intermediateAccel.y*alpha + initialAccel.y*beta;
 		initialAccel.z = intermediateAccel.z*alpha + initialAccel.z*beta;
