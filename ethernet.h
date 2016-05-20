@@ -126,30 +126,14 @@
 #define MSG 			"MSG"	// Message
 #define PWR 			"PWR"	// Power
 #define PASSWORD 		"gaucholoop" // Default Password
+/* Web Application Commands */
+#define EBRAKE			"EBRAKE"	// Emergency Brake
+#define POWRUP			"POWRUP"	// Power Up Flag
+#define PWRDWN			"PWRDWN"	// Power Down Flag
+#define SERPRO			"SERPRO"	// Service Propulsion
+#define SERSTP			"SERSTP"	// Service Propulsion Stop
 
 #define SOCKET_ID 		0
-
-
-enum Wiz_State {
-
-	WIZ_IDLE,
-
-	/* Message Send */
-	START_SEND,
-	TX_WP_READ,
-	DATA_TRANSFER,
-	TX_WP_WRITE,
-	SEND_CMD,
-
-	/* Message Receive */
-	START_RECV,
-	RX_RSR_READ,
-	RX_ADDR_READ,
-	DATA_RECV,
-	RX_ADDR_WRITE,
-	RECV_CMD
-
-};
 
 struct data_packet {
 	// all pointers are ini
@@ -198,18 +182,19 @@ uint16_t int_dst_mask, int_dst_ptr, int_wr_base, int_rd_ptr0, int_rd_ptr1;
 uint16_t int_src_mask, int_src_ptr, int_rd_base;
 volatile uint8_t sendDataFlag;
 volatile uint8_t wizIntFlag;
+uint8_t eBrakeFlag, powerUpFlag, powerDownFlag, serPropulsionWheels;
 
 // DATA_BUF_SIZE is the size of a packet, which we don't expect to exceed
 uint8_t Net_Tx_Data[DATA_BUF_SIZE];
 uint8_t Net_Rx_Data[DATA_BUF_SIZE];
 
-void sendData();
-void recvData();
+//void sendData();
+//void recvData();
 void WIZNET_IRQ_HANDLER(void);
 void wizIntFunction();
 void rec_method(char *method, char *val, int *val_len);
 void send_method(char *method, char* val, int val_len);
-void send_data_packet();
+void sendDataPacket();
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 void Wiz_Restart();
 void Wiz_Init();

@@ -55,15 +55,6 @@ int main(void)
     DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
-//	sendDataFlag = 1;
-
-//	int val_len;
-//	char method[4] = {0};
-//	char value[30] = {0};
-//	rec_method(method, value, &val_len);
-//	printf("rec: %s:%s\n", method, value);
-//	printf("-----------------\n");
-
     /* Enable GPIO Interrupts */
     GPIO_Interrupt_Enable();
 
@@ -76,16 +67,34 @@ int main(void)
     srand((unsigned) time(&t));
     while( 1 ) {
 
+		serPropulsionWheels = 0;
+
+		if(eBrakeFlag) {
+			printf("Emergency Brake!\n");
+			eBrakeFlag = 0;
+		}
+		if(powerDownFlag) {
+			printf("Power Down!\n");
+			powerDownFlag = 0;
+		} else if(powerUpFlag) {
+			printf("Power Up!\n");
+			powerUpFlag = 0;
+		}
+		if(serPropulsionWheels) {
+			printf("Service Propulsion On!\n");
+			serPropulsionWheels = 0;
+		}
+
     	/* Need to do this cleanly, on a timer to prevent multiple attempts before a response */
     	if(!connectionOpen && !connectionClosed && sendDataFlag) {
     		sendDataFlag = 0;
     		ethernetInit(PROTO_TCP, 0);
     	}
 
-//        if(stripDetectedFlag) {
-//            stripDetected();
-//        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
-//        }
+        if(stripDetectedFlag) {
+            stripDetected();
+        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
+        }
 
         if(collectDataFlag){
             collectData();
@@ -97,8 +106,8 @@ int main(void)
             DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
             DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
             DEBUGOUT( "shortRangingJ37 = %f\t", sensorData.shortRangingJ37 );
-            DEBUGOUT( "temperature = %d\n", sensorData.temp );
-            DEBUGOUT( "pressure = %u\n", sensorData.pressure );
+            DEBUGOUT( "temperature = %f\n", sensorData.temp );
+            DEBUGOUT( "pressure = %f\n", sensorData.pressure );
             DEBUGOUT( "accelX = %f\t", sensorData.accelX );
             DEBUGOUT( "accelY = %f\t", sensorData.accelY );
             DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
@@ -112,12 +121,7 @@ int main(void)
     		wizIntFunction();
     	}
 
-    	if(/*wizIntFlag || isXferCompleted || */(sendDataFlag && connectionOpen)) {
-
-//    		wizStateHandler(); Used for interrupt driven
-
-//    		//sendData();
-//    		DEBUGOUT( "Sending Data!\n" );
+    	if((sendDataFlag && connectionOpen)) {
 
     		sendDataFlag = 0;
 
@@ -141,23 +145,8 @@ int main(void)
 			sensorData.pitch 	= ((float)(rand() % 100)-50)/ 10.0;
 			sensorData.yaw 		= ((float)(rand() % 100)-50)/ 10.0;
 
-//    		sprintf(sensorData.bmp, "%03d.00", rand() % 500);
-//    		sprintf(DataPacket.tmp, "%03d.00", rand() % 300);
-//    		sprintf(DataPacket.bat, "%03d.00", rand() % 400);
-//    		sprintf(DataPacket.pos, "%03d.00", rand() % 1000);
-//    		sprintf(DataPacket.vel, "%03d.00", rand() % 130);
-//    		sprintf(DataPacket.acc, "%03d.00", rand() % 50);
-//    		sprintf(DataPacket.rol, "%03d.00", (rand() % 12) - 6);
-//    		sprintf(DataPacket.pit, "%03d.00", (rand() % 12) - 6);
-//    		sprintf(DataPacket.yaw, "%03d.00", (rand() % 12) - 6);
-
-    		send_data_packet();
+//    		sendDataPacket();
     	}
-
-//        if(emergencyBrakeFlag){
-//            emergencyBrake();
-//        	DEBUGOUT( "Emergency brake signal received!\n" );
-//        }
 
     }
 

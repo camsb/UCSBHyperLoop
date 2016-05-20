@@ -189,7 +189,30 @@ void send_data_packet_helper(char *method, char *val, int *position) {
 	}
 }
 
-void send_data_packet() {
+
+void recvDataPacket() {
+
+	Wiz_Recv_Blocking(SOCKET_ID, Net_Rx_Data);
+
+	if(strstr((char *)Net_Rx_Data, EBRAKE) != NULL) {	// Emergency Brake
+		eBrakeFlag = 1;
+	}
+	if(strstr((char *)Net_Rx_Data, POWRUP) != NULL) {	// Pod Start Flag
+		powerUpFlag = 1;
+	}
+	if(strstr((char *)Net_Rx_Data, PWRDWN) != NULL) {	// Pod Stop Flag
+		powerDownFlag = 1;
+		powerUpFlag = 0;
+	}
+	if(strstr((char *)Net_Rx_Data, SERPRO) != NULL) {	// Service Propulsion Start
+		serPropulsionWheels = 1;
+	}
+	if(strstr((char *)Net_Rx_Data, SERSTP) != NULL) {	// Service Propulsion Stop
+		serPropulsionWheels = 0;
+	}
+}
+
+void sendDataPacket() {
 
 	memset(Net_Tx_Data, 0, DATA_BUF_SIZE);
 
@@ -257,22 +280,12 @@ void rec_method(char *method, char *val, int *val_len) {
 	}
 }
 
-void sendData(){
-	sendDataFlag = 0;
-  // Rest of function here.
-}
-
 /* Handle Wiznet Interrupt */
 void wizIntFunction() {
 	uint16_t offset = 0;// 0x0100*n;
 	uint8_t socket_int, n;
-	static char method[4];
-	static char value[DATA_BUF_SIZE - 4]; // Method name is 4 characters
-	int val_len;
 
 	/* Read Socket Interrupts */
-//	printf("Interrupt Detected:\n");
-
 	for(n = 0; n < 8; n++) {
 		if(activeSockets >> n & 0x01) {
 			offset = 0x0010 * n;
@@ -281,42 +294,27 @@ void wizIntFunction() {
 			Tx_Buf[4] = 0xFF;
 			spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
 			socket_int = Rx_Buf[4];
-//			printf("Socket %u: 0x%x\n", n, socket_int);
 
 			/* Handle Interrupt Request */
 			if( socket_int & SEND_OK ) {	 // Send Completed
-//				printf("Send Completed\n");
 			}
 			if( socket_int & TIMEOUT ) { // Timeout Occurred
-				printf("Timeout Occurred\n");
 			}
 			if( socket_int & RECV_PKT ) {	 // Packet Received
-				printf("Packet Received\n");
-				rec_method(method, value, &val_len);
-				// Now we have the method, the value, and the value length
-				printf("%s:%s\n", method, value);
-				// Processing
-					// e break
-					// authetication
-					// service propulsion
-					// levitation
+				recvDataPacket();
 			}
 			if( socket_int & DISCON_SKT ) {	 // FIN/FIN ACK Received
 				if(connectionOpen)
 					connectionClosed = 1;
 				connectionOpen = 0;
-				printf("Connection Closed\n");
 			}
 			if( socket_int & Sn_CON ) {	 // Socket Connection Completed
 				connectionOpen = 1;
-				printf("Connected\n");
 			}
 
 			/* Clear Socket n Interrupt Register */
 			Tx_Buf[4] = socket_int;
 			spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
-
-//			printf("-----------------\n");
 		}
 	}
 
