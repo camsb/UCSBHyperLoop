@@ -24,6 +24,7 @@
 #include "ethernet.h"
 #include "ranging.h"
 #include "braking.h"
+#include "actuators.h"
 
  int main(void)
  {
@@ -32,6 +33,9 @@
     SystemCoreClockUpdate();
     Board_Init();
 
+    if(CMP_ACTIVE){
+    	motorActuatorInit();
+    }
     if(PWM_ACTIVE){
         Init_PWM(LPC_PWM1);
         Init_Channel(LPC_PWM1, 1);
@@ -66,6 +70,10 @@
 
     while( 1 )
     {
+    	if(CMP_ACTIVE){
+    		motorActuatorDisconnect();
+    	}
+
         if(stripDetectedFlag) {
             stripDetected();
         	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);

@@ -31,3 +31,13 @@ void timerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
 
 	return;
 }
+
+/* Delay in miliseconds  (cclk = 120MHz) */
+void delayMs(uint32_t ms)
+{
+	delay(ms * 40000);
+}
+
+void delay(uint32_t i){
+	while (i--) {}
+}
