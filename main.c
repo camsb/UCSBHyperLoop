@@ -69,7 +69,7 @@
     {
         if(stripDetectedFlag) {
             stripDetected();
-        	DEBUGOUT("Strip %u, of %u in region %u!\n", strip_count, regional_strip_count, strip_region);
+        	DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
 
         }
 
