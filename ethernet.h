@@ -192,11 +192,10 @@ uint8_t Tx_Buf[BUFFER_SIZE];
 uint8_t Tx_Data[DATA_BUF_SIZE];
 uint8_t Rx_Buf[BUFFER_SIZE];
 uint8_t Rx_Data[DATA_BUF_SIZE];
-uint8_t activeSockets, connectionOpen, connectionClosed, wiznetState;
+uint8_t activeSockets, connectionOpen, connectionClosed;
 uint16_t int_length;
 uint16_t int_dst_mask, int_dst_ptr, int_wr_base, int_rd_ptr0, int_rd_ptr1;
 uint16_t int_src_mask, int_src_ptr, int_rd_base;
-volatile uint8_t isXferCompleted;
 volatile uint8_t sendDataFlag;
 volatile uint8_t wizIntFlag;
 
@@ -206,7 +205,6 @@ uint8_t Net_Rx_Data[DATA_BUF_SIZE];
 
 void sendData();
 void recvData();
-void SSPIRQHANDLER(void);
 void WIZNET_IRQ_HANDLER(void);
 void wizIntFunction();
 void rec_method(char *method, char *val, int *val_len);
@@ -230,15 +228,11 @@ void Wiz_UDP_Close(uint8_t n);
 void Wiz_Clear_Buffer(uint8_t n);
 void ethernetInit(uint8_t protocol, uint8_t socket);
 void Wiz_Deinit(uint8_t protocol, uint8_t socket);
-void spi_Send_Int(uint16_t address, uint16_t length);
-void spi_Recv_Int(uint16_t address, uint16_t length);
 void spi_Send_Blocking(uint16_t address, uint16_t length);
 void spi_Recv_Blocking(uint16_t address, uint16_t length);
 void TIMER2_IRQHandler(void);
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
-void Wiz_Xfer_Int(uint8_t n);
 void send_data_packet_helper(char *method, char *val, int *position);
-
 uint8_t Wiz_Check_Socket(uint8_t n);
 uint8_t Wiz_Int_Clear(uint8_t n);
 uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message);
