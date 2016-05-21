@@ -2,32 +2,33 @@
  *
  * UCSB Hyperloop Controller
  *
- * Celeste "Bean Bag" Bean
- * Connor "She Sucks ^^^" Buckland
- * Benoit "Balls" Hartl
- * Cameron "Future Billionaire, TV star, etc." McCarthy
- * Connor.js Mulcahey
+ * Celeste "Not Again" Bean
+ * Connor "TCP/IP Expert" Buckland
+ * "Big" Ben Hartl
+ * Cameron "Deep Fried Board" McCarthy
+ * Connor "Funny Guy" Mulcahey
  *
  */
 
 #include "initialization.h"
 #include "time.h"
-#include "board.h" 
+#include "board.h"
 #include "temp_press.h"
 #include "stdlib.h"
 #include "accelerometer.h"
 #include "stdio.h"
+#include "string.h"
 #include "sensor_data.h"
 #include "i2c.h"
 #include "photo_electric.h"
 #include "pwm.h"
 #include "ethernet.h"
+#include "gpio.h"
 #include "ranging.h"
 #include "braking.h"
 
- int main(void)
- {
-
+int main(void)
+{
     /* Initialize the board and clock */
     SystemCoreClockUpdate();
     Board_Init();
@@ -55,18 +56,45 @@
     	photoelectricInit();
     }
     if(ETHERNET_ACTIVE){
-    	ethernetInit(PROTO_UDP, 0);
+    	ethernetInit(PROTO_TCP, 0);
+        sendSensorDataTimerInit(LPC_TIMER2, TIMER2_IRQn, 4);
     }
     if(RANGING_SENSORS_ACTIVE){
     	rangingSensorsInit();
     }
+    if(GPIO_INT_ACTIVE){
+		/* Enable GPIO Interrupts */
+		GPIO_Interrupt_Enable();
+    }
 
-    DEBUGOUT(" UCSB Hyperloop Controller Initialized\n");
+    /* Handle all Wiznet Interrupts, including RECV */
+    if(wizIntFlag) {
+		wizIntFunction();
+	}
+
+    DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
-
 
     while( 1 )
     {
+
+    	/* Need to do this cleanly, on a timer to prevent multiple attempts before a response */
+    	if(!connectionOpen && !connectionClosed && sendDataFlag) {
+    		sendDataFlag = 0;
+    		ethernetInit(PROTO_TCP, 0);
+    	}
+
+        /* Handle all Wiznet Interrupts, including RECV */
+        if(wizIntFlag) {
+    		wizIntFunction();
+    	}
+
+        /* If Data Send Requested, Send Data */
+    	if((sendDataFlag && connectionOpen)) {
+    		sendDataPacket();
+    	}
+
+    	/* Handle Photoelectric Strip Detected */
         if(stripDetectedFlag) {
             stripDetected();
         	DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
@@ -102,25 +130,10 @@
 				DEBUGOUT( "\n" );
 				sensorData.dataPrintFlag = 0;
             }
-        }
 
-        if(sendDataFlag){
-            sendData();
-            DEBUGOUT( "Sending Data!\n" );
         }
-
-        if(recvDataFlag){
-            recvData();
-        	DEBUGOUT( "Receiving Data!\n" );
-        }
-
-        if(emergencyBrakeFlag){
-            emergencyBrake();
-        	DEBUGOUT( "Emergency brake signal received!\n" );
-        }
-
 
     }
 
     return 0;
- }
+}
