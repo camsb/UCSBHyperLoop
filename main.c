@@ -129,7 +129,7 @@ int main(void)
 				DEBUGOUT( "positionZ = %f\n", sensorData.positionZ );
 				DEBUGOUT( "\n" );
 				sensorData.dataPrintFlag = 0;
-//            }
+            }
 
         }
 
