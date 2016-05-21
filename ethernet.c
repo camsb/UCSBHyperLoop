@@ -27,13 +27,6 @@ void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32
 	 timerInit(timer, timerInterrupt, tickRate);
 }
 
-/* Wiznet GPIO Interrupt Handler */
-void WIZNET_IRQ_HANDLER(void) {
-	/* Clear GPIO Interrupt, Set Wiznet Interrupt Flag */
-	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, WIZNET_INT_PORT, 1 << WIZNET_INT_PIN);
-	wizIntFlag = 1;
-}
-
 /* SSP Initialization */
 void Wiz_SSP_Init() {
 	Board_SSP_Init(LPC_SSP1);
@@ -189,26 +182,48 @@ void send_data_packet_helper(char *method, char *val, int *position) {
 	}
 }
 
+void send_data_ack_helper(char *method, int *position) {
+	memcpy(Net_Tx_Data + *position, method, 3);
+	*position += 3;
+	memcpy(Net_Tx_Data + *position, "\n", 1);
+	*position += 1;
+}
+
 
 void recvDataPacket() {
+	int pos = 0;
+	memset(Net_Tx_Data, 0, 64);
 
 	Wiz_Recv_Blocking(SOCKET_ID, Net_Rx_Data);
+	printf("Receiving Data Packet!\n");
 
 	if(strstr((char *)Net_Rx_Data, EBRAKE) != NULL) {	// Emergency Brake
 		eBrakeFlag = 1;
+		printf("Emergency Brake!\n");
+		send_data_ack_helper(PAK, &pos);
 	}
 	if(strstr((char *)Net_Rx_Data, POWRUP) != NULL) {	// Pod Start Flag
 		powerUpFlag = 1;
+		send_data_ack_helper(PAK, &pos);
+		printf("Power Up!\n");
 	}
 	if(strstr((char *)Net_Rx_Data, PWRDWN) != NULL) {	// Pod Stop Flag
 		powerDownFlag = 1;
 		powerUpFlag = 0;
+		printf("Power Down!\n");
 	}
 	if(strstr((char *)Net_Rx_Data, SERPRO) != NULL) {	// Service Propulsion Start
 		serPropulsionWheels = 1;
+		send_data_ack_helper(WAK, &pos);
+		printf("Service Propulsion Activated!\n");
 	}
 	if(strstr((char *)Net_Rx_Data, SERSTP) != NULL) {	// Service Propulsion Stop
 		serPropulsionWheels = 0;
+		printf("Service Propulsion Disactivated!\n");
+	}
+
+	if(pos != 0) {
+		Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 	}
 }
 
@@ -216,23 +231,24 @@ void sendDataPacket() {
 
 	sendDataFlag = 0;
 
-	memset(Net_Tx_Data, 0, DATA_BUF_SIZE);
-
 	// Copy strings to Net_Tx_Data
 	int pos = 0;
+	memset(Net_Tx_Data, 0, 256); // Make sure this clears enough space
 
 	/* Atmospheric, Miscellaneous Data */
-	sprintf(DataPacket.bmp, "%06.2f", sensorData.pressure);
-	sprintf(DataPacket.tmp, "%06.2f", sensorData.temp);
+	sprintf(DataPacket.bm1, "%06.2f", sensorData.pressure1);
+	sprintf(DataPacket.bm2, "%06.2f", sensorData.pressure2);
+	sprintf(DataPacket.tm1, "%06.2f", sensorData.temp1);
+	sprintf(DataPacket.tm2, "%06.2f", sensorData.temp2);
 	sprintf(DataPacket.pwr, "%06.2f", sensorData.power);
 	/* Positional Data */
-	sprintf(DataPacket.pox, "%06.2f", sensorData.posX);
-	sprintf(DataPacket.poy, "%06.2f", sensorData.posY);
-	sprintf(DataPacket.poz, "%06.2f", sensorData.posZ);
+	sprintf(DataPacket.pox, "%06.2f", sensorData.positionX);
+	sprintf(DataPacket.poy, "%06.2f", sensorData.positionY);
+	sprintf(DataPacket.poz, "%06.2f", sensorData.positionZ);
 	/* Velocity Data */
-	sprintf(DataPacket.vex, "%06.2f", sensorData.velX);
-	sprintf(DataPacket.vey, "%06.2f", sensorData.velY);
-	sprintf(DataPacket.vez, "%06.2f", sensorData.velZ);
+	sprintf(DataPacket.vex, "%06.2f", sensorData.velocityX);
+	sprintf(DataPacket.vey, "%06.2f", sensorData.velocityY);
+	sprintf(DataPacket.vez, "%06.2f", sensorData.velocityZ);
 	/* Acceleration Data */
 	sprintf(DataPacket.acx, "%06.2f", sensorData.accelX);
 	sprintf(DataPacket.acy, "%06.2f", sensorData.accelY);
@@ -243,8 +259,10 @@ void sendDataPacket() {
 	sprintf(DataPacket.yaw, "%06.2f", sensorData.yaw);
 
 	/* Atmospheric, Miscellaneous Data */
-	send_data_packet_helper(BMP, DataPacket.bmp, &pos);
-	send_data_packet_helper(TMP, DataPacket.tmp, &pos);
+	send_data_packet_helper(BM1, DataPacket.bm1, &pos);
+	send_data_packet_helper(BM2, DataPacket.bm2, &pos);
+	send_data_packet_helper(TM1, DataPacket.tm1, &pos);
+	send_data_packet_helper(TM2, DataPacket.tm2, &pos);
 	send_data_packet_helper(PWR, DataPacket.pwr, &pos);
 	/* Positional Data */
 	send_data_packet_helper(POX, DataPacket.pox, &pos);
@@ -357,8 +375,8 @@ void Wiz_Memory_Init() {
 	}
 }
 
-/* TCP Initialization */
 void Wiz_TCP_Init(uint8_t n) {
+/* TCP Initialization */
 	uint8_t reserv_bit;
 	uint16_t offset = 0x0100*n;
 

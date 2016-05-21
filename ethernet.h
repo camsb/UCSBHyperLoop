@@ -6,8 +6,6 @@
 /* Wiznet Interrupt Input Pin */
 #define WIZNET_INT_PORT					0
 #define WIZNET_INT_PIN					4
-#define WIZNET_IRQ_HANDLER     			GPIO_IRQHandler /* GPIO interrupt IRQ function name */
-#define WIZNET_INTERRUPT_NVIC    		GPIO_IRQn   	/* GPIO interrupt NVIC interrupt name */
 
 /* SSP Constants */
 #define LPC_SSP           				LPC_SSP1
@@ -104,8 +102,10 @@
 
 /* Protocol Methods */
 /* Atmospheric data */
-#define BMP 			"BMP"	// Pressure
-#define TMP 			"TMP"	// Temperature
+#define BM1 			"BM1"	// Pressure
+#define BM2 			"BM2"	// Pressure
+#define TM1 			"TM1"	// Temperature
+#define TM2 			"TM2"	// Temperature
 /* Positional Data */
 #define POX 			"POX"	// x Position
 #define POY 			"POY"	// y Position
@@ -132,6 +132,9 @@
 #define PWRDWN			"PWRDWN"	// Power Down Flag
 #define SERPRO			"SERPRO"	// Service Propulsion
 #define SERSTP			"SERSTP"	// Service Propulsion Stop
+/* Web Application Level Acknowledgements */
+#define WAK				"WAK"		// Service Propulsion Acknowledgement
+#define PAK				"PAK"		// Power Up Acknowledgement
 
 #define SOCKET_ID 		0
 
@@ -142,8 +145,10 @@ struct data_packet {
 	// format with ###.## zero padded
 
 	/* Atmospheric Data */
-	char bmp[6];	// Pressure
-	char tmp[6];	// Temperature
+	char bm1[6];	// Pressure1
+	char bm2[6];	// Pressure2
+	char tm1[6];	// Temperature
+	char tm2[6];	// Temperature
 	char pwr[6];	// Power Consumption
 	/* Positional Data */
 	char pox[6];	// x Position
@@ -188,9 +193,6 @@ uint8_t eBrakeFlag, powerUpFlag, powerDownFlag, serPropulsionWheels;
 uint8_t Net_Tx_Data[DATA_BUF_SIZE];
 uint8_t Net_Rx_Data[DATA_BUF_SIZE];
 
-//void sendData();
-//void recvData();
-void WIZNET_IRQ_HANDLER(void);
 void wizIntFunction();
 void rec_method(char *method, char *val, int *val_len);
 void send_method(char *method, char* val, int val_len);
@@ -218,6 +220,7 @@ void spi_Recv_Blocking(uint16_t address, uint16_t length);
 void TIMER2_IRQHandler(void);
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 void send_data_packet_helper(char *method, char *val, int *position);
+void send_data_ack_helper(char *method, int *position);
 uint8_t Wiz_Check_Socket(uint8_t n);
 uint8_t Wiz_Int_Clear(uint8_t n);
 uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message);

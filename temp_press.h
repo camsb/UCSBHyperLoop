@@ -20,16 +20,14 @@ typedef struct {
   int32_t  B5;
 } constants;
 
-constants *c;
+constants *smooshedOne, *smooshedTwo;
 
-uint32_t  calculatePressure( uint32_t uncalcPres );
-int32_t  	calculateTemperature( uint32_t uncalcTemp );
-uint32_t  getDataValue( uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph );
-int32_t  	getTemperature();
-uint32_t  getPressure();
-void    	initCalibrationData();
-void    	printConstants();
-uint16_t  readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg );
-void 		  temperaturePressureInit();
+float  		calculatePressure( constants * c, uint32_t uncalcPres );
+float  		calculateTemperature( constants * c, uint32_t uncalcTemp );
+uint32_t  	getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8_t recvLen, uint8_t sendLen, uint8_t periph );
+float  		getTemperature( constants * c, I2C_ID_T id );
+float 		getPressure( constants * c, I2C_ID_T id );
+uint16_t  	readRegs( I2C_ID_T id, uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg );
+constants* 	temperaturePressureInit(I2C_ID_T id);
 
 #endif
