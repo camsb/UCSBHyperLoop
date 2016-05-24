@@ -1,5 +1,6 @@
 #include "ranging.h"
 #include "math.h"
+#include "sensor_data.h"
 
 /*
  *  Left-front long J25
@@ -14,17 +15,12 @@
  */
 
 float sin_inv(float x) {
+	static const step = 2.0/256.0;
+	uint16_t index = ((uint16_t)(((x + 1.0)/step) + 0.5));
 	return 0;
 }
 
 void computePositionAttitudeRanging() {
-	/* Compute Constants */
-//	static const short_front_left_pyth 	= sqrt((SHORT_FRONT_LEFT_DIST^2.0) + (SHORT_FRONT_DIST^2.0));
-	static const short_front_right_pyth = sqrt((SHORT_FRONT_RIGHT_DIST^2.0) + (SHORT_FRONT_DIST^2.0));
-//	static const short_back_left_pyth 	= sqrt((SHORT_BACK_LEFT_DIST^2.0) + (SHORT_BACK_DIST^2.0));
-	static const short_back_right_pyth 	= sqrt((SHORT_BACK_RIGHT_DIST^2.0) + (SHORT_BACK_DIST^2.0));
-//	static const short_left_pyth_inv 	= (0.5 / (short_front_left_pyth + short_back_left_pyth));
-	static const short_right_pyth_inv 	= (0.5 / (short_front_right_pyth + short_back_right_pyth));
 
 	/* y Position */
 	float y_front = (sensorData.longRangingJ30 - sensorData.longRangingJ25) * 0.5;
@@ -142,6 +138,11 @@ void rangingSensorsInit(void)  {
 	Burst_Mode_Flag = 1;
 	ADC_Interrupt_Done_Flag = 0;
 	uint32_t _bitRate = ADC_MAX_SAMPLE_RATE;
+
+	/* Compute Constants */
+	short_front_right_pyth = sqrt((SHORT_FRONT_RIGHT_DIST*SHORT_FRONT_RIGHT_DIST) + (SHORT_FRONT_DIST*SHORT_FRONT_DIST));
+	short_back_right_pyth 	= sqrt((SHORT_BACK_RIGHT_DIST*SHORT_BACK_RIGHT_DIST) + (SHORT_BACK_DIST*SHORT_BACK_DIST));
+	short_right_pyth_inv 	= (0.5 / (short_front_right_pyth + short_back_right_pyth));
 
 	/* Enable all ranging sensor channels */
 	initADCChannel(ADC_CH0, 0, 23, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Left-front long J25
