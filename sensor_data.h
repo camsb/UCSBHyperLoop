@@ -18,6 +18,16 @@ typedef struct{
 
 typedef struct{
 
+	float y;
+	float z;
+	float roll;
+	float pitch;
+	float yaw;
+
+} rangingData;
+
+typedef struct{
+
   uint32_t dataPrintFlag;
 
   float gyroX;

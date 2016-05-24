@@ -1,18 +1,13 @@
 #include "ranging.h"
 #include "math.h"
 
-float sin_inv(float x) {
-	return 0;
+float arcsin(float x) {
+	static const step = 2.0/256.0;
+	uint16_t index = ((uint16_t)(((x + 1.0)/step) + 0.5));
+	return arcSinLUT[index];
 }
 
 void computePositionAttitudeRanging() {
-	/* Compute Constants */
-//	static const short_front_left_pyth 	= sqrt((SHORT_FRONT_LEFT_DIST^2.0) + (SHORT_FRONT_DIST^2.0));
-	static const short_front_right_pyth = sqrt((SHORT_FRONT_RIGHT_DIST^2.0) + (SHORT_FRONT_DIST^2.0));
-//	static const short_back_left_pyth 	= sqrt((SHORT_BACK_LEFT_DIST^2.0) + (SHORT_BACK_DIST^2.0));
-	static const short_back_right_pyth 	= sqrt((SHORT_BACK_RIGHT_DIST^2.0) + (SHORT_BACK_DIST^2.0));
-//	static const short_left_pyth_inv 	= (0.5 / (short_front_left_pyth + short_back_left_pyth));
-	static const short_right_pyth_inv 	= (0.5 / (short_front_right_pyth + short_back_right_pyth));
 
 	/* y Position */
 	float y_front = (sensorData.longRangingJ30 - sensorData.longRangingJ25) * 0.5;
@@ -20,7 +15,7 @@ void computePositionAttitudeRanging() {
 	float y_com   = (y_front*LONG_FRONT_DIST + y_back*LONG_BACK_DIST) * LONG_AXIS_SUM_INV;
 
 	/* Yaw */
-	float yaw     = sin_inv((y_front - y_com) / LONG_FRONT_DIST);
+	float yaw     = arcsin((y_front - y_com) / LONG_FRONT_DIST);
 
 	/* z Position */
 	float z_front = ((sensorData.shortRangingJ36 + SHORT_FRONT_HEIGHT) + (sensorData.shortRangingJ37 + SHORT_BACK_HEIGHT)) * 0.5;
@@ -28,13 +23,14 @@ void computePositionAttitudeRanging() {
 	float z_com   = (z_front*SHORT_FRONT_DIST + z_back*SHORT_BACK_DIST) * SHORT_AXIS_SUM_INV;
 
 	/* Pitch */
-	float pitch   = sin_inv((z_back - z_com) * SHORT_BACK_DIST_INV);
+	float pitch   = arcsin((z_back - z_com) * SHORT_BACK_DIST_INV);
 
 	/* Roll */
 	float z_right = (short_front_right_pyth*(sensorData.shortRangingJ37 + SHORT_FRONT_HEIGHT) +
 					 short_back_right_pyth*(sensorData.shortRangingJ35 + SHORT_BACK_HEIGHT)) *
 					 short_right_pyth_inv;
-	float roll	  = sin_inv((z_right - z_com)*SHORT_RIGHT_AVG_INV);
+	float roll	  = arcsin((z_right - z_com)*SHORT_RIGHT_AVG_INV);
+
 
 }
 
@@ -130,6 +126,11 @@ void rangingSensorsInit(void)  {
 	Burst_Mode_Flag = 1;
 	ADC_Interrupt_Done_Flag = 0;
 	uint32_t _bitRate = ADC_MAX_SAMPLE_RATE;
+
+	/* Compute Constants */
+	short_front_right_pyth = sqrt((SHORT_FRONT_RIGHT_DIST*SHORT_FRONT_RIGHT_DIST) + (SHORT_FRONT_DIST*SHORT_FRONT_DIST));
+	short_back_right_pyth 	= sqrt((SHORT_BACK_RIGHT_DIST*SHORT_BACK_RIGHT_DIST) + (SHORT_BACK_DIST*SHORT_BACK_DIST));
+	short_right_pyth_inv 	= (0.5 / (short_front_right_pyth + short_back_right_pyth));
 
 	/* Enable all ranging sensor channels */
 	initADCChannel(ADC_CH0, 0, 23, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Port-front long J25
