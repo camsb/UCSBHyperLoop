@@ -7,31 +7,37 @@ float arcsin(float x) {
 	return arcSinLUT[index];
 }
 
-void computePositionAttitudeRanging() {
+positionAttitudeData computePositionAttitudeRanging(rangingData longRangingData, rangingData shortRangingData) {
 
 	/* y Position */
-	float y_front = (sensorData.longRangingJ30 - sensorData.longRangingJ25) * 0.5;
-	float y_back  = (sensorData.longRangingJ31 - sensorData.longRangingJ22) * 0.5;
+	float y_front = (longRangingData.frontRight - longRangingData.frontLeft) * 0.5;
+	float y_back  = (longRangingData.backRight - longRangingData.backLeft) * 0.5;
 	float y_com   = (y_front*LONG_FRONT_DIST + y_back*LONG_BACK_DIST) * LONG_AXIS_SUM_INV;
 
 	/* Yaw */
 	float yaw     = arcsin((y_front - y_com) / LONG_FRONT_DIST);
 
 	/* z Position */
-	float z_front = ((sensorData.shortRangingJ36 + SHORT_FRONT_HEIGHT) + (sensorData.shortRangingJ37 + SHORT_BACK_HEIGHT)) * 0.5;
-	float z_back  = ((sensorData.shortRangingJ34 + SHORT_FRONT_HEIGHT) + (sensorData.shortRangingJ35 + SHORT_BACK_HEIGHT)) * 0.5;
+	float z_front = ((shortRangingData.frontRight + SHORT_FRONT_HEIGHT) + (shortRangingData.frontLeft + SHORT_FRONT_HEIGHT)) * 0.5;
+	float z_back  = ((shortRangingData.backRight + SHORT_BACK_HEIGHT) + (shortRangingData.backLeft + SHORT_BACK_HEIGHT)) * 0.5;
 	float z_com   = (z_front*SHORT_FRONT_DIST + z_back*SHORT_BACK_DIST) * SHORT_AXIS_SUM_INV;
 
 	/* Pitch */
 	float pitch   = arcsin((z_back - z_com) * SHORT_BACK_DIST_INV);
 
 	/* Roll */
-	float z_right = (short_front_right_pyth*(sensorData.shortRangingJ37 + SHORT_FRONT_HEIGHT) +
-					 short_back_right_pyth*(sensorData.shortRangingJ35 + SHORT_BACK_HEIGHT)) *
+	float z_right = (short_front_right_pyth*(shortRangingData.frontRight + SHORT_FRONT_HEIGHT) +
+					 short_back_right_pyth*(shortRangingData.backRight + SHORT_BACK_HEIGHT)) *
 					 short_right_pyth_inv;
 	float roll	  = arcsin((z_right - z_com)*SHORT_RIGHT_AVG_INV);
 
-
+	positionAttitudeData positionAttitude;
+	positionAttitude.y = y_com;
+	positionAttitude.z = z_com;
+	positionAttitude.roll = roll;
+	positionAttitude.pitch = pitch;
+	positionAttitude.yaw = yaw;
+	return positionAttitude;
 }
 
 /* Convert voltage */
@@ -71,10 +77,10 @@ rangingData getShortDistance(void)
 	rangingData short_data;
 
 	/* Read ADC value */
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH4, &ShortRangingDataRaw[0]);
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH5, &ShortRangingDataRaw[1]);
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH6, &ShortRangingDataRaw[2]);
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH7, &ShortRangingDataRaw[3]);
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH6, &ShortRangingDataRaw[0]); // Front left
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH4, &ShortRangingDataRaw[1]); // Front right
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH7, &ShortRangingDataRaw[2]); // Back left
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH5, &ShortRangingDataRaw[3]); // Back right
 
 	/* Print ADC value */
 	convertVoltageShort(0);
@@ -83,10 +89,10 @@ rangingData getShortDistance(void)
 	convertVoltageShort(3);
 
 	/* Return rangingData structure */
-	short_data.sensor0 = ShortRangingMovingAverage[0];
-	short_data.sensor1 = ShortRangingMovingAverage[1];
-	short_data.sensor2 = ShortRangingMovingAverage[2];
-	short_data.sensor3 = ShortRangingMovingAverage[3];
+	short_data.frontLeft = ShortRangingMovingAverage[0];
+	short_data.frontRight = ShortRangingMovingAverage[1];
+	short_data.backLeft = ShortRangingMovingAverage[2];
+	short_data.backRight = ShortRangingMovingAverage[3];
 	return short_data;
 }
 
@@ -95,10 +101,10 @@ rangingData getLongDistance(void)
 	rangingData long_data;
 
 	/* Read ADC value */
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH0, &LongRangingDataRaw[0]);
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH1, &LongRangingDataRaw[1]);
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH2, &LongRangingDataRaw[2]);
-	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH3, &LongRangingDataRaw[3]);
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH3, &LongRangingDataRaw[0]); // Front Left
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH1, &LongRangingDataRaw[1]); // Front Right
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH0, &LongRangingDataRaw[2]); // Back Left
+	Chip_ADC_ReadValue(_LPC_ADC_ID, ADC_CH2, &LongRangingDataRaw[3]); // Back Right
 
 	/* Print ADC value */
 	convertVoltageLong(0);
@@ -107,10 +113,10 @@ rangingData getLongDistance(void)
 	convertVoltageLong(3);
 
 	/* Return rangingData structure */
-	long_data.sensor0 = LongRangingMovingAverage[0];
-	long_data.sensor1 = LongRangingMovingAverage[1];
-	long_data.sensor2 = LongRangingMovingAverage[2];
-	long_data.sensor3 = LongRangingMovingAverage[3];
+	long_data.frontLeft = LongRangingMovingAverage[0];
+	long_data.frontRight = LongRangingMovingAverage[1];
+	long_data.backLeft = LongRangingMovingAverage[2];
+	long_data.backRight = LongRangingMovingAverage[3];
 	return long_data;
 }
 

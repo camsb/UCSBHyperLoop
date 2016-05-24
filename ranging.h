@@ -52,12 +52,22 @@ ADC_CLOCK_SETUP_T ADCSetup;
 
 typedef struct{
 
-  float sensor0;
-  float sensor1;
-  float sensor2;
-  float sensor3;
+  float frontLeft;
+  float frontRight;
+  float backLeft;
+  float backRight;
 
 } rangingData;
+
+typedef struct{
+
+	float y;
+	float z;
+	float roll;
+	float pitch;
+	float yaw;
+
+} positionAttitudeData;
 
 static const float arcSinLUT[] =
 {	-90.00, -82.82, -79.84, -77.55, -75.61, -73.90, -72.35, -70.93, -69.60, -68.34,
@@ -139,7 +149,7 @@ static const float longRangingDistanceLUT[] =
 
 
 float arcsin(float x);
-void computePositionAttitudeRanging();
+positionAttitudeData computePositionAttitudeRanging();
 rangingData getLongDistance();
 void convertVoltage(uint16_t data, uint8_t sensor);
 rangingData getShortDistance();

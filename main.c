@@ -86,6 +86,9 @@
             DEBUGOUT( "positionX = %f\t", sensorData.positionX );
             DEBUGOUT( "positionY = %f\t", sensorData.positionY );
             DEBUGOUT( "positionZ = %f\n", sensorData.positionZ );
+            DEBUGOUT( "Roll = %f\t", sensorData.roll );
+            DEBUGOUT( "Pitch = %f\t", sensorData.pitch );
+            DEBUGOUT( "Yaw = %f\n", sensorData.yaw );
 //            DEBUGOUT( "gyroX = %f\t", sensorData.gyroX );
 //            DEBUGOUT( "gyroY = %f\t", sensorData.gyroY );
 //            DEBUGOUT( "gyroZ = %f\n", sensorData.gyroZ );

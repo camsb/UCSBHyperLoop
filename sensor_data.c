@@ -17,48 +17,55 @@ void collectCalibrationData(){
 }
 
 void collectData(){
-  collectDataFlag = 0;
-  sensorData.dataPrintFlag += 1;
+	collectDataFlag = 0;
+	sensorData.dataPrintFlag += 1;
 
-  XYZ acceleration, rotation, velocity, position;
-//  rangingData shortRangingData, longRangingData;
+	XYZ acceleration, rotation, velocity, position;
+	rangingData shortRangingData, longRangingData;
+	positionAttitudeData positionAttitude;
 
-  sensorData.temp1 = getTemperature(I2C1);
-  sensorData.temp2 = getTemperature(I2C2);
+	sensorData.temp1 = getTemperature(I2C1);
+	sensorData.temp2 = getTemperature(I2C2);
 
-  sensorData.pressure = getPressure();
+	sensorData.pressure = getPressure();
 
-//  longRangingData = getLongDistance();
-//  sensorData.longRangingJ25 = longRangingData.sensor0;
-//  sensorData.longRangingJ30 = longRangingData.sensor1;
-//  sensorData.longRangingJ22 = longRangingData.sensor2;
-//  sensorData.longRangingJ31 = longRangingData.sensor3;
-//
-//  shortRangingData = getShortDistance();
-//  sensorData.shortRangingJ36 = shortRangingData.sensor0;
-//  sensorData.shortRangingJ37 = shortRangingData.sensor1;
-//  sensorData.shortRangingJ34 = shortRangingData.sensor2;
-//  sensorData.shortRangingJ35 = shortRangingData.sensor3;
+	longRangingData = getLongDistance();
+	//  sensorData.longRangingJ25 = longRangingData.sensor0;
+	//  sensorData.longRangingJ30 = longRangingData.sensor1;
+	//  sensorData.longRangingJ22 = longRangingData.sensor2;
+	//  sensorData.longRangingJ31 = longRangingData.sensor3;
 
-  acceleration = getAccelerometerData();
-  sensorData.accelX = acceleration.x;
-  sensorData.accelY = acceleration.y;
-  sensorData.accelZ = acceleration.z;
+	shortRangingData = getShortDistance();
+	//  sensorData.shortRangingJ36 = shortRangingData.sensor0;
+	//  sensorData.shortRangingJ37 = shortRangingData.sensor1;
+	//  sensorData.shortRangingJ34 = shortRangingData.sensor2;
+	//  sensorData.shortRangingJ35 = shortRangingData.sensor3;
+	positionAttitude = computePositionAttitudeRanging(longRangingData, shortRangingData);
+	sensorData.positionY = positionAttitude.y;
+	sensorData.positionZ = positionAttitude.z;
+	sensorData.roll = positionAttitude.roll;
+	sensorData.pitch = positionAttitude.pitch;
+	sensorData.yaw = positionAttitude.yaw;
 
-  rotation = getGyroscopeData();
-  sensorData.gyroX = rotation.x;
-  sensorData.gyroY = rotation.y;
-  sensorData.gyroZ = rotation.z;
+	acceleration = getAccelerometerData();
+	sensorData.accelX = acceleration.x;
+	sensorData.accelY = acceleration.y;
+	sensorData.accelZ = acceleration.z;
 
-  velocity = getInertialVelocity();
-  sensorData.velocityX = velocity.x;
-  sensorData.velocityY = velocity.y;
-  sensorData.velocityZ = velocity.z;
+	rotation = getGyroscopeData();
+	sensorData.gyroX = rotation.x;
+	sensorData.gyroY = rotation.y;
+	sensorData.gyroZ = rotation.z;
 
-  position = getInertialPosition();
-  sensorData.positionX = position.x;
-  sensorData.positionY = position.y;
-  sensorData.positionZ = position.z;
+	velocity = getInertialVelocity();
+	sensorData.velocityX = velocity.x;
+	sensorData.velocityY = velocity.y;
+	sensorData.velocityZ = velocity.z;
+
+	position = getInertialPosition();
+	sensorData.positionX = position.x;
+//	sensorData.positionY = position.y;
+//	sensorData.positionZ = position.z;
 
 }
 
