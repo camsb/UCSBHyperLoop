@@ -24,10 +24,10 @@ void collectData(){
 	rangingData shortRangingData, longRangingData;
 	positionAttitudeData positionAttitude;
 
-	sensorData.temp1 = getTemperature(I2C1);
-	sensorData.temp2 = getTemperature(I2C2);
-
-	sensorData.pressure = getPressure();
+//	sensorData.temp1 = getTemperature(I2C1);
+//	sensorData.temp2 = getTemperature(I2C2);
+//
+//	sensorData.pressure = getPressure();
 
 	longRangingData = getLongDistance();
 	//  sensorData.longRangingJ25 = longRangingData.sensor0;
@@ -47,23 +47,23 @@ void collectData(){
 	sensorData.pitch = positionAttitude.pitch;
 	sensorData.yaw = positionAttitude.yaw;
 
-	acceleration = getAccelerometerData();
-	sensorData.accelX = acceleration.x;
-	sensorData.accelY = acceleration.y;
-	sensorData.accelZ = acceleration.z;
+//	acceleration = getAccelerometerData();
+//	sensorData.accelX = acceleration.x;
+//	sensorData.accelY = acceleration.y;
+//	sensorData.accelZ = acceleration.z;
+//
+//	rotation = getGyroscopeData();
+//	sensorData.gyroX = rotation.x;
+//	sensorData.gyroY = rotation.y;
+//	sensorData.gyroZ = rotation.z;
+//
+//	velocity = getInertialVelocity();
+//	sensorData.velocityX = velocity.x;
+//	sensorData.velocityY = velocity.y;
+//	sensorData.velocityZ = velocity.z;
 
-	rotation = getGyroscopeData();
-	sensorData.gyroX = rotation.x;
-	sensorData.gyroY = rotation.y;
-	sensorData.gyroZ = rotation.z;
-
-	velocity = getInertialVelocity();
-	sensorData.velocityX = velocity.x;
-	sensorData.velocityY = velocity.y;
-	sensorData.velocityZ = velocity.z;
-
-	position = getInertialPosition();
-	sensorData.positionX = position.x;
+//	position = getInertialPosition();
+//	sensorData.positionX = position.x;
 //	sensorData.positionY = position.y;
 //	sensorData.positionZ = position.z;
 

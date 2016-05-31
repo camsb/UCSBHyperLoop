@@ -2,8 +2,13 @@
 #include "math.h"
 
 float arcsin(float x) {
-	static const step = 2.0/256.0;
+	static const float step = 2.0/256.0;
+	if(x > 1.0)
+		return 90.0;
+	if(x < -1.0)
+		return -90.0;
 	uint16_t index = ((uint16_t)(((x + 1.0)/step) + 0.5));
+	printf("i: %d, x: %f\n", index, x);
 	return arcSinLUT[index];
 }
 
@@ -29,6 +34,7 @@ positionAttitudeData computePositionAttitudeRanging(rangingData longRangingData,
 	float z_right = (short_front_right_pyth*(shortRangingData.frontRight + SHORT_FRONT_HEIGHT) +
 					 short_back_right_pyth*(shortRangingData.backRight + SHORT_BACK_HEIGHT)) *
 					 short_right_pyth_inv;
+	DEBUGOUT("z_right: %f, fr_pyth: %f, br_pyth: %f, sh_r_inv = %f\n", z_right, short_front_right_pyth, short_back_right_pyth, short_right_pyth_inv);
 	float roll	  = arcsin((z_right - z_com)*SHORT_RIGHT_AVG_INV);
 
 	positionAttitudeData positionAttitude;
@@ -48,7 +54,7 @@ void convertVoltageShort(uint8_t sensor)
 	float voltage = ((float)ShortRangingDataRaw[sensor]) / 1300;
 
 	if ((voltage < 0.34) || (voltage > 2.43)) {
-		DEBUGOUT("%d sensor voltage of %.3f V is out of operating range.\n", sensor, voltage);
+//		DEBUGOUT("%d sensor voltage of %.3f V is out of operating range.\n", sensor, voltage);
 	}
 	else {
 		index = (uint16_t)(voltage * 100.0 + 0.5) - 34;
@@ -64,7 +70,7 @@ void convertVoltageLong(uint8_t sensor)
 	float voltage = ((float)LongRangingDataRaw[sensor]) / 1300.0;
 
 	if ((voltage < 0.49) || (voltage > 2.73)) {
-		DEBUGOUT("%d sensor voltage of %.3f V is out of operating range.\n", sensor, voltage);
+//		DEBUGOUT("%d sensor voltage of %.3f V is out of operating range.\n", sensor, voltage);
 	}
 	else {
 		index = (uint16_t)(voltage * 100.0 + 0.5) - 49;
@@ -134,9 +140,9 @@ void rangingSensorsInit(void)  {
 	uint32_t _bitRate = ADC_MAX_SAMPLE_RATE;
 
 	/* Compute Constants */
-	short_front_right_pyth = sqrt((SHORT_FRONT_RIGHT_DIST*SHORT_FRONT_RIGHT_DIST) + (SHORT_FRONT_DIST*SHORT_FRONT_DIST));
+	short_front_right_pyth 	= sqrt((SHORT_FRONT_RIGHT_DIST*SHORT_FRONT_RIGHT_DIST) + (SHORT_FRONT_DIST*SHORT_FRONT_DIST));
 	short_back_right_pyth 	= sqrt((SHORT_BACK_RIGHT_DIST*SHORT_BACK_RIGHT_DIST) + (SHORT_BACK_DIST*SHORT_BACK_DIST));
-	short_right_pyth_inv 	= (0.5 / (short_front_right_pyth + short_back_right_pyth));
+	short_right_pyth_inv 	= (2.0 / (short_front_right_pyth + short_back_right_pyth));
 
 	/* Enable all ranging sensor channels */
 	initADCChannel(ADC_CH0, 0, 23, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Port-front long J25
