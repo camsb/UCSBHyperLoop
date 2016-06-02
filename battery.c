@@ -21,9 +21,32 @@ float ADCConversion14Bit( uint8_t msb, uint8_t lsb )
  */
 void batteryInit()
 {
+//	batteryFlag = 1;
+	batteryFlag = 0;
+	uint8_t regValue;
+	uint8_t wBuffer[ 2 ];
+
 	DEBUGOUT("Initializing the battery\n");
 	Chip_IOCON_PinMuxSet( LPC_IOCON, BATT_GPIO_PORT, BATT_GPIO_PIN, IOCON_FUNC0 );
 	Chip_GPIO_SetPinDIRInput( LPC_GPIO, BATT_GPIO_PORT, BATT_GPIO_PIN );
+
+	/////////////////////////////////////////////////////
+	// enable DSG_ON
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+	wBuffer[ 0 ] = REG_SYS_CTRL2;
+//	wBuffer[ 1 ] = regValue | 0b010;
+	wBuffer[ 1 ] = 0xFF;
+	DEBUGOUT( "ENABLE DSG_ON Send Back = %x\n", wBuffer[ 1 ] );
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_STAT, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+	DEBUGOUT( "ENABLE DSG_ON Read Back = %x\n", regValue );
+	/////////////////////////////////////////////////////
 
 	/* Configure the GPIO interrupt */
 	Chip_GPIOINT_SetIntRising(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
@@ -40,20 +63,103 @@ void batteryInit()
 	setVoltageLimit( VOLTAGE_MIN, REG_UV_TRIP );
 
 	// set the times that the batteries will need to be past their limits to send interrupts
-	setProtectDelayTimes();
+//	setProtectDelayTimes();
 
 	// set the ADC_EN bit in SYS_CTRL1 to 1 to activate the over voltage and under voltage limits
-	enableBit( 1 << 4, REG_SYS_CTRL1 );
+	enableMask( ADC_EN, REG_SYS_CTRL1 );
 
-	// set this register to all 0s
+	// Coulomb Counter Reading:
+	// NOT 1 Shot: whenever we want
+		//	disableMask( CC_EN, REG_SYS_CTRL2 );
+		//	enableMask( CC_ONESHOT, REG_SYS_CTRL2 );
+	// Always On mode: every 250ms
+		//	enableMask( CC_EN, REG_SYS_CTRL2 );
+
+	// Discharge FET driver or discharge signal control
+
+
+	// enable CC bit
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+	wBuffer[ 0 ] = REG_SYS_CTRL2;
+	wBuffer[ 1 ] = regValue | 0x40;
+	DEBUGOUT( "ENABLE CC Send Back = %x\n", wBuffer[ 1 ] );
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+	DEBUGOUT( "ENABLE CC Read Back = %x\n", regValue );
+
+	// enable DSG_ON
+//	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+//	wBuffer[ 0 ] = REG_SYS_CTRL2;
+//	wBuffer[ 1 ] = ( ( regValue | 0x02 ) & 0xFE ) & 0xBF;
+//	DEBUGOUT( "ENABLE DSG_ON, DISABLE CHG_ON Send Back = %x\n", wBuffer[ 1 ] );
+//	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+//
+//	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+//	DEBUGOUT( "ENABLE DSG_ON, DISABLE CHG_ON Read Back = %x\n", regValue );
+
+	/////////////////////////////////////////////////////////////////
+	// disable CHG_ON
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+	wBuffer[ 0 ] = REG_SYS_CTRL2;
+	wBuffer[ 1 ] = regValue & 0xFE;
+	DEBUGOUT( "DISABLE CHG_ON Send Back = %x\n", wBuffer[ 1 ] );
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+	DEBUGOUT( "DISABLE CHG_ON Read Back = %x\n", regValue );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_STAT, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_STAT, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_STAT, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+
+	//
+
+	// enable DSG_ON
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+	wBuffer[ 0 ] = REG_SYS_CTRL2;
+//	wBuffer[ 1 ] = regValue | 0b010;
+	wBuffer[ 1 ] = 2;
+	DEBUGOUT( "ENABLE DSG_ON Send Back = %x\n", wBuffer[ 1 ] );
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_STAT, &regValue, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+	DEBUGOUT( "ENABLE DSG_ON Read Back = %x\n", regValue );
+	/////////////////////////////////////////////////////////////////
+
+
+	// disable CC bit
+//	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+//	wBuffer[ 0 ] = REG_SYS_CTRL2;
+//	wBuffer[ 1 ] = regValue & 0xBF;
+//	DEBUGOUT( "DISABLE CC Send Back = %x\n", wBuffer[ 1 ] );
+//	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+//
+//	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
+//	DEBUGOUT( "DISABLE CC Read Back = %x\n", regValue );
+
+	//	 enableMask( DSG_ON, REG_SYS_CTRL2 );
+//	 disableMask( CHG_ON, REG_SYS_CTRL2 );
+
+		// enableMask( CHG_ON, REG_SYS_CTRL2 );
+		// disableMask( DSG_ON, REG_SYS_CTRL2 );
+
+	// set this register to all 0s by sending itself back
 	resetRegister( REG_SYS_STAT );
-
-	batteryFlag = 0;
-	batteryInterruptFlag = 0;
 }
 
-// will extract the register and will enable the bit and send it back
-void enableBit( uint8_t bit, uint8_t reg )
+// will extract the register and will disable the mask and send it back
+void disableMask( uint8_t mask, uint8_t reg )
 {
 	uint8_t regValue;
 	uint8_t wBuffer[ 2 ];
@@ -61,7 +167,21 @@ void enableBit( uint8_t bit, uint8_t reg )
 	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, reg, &regValue, 1 );
 
 	wBuffer[ 0 ] = reg;
-	wBuffer[ 1 ] = regValue | bit;
+	wBuffer[ 1 ] = regValue & ( ! mask );
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+	return;
+}
+
+// will extract the register and will enable the mask and send it back
+void enableMask( uint8_t mask, uint8_t reg )
+{
+	uint8_t regValue;
+	uint8_t wBuffer[ 2 ];
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, reg, &regValue, 1 );
+
+	wBuffer[ 0 ] = reg;
+	wBuffer[ 1 ] = regValue | mask;
 	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
 	return;
 }
@@ -74,6 +194,7 @@ void getBatteryData()
 {
 	uint8_t rBuffer[ 10 ];
 
+//	batteryFlag = 1;
 	batteryFlag = 0;
 
 	// read the msb and lsb for the 5 batteries. 10 total registers to read from
@@ -93,13 +214,13 @@ void getBatteryData()
  */
 float getGain()
 {
-	uint8_t		rBuffer[ 1 ];
-    uint8_t     adcGain1;
-    uint8_t 	adcGain2;
+	uint8_t  	readValue;
+    uint8_t  	adcGain1;
+    uint8_t		adcGain2;
     uint16_t 	adcGain;
 
-	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_ADCGAIN1, rBuffer, 1);
-	adcGain1 = rBuffer[ 0 ];
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_ADCGAIN1, &readValue, 1);
+	adcGain1 = readValue;
 	adcGain1 = adcGain1 & ADC_GAIN1_MASK;
 	adcGain1 = adcGain1 >> 2;
 	// adcGain1 = 0b000000xx
@@ -107,8 +228,8 @@ float getGain()
 	adcGain = adcGain1 << 3;
 	// adcGain = 0b000xx000
 
-	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_ADCGAIN2, rBuffer, 1);
-	adcGain2 = rBuffer[ 0 ];
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_ADCGAIN2, &readValue, 1);
+	adcGain2 = readValue;
 	adcGain2 = adcGain2 & ADC_GAIN2_MASK;
 	adcGain2 = adcGain2 >> 5;
 	// adcGain2 = 0b00000xxx
@@ -124,13 +245,13 @@ float getGain()
 
 float getOffset()
 {
-	uint8_t		rBuffer[ 1 ];
+	uint8_t		readValue;
     int8_t 		adcOffset;
 
-	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_ADCOFFSET, rBuffer, 1 );
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_ADCOFFSET, &readValue, 1 );
 
 	// range should be within -128mV and 128 mV
-	adcOffset = rBuffer[ 0 ]; // in mV
+	adcOffset = readValue; // in mV
 
 	return adcOffset * mV_TO_VOLTS; // convert to volts
 }
@@ -147,10 +268,25 @@ uint8_t getVoltageLimit( float v )
 	float voltageLimit;
 
 	voltageLimit = ( v - battery.OFFSET ) / battery.GAIN;
-	DEBUGOUT( "voltageLimit = %f\n", voltageLimit );
 
 	return ( uint8_t )( ( ( uint16_t ) voltageLimit ) >> 4 );
 }
+
+void printRegValues()
+{
+	uint8_t regValue;
+
+//	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_, &readValue, 1 );
+//	DEBUGOUT( "regValue = %d", regValue );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL1, &regValue, 1 );
+	DEBUGOUT( "LOAD_PRESENT  = %d\n", ( regValue & LOAD_PRESENT ) >> 7 );
+
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1);
+	DEBUGOUT( "DSG_ON        = %d\n", ( regValue & DSG_ON ) >> 1 );
+	DEBUGOUT( "CHG_ON        = %d\n", ( regValue & CHG_ON ) >> 0 );
+}
+
 
 // Extract the value in SYS_STAT to determine which interrupt was hit.
 void processBatteryInterrupt()
@@ -158,26 +294,48 @@ void processBatteryInterrupt()
 	uint8_t regValue;
 
 	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_STAT, &regValue, 1 );
-	DEBUGOUT( "Battery Interrupt! REG_SYS_STAT = 0x%X\n", regValue );
 
-	switch( regValue )
+	if( regValue == 0 )
 	{
-		case regValue & ALERT_CC:
-			DEBUGOUT( "ALERT_CC!\n" );
-			break;
-		case regValue & ALERT_UV:
-			DEBUGOUT( "ALERT_UV!\n" );
-			break;
-		case regValue & ALERT_OV:
-			DEBUGOUT( "ALERT_OV!\n" );
-			break;
-		case regValue & ALERT_SCD:
-			DEBUGOUT( "ALERT_SCD!\n" );
-			break;
-		case regValue & ALERT_OCD:
-			DEBUGOUT( "ALERT_OCD!\n" );
-			break;
+		DEBUGOUT( "REG_SYS_STAT  = 0x%X\n\n", regValue );
 	}
+
+	// Check which interrupt regValue was
+	if( regValue & ALERT_CC )
+	{
+		DEBUGOUT( "ALERT_CC: Coulomb Counter!\n" );
+	}
+	if( regValue & DEVICE_XREADY )
+	{
+		DEBUGOUT( "DEVICE_XREADY: Internal Chip Fault!\n" );
+		DEBUGOUT( "               Disables CHG_ON and DSG_ON to 0!\n" );
+	}
+	if( regValue & OVRD_ALERT )
+	{
+		DEBUGOUT( "OVRD_ALERT: Pin is forced high externally while low!\n" );
+		DEBUGOUT( "            Disables CHG_ON and DSG_ON to 0!\n" );
+	}
+	if( regValue & ALERT_UV )
+	{
+		DEBUGOUT( "ALERT_UV: Under Voltage!\n" );
+		DEBUGOUT( "          Disables DSG_ON to 0\n" );
+	}
+	if( regValue & ALERT_OV )
+	{
+		DEBUGOUT( "ALERT_OV: Over Voltage!\n" );
+		DEBUGOUT( "          Disables CHG_ON to 0\n" );
+	}
+	if( regValue & ALERT_SCD )
+	{
+		DEBUGOUT( "ALERT_SCD: Short Circuit Discharge!\n" );
+		DEBUGOUT( "           Disables DSG_ON to 0\n" );
+	}
+	if( regValue & ALERT_OCD )
+	{
+		DEBUGOUT( "ALERT_OCD: Over Current in Discharge!\n" );
+		DEBUGOUT( "           Disables DSG_ON to 0\n" );
+	}
+
 
 	// reset this variable because an interrupt was hit.
 	resetRegister( REG_SYS_STAT );
@@ -186,23 +344,41 @@ void processBatteryInterrupt()
 // extracts the register and send it back exactly the same to reset its values
 void resetRegister( uint8_t reg )
 {
-	enableBit( 0, reg );
+	enableMask( 0, reg );
 	return;
 }
-
-// set the UV_DELAY and OV_DELAY values into the Protect Register
+/*
+ * Set the delay values into the Protect Registers to delay for values defined as
+ * macros in the header file. These delay times are used to make sure the values
+ * are accurate before sending an alert.
+ */
 void setProtectDelayTimes()
 {
 	uint8_t regValue;
 	uint8_t wBuffer[ 2 ];
-	uint8_t uv2BitDelay = UV_DELAY & 0x03;
-	uint8_t ov2BitDelay = OV_DELAY & 0x03;
+	uint8_t uv2BitDelay  = DELAY_UV  & 0x03;
+	uint8_t ov2BitDelay  = DELAY_OV  & 0x03;
+	uint8_t scd2BitDelay = DELAY_SCD & 0x03;
+	uint8_t ocd3BitDelay = DELAY_OCD & 0x07;
 
+	// set Under Voltage and Over Voltage delay
 	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_PROTECT3, &regValue, 1 );
-
 	wBuffer[ 0 ] = REG_PROTECT3;
 	wBuffer[ 1 ] = ( uv2BitDelay << 6 ) | ( ov2BitDelay << 4 ) | ( regValue & 0x0F );
 	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+	// set the Overcurrent in discharge delay
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_PROTECT2, &regValue, 1 );
+	wBuffer[ 0 ] = REG_PROTECT2;
+	wBuffer[ 1 ] = ( regValue & 0x8F ) | ( ocd3BitDelay << 4 );
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
+	// set the Short Circuit Discharge delay
+	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_PROTECT1, &regValue, 1 );
+	wBuffer[ 0 ] = REG_PROTECT1;
+	wBuffer[ 1 ] = ( regValue & 0xE7 ) | ( scd2BitDelay << 3 );
+	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
 	return;
 }
 
@@ -215,7 +391,9 @@ void setVoltageLimit( float limit, uint8_t reg )
 
 	wBuffer[ 0 ] = reg;
 	wBuffer[ 1 ] = limit8Bit;
+
 	Chip_I2C_MasterSend( BATT_I2C, BATT_ADDRESS, wBuffer, 2 );
+
 	return;
 }
 

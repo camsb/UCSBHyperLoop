@@ -20,9 +20,9 @@ void GPIO_IRQHandler(void)
     Chip_TIMER_MatchEnableInt(LPC_TIMER3, 1);
   }
 
-  if(interrupt_bits & (1 << BATT_GPIO_PIN)){
-    batteryInterruptFlag = 1;
-    Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
+  if( interrupt_bits & ( 1 << BATT_GPIO_PIN ) ) {
+    batteryFlag = 1;
+    Chip_GPIOINT_ClearIntStatus( LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN );
   }
 
 }

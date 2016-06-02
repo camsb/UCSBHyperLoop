@@ -99,10 +99,17 @@
         	DEBUGOUT( "Emergency brake signal received!\n" );
         }
 
-        if(batteryFlag){
-            getBatteryData();
-            DEBUGOUT( "Battery signal received!, total voltage = %f\n",
-            		battery.VC1 + battery.VC2 + battery.VC3 + battery.VC4 + battery.VC5  );
+        // Just make sure to reset batteryFlag
+        if( batteryFlag ){
+//            DEBUGOUT( "\n" );
+//            DEBUGOUT( "\n" );
+//            DEBUGOUT( "\n" );
+//            DEBUGOUT( "Battery Interrupt Received!\n" );
+//        	processBatteryInterrupt();
+//            printRegValues();
+//            getBatteryData();
+//            DEBUGOUT( "Total Voltage = %f\n",
+//            		battery.VC1 + battery.VC2 + battery.VC3 + battery.VC4 + battery.VC5  );
 //        	DEBUGOUT( "VC1    = %f volts\n", battery.VC1 );
 //        	DEBUGOUT( "VC2    = %f volts\n", battery.VC2 );
 //        	DEBUGOUT( "VC3    = %f volts\n", battery.VC3 );
@@ -111,11 +118,6 @@
 //        	DEBUGOUT( "GAIN   = %d micro volts\n", ( int ) ( battery.GAIN * 1000000 ) );
 //        	DEBUGOUT( "OFFSET = %d milli volts\n", ( int ) ( battery.OFFSET * 1000 ) );
         }
-
-        if( batteryInterruptFlag ){
-        	processBatteryInterrupt();
-        }
-
     }
 
     return 0;

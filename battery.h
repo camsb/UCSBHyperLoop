@@ -16,30 +16,50 @@
 #define BATT_IRQ_HANDLER	GPIO_IRQHandler
 #define BATT_I2C			I2C0
 #define BATT_NVIC			GPIO_IRQn
+#define DELAY_OCD			0x0			// 0x0 = 8ms, 0x1 = 20ms, 0x2 = 40ms, 0x3 = 80ms, 0x4 = 160ms, 0x5 = 320ms, 0x6 = 640ms, 0x7 = 1280ms
+#define DELAY_OV			0x0			// 0x0 = 1s, 0x1 = 2s, 0x2 = 4s, 0x3 = 8s
+#define DELAY_UV			0x0			// 0x0 = 1s, 0x1 = 4s, 0x2 = 8s, 0x3 = 16s
+#define DELAY_SCD			0x0			// 0x0 = 70us, 0x1 = 100us, 0x2 = 200us, 0x4 = 400us
 #define MASK_6_BIT			0x3F  		// 0b 0011 1111
 #define mV_TO_VOLTS			.001		// 1/1000
-#define OV_DELAY			0x0			// 0x0 = 1s, 0x1 = 2s, 0x2 = 4s, 0x3 = 8s
-#define UV_DELAY			0x0			// 0x0 = 1s, 0x1 = 4s, 0x2 = 8s, 0x3 = 16s
 #define uV_TO_VOLTS			.000001		// 1/1000000
 #define VOLTAGE_MAX			4.5			// Over Voltage Limit
 #define VOLTAGE_MIN			3.1			// Under Voltage Limit
 
 //////////////////////////////////////////////////////////////
 // Alert macros used for interrupts
-#define ALERT_CC			0x80
-#define ALERT_UV			0x08
-#define ALERT_OV			0x04
-#define ALERT_SCD			0x02
 #define ALERT_OCD			0x01
+#define ALERT_SCD			0x02
+#define ALERT_OV			0x04
+#define ALERT_UV			0x08
+#define OVRD_ALERT			0x10
+#define DEVICE_XREADY		0x20
+#define ALERT_CC			0x80
+
+//////////////////////////////////////////////////////////////
+// Bit masks for register values
+// located in REG_SYS_CTRL1
+//#define SHUT_B				0x01
+//#define SHUT_A				0x02
+//#define TEMP_SEL			0x08
+#define ADC_EN				0x10
+#define LOAD_PRESENT		0x80
+
+// located in REG_SYS_CTRL2
+#define CHG_ON				0x01
+#define DSG_ON				0x02
+#define CC_ONESHOT			0x20
+#define CC_EN				0x40
+//#define DELAY_DIS			0x80
 
 ////////////////////////////////////////////////////////////
 // Registers macros
 // only the ones that are uncommented are used at the moment.
 #define REG_SYS_STAT        0x00
 #define REG_SYS_CTRL1       0x04
-//#define REG_SYS_CTRL2       0x05
-//#define REG_PROTECT1        0x06
-//#define REG_PROTECT2        0x07
+#define REG_SYS_CTRL2       0x05
+#define REG_PROTECT1        0x06
+#define REG_PROTECT2        0x07
 #define REG_PROTECT3        0x08
 #define REG_OV_TRIP         0x09
 #define REG_UV_TRIP         0x0A
@@ -81,17 +101,18 @@ typedef struct {
 // globals defined
 batteries battery;
 uint8_t batteryFlag;
-uint8_t batteryInterruptFlag;
 
 ////////////////////////////////////////////////////////////
 // Function declarations
 float   ADCConversion14Bit( uint8_t msb, uint8_t lsb );
 void 	batteryInit();
-void 	enableBit( uint8_t bit, uint8_t reg );
+void    disableMask( uint8_t mask, uint8_t reg );
+void    enableMask( uint8_t mask, uint8_t reg );
 void 	getBatteryData();
 float 	getGain();
 float 	getOffset();
 uint8_t getVoltageLimit( float v );
+void    printRegValues();
 void 	processBatteryInterrupt();
 void 	resetRegister( uint8_t reg );
 void 	setProtectDelayTimes();
