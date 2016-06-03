@@ -17,6 +17,7 @@ void collectCalibrationData( I2C_ID_T id ){
 }
 
 void collectData(){
+
 	collectDataFlag = 0;
 	sensorData.dataPrintFlag += 1;
 
@@ -73,7 +74,7 @@ void collectData(){
 		sensorData.shortRangingJ35 = shortRangingData.sensor3;
 	}
 
-	getPressureFlag = !getPressureFlag;
+	getPressureFlag = !getPressureFlag; // Toggling between pressure and temperature register loading.
 
 }
 

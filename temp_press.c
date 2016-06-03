@@ -52,8 +52,7 @@ uint32_t getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8
 
   returnVal = 0;
 
-  for( i = 0; i < recvLen; i++ )
-  {
+  for( i = 0; i < recvLen; i++ )  {
     readVal   = 0;
     Chip_I2C_MasterCmdRead( id, periph, readBuf[ i ], &readVal, 1 );
     returnVal = returnVal | ( ((uint32_t)readVal) << ( 8 * ( recvLen - i - 1 ) ) );
@@ -117,8 +116,6 @@ float getPressure( constants * c, I2C_ID_T id )
 
   uncalcPressure = getDataValue( id, wBuffer, rBuffer, 3, 2, BMP_ADDRESS );
 
-  // TODO: set to 0 precision
-  // bit shift back, for precision
   uncalcPressure = uncalcPressure >> 8;
   return calculatePressure( c, uncalcPressure );
 }

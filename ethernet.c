@@ -1,7 +1,8 @@
 #include "ethernet.h"
+#include "sensor_data.h"
 #include <string.h>
 #include "stdio.h"
-#include "time.h"
+#include "timer.h"
 
 /* Rx Buffer Addresses */
 uint16_t gSn_RX_BASE[] = {
@@ -15,40 +16,15 @@ uint16_t gSn_TX_BASE[] = {
 	0xA000, 0xA800,	0xB000,	0xB800	// Socket 4, 5, 6, 7
 };
 
-void sendData(){
-	sendDataFlag = 0;
-  // Rest of function here.
-}
-
-void recvData(){
-	recvDataFlag = 0;
-	// Rest of function here.
-}
-
+/* Data Send Timer Interrupt */
 void TIMER2_IRQHandler(void){
 	sendDataFlag = 1;
+	Chip_TIMER_ClearMatch( LPC_TIMER2, 1 );
 }
 
+/* Initialize Data Send Timer */
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){
 	 timerInit(timer, timerInterrupt, tickRate);
-}
-
-void SSPIRQHANDLER(void)
-{
-	Chip_SSP_Int_Disable(LPC_SSP1);	/* Disable all interrupt */
-	if (SSP_DATA_BYTES(ssp_format.bits) == 1) {
-		Chip_SSP_Int_RWFrames8Bits(LPC_SSP1, &xf_setup);
-	}
-	else {
-		Chip_SSP_Int_RWFrames16Bits(LPC_SSP1, &xf_setup);
-	}
-
-	if ((xf_setup.rx_cnt != xf_setup.length) || (xf_setup.tx_cnt != xf_setup.length)) {
-		Chip_SSP_Int_Enable(LPC_SSP1);	/* enable all interrupts */
-	}
-	else {
-		isXferCompleted = 1;
-	}
 }
 
 /* SSP Initialization */
@@ -63,50 +39,6 @@ void Wiz_SSP_Init() {
 
 	Chip_SSP_Enable(LPC_SSP1);
 	Chip_SSP_SetMaster(LPC_SSP1, 1);
-}
-
-/* Interrupt based write. NOT WORKING YET. TODO: FIX THIS! */
-void spi_Send_Int(uint16_t address, uint16_t length) {
-	isXferCompleted = 0;
-	xf_setup.rx_cnt = xf_setup.tx_cnt = 0;
-	Chip_SSP_Int_FlushData(LPC_SSP1); /* flush data from SSP FiFO */
-
-	Tx_Buf[0] = (address & 0xFF00) >> 8;		// Address MSB
-	Tx_Buf[1] = (address & 0x00FF);				// Address LSB
-	Tx_Buf[2] = (length  & 0xFF00) >> 8 | 0x80; // OP Code (R/W) | Length MSB
-	Tx_Buf[3] = (length  & 0x00FF);				// Data length LSB
-
-	Chip_GPIO_WritePortBit(LPC_GPIO, 0, 6, 0);
-	Chip_SSP_Int_RWFrames8Bits(LPC_SSP1, &xf_setup);
-	Chip_SSP_Int_Enable(LPC_SSP1);	/* enable interrupt */
-	while (!isXferCompleted) {}
-	printf("%u, %u, %u, %u, %u\n", Tx_Buf[0], Tx_Buf[1], Tx_Buf[2], Tx_Buf[3], Tx_Buf[4]);
-	printf("%u, %u, %u, %u, %u\n", Rx_Buf[0], Rx_Buf[1], Rx_Buf[2], Rx_Buf[3], Rx_Buf[4]);
-	Chip_SSP_Int_FlushData(LPC_SSP1);
-	Chip_SSP_Int_Disable(LPC_SSP1);	/* disable interrupt */
-	Chip_GPIO_WritePortBit(LPC_GPIO, 0, 6, 1);
-}
-
-/* Interrupt based read. NOT WORKING YET. TODO: FIX THIS! */
-void spi_Recv_Int(uint16_t address) {
-	isXferCompleted = 0;
-	xf_setup.rx_cnt = xf_setup.tx_cnt = 0;
-	Chip_SSP_Int_FlushData(LPC_SSP1); /* flush data from SSP1 FiFO */
-
-	Tx_Buf[0] = (address & 0xFF00) >> 8;		// Address MSB
-	Tx_Buf[1] = (address & 0x00FF);				// Address LSB
-	Tx_Buf[2] = 0x00; 							// OP Code (R/W) | Length MSB
-	Tx_Buf[3] = 0x01;							// Data length LSB
-	Tx_Buf[4] = 0x00;							// Dummy data
-
-	Chip_GPIO_WritePortBit(LPC_GPIO, 0, 6, 0);
-	Chip_SSP_Int_RWFrames8Bits(LPC_SSP1, &xf_setup);
-	Chip_SSP_Int_Enable(LPC_SSP1);	/* enable interrupt */
-	while (!isXferCompleted) {}
-	printf("%u, %u, %u, %u, %u\n", Rx_Buf[0], Rx_Buf[1], Rx_Buf[2], Rx_Buf[3], Rx_Buf[4]);
-	Chip_SSP_Int_FlushData(LPC_SSP1);
-	Chip_SSP_Int_Disable(LPC_SSP1);	/* disable interrupt */
-	Chip_GPIO_WritePortBit(LPC_GPIO, 0, 6, 1);
 }
 
 /* Write 'length' bytes sequentially to address (blocking) */
@@ -138,10 +70,6 @@ void spi_Recv_Blocking(uint16_t address, uint16_t length) {
 /* Wiznet Basic Register Initialization */
 void Wiz_Init() {
 	xf_setup.length = BUFFER_SIZE; // May not be necessary
-
-	/* Software Reset Wiznet (Mode Register) */
-	Tx_Buf[4] = 0x80; // Data
-	spi_Send_Blocking(MR, 0x0001);
 
 	/* Interrupt Mask Registers */
 	Tx_Buf[4] = 0x00; // Data
@@ -202,8 +130,253 @@ void Wiz_Check_Network_Registers() {
 	printf("Source IP: %u.%u.%u.%u\n", Rx_Buf[4], Rx_Buf[5], Rx_Buf[6], Rx_Buf[7]);
 }
 
-/* TCP Initialization */
+/* Socket Interrupt Initialization */
+void Wiz_Int_Init(uint8_t n) {
+	uint16_t offset = 0x0100*n;
+
+	/* Datasheet and addresses are backwards for
+	 * Socket Interrupt Mask and General Interrupt Mask. */
+	/* Socket Interrupt Mask */
+	Tx_Buf[4] = 0x01 << n;
+	spi_Send_Blocking(IMR, 0x0001);
+
+	/* General Interrupt Mask */
+	Tx_Buf[4] = 0x00;
+	spi_Send_Blocking(IMR2, 0x0001);
+
+	/* Socket n Interrupt Mask Register */
+	Tx_Buf[4] = 0x1F;
+	spi_Send_Blocking(Sn_IMR_BASE + offset, 0x0001);
+
+	/* Configure Wiznet interrupt pin as input */
+	Chip_IOCON_PinMuxSet(LPC_IOCON, WIZNET_INT_PORT, WIZNET_INT_PIN, IOCON_FUNC0);
+	Chip_GPIO_SetPinDIRInput(LPC_GPIO, WIZNET_INT_PORT, WIZNET_INT_PIN);
+
+	/* Configure the GPIO interrupt */
+	Chip_GPIOINT_SetIntFalling(LPC_GPIOINT, WIZNET_INT_PORT, 1 << WIZNET_INT_PIN); // Set to falling edge trigger
+}
+
+void send_method(char *method, char* val, int val_len) {
+
+	memset(Net_Tx_Data, 0, DATA_BUF_SIZE);
+	memcpy(Net_Tx_Data, method, 3);
+	Net_Tx_Data[3] = ':';
+	memcpy(Net_Tx_Data + 4, val, val_len);
+	Net_Tx_Data[4 + val_len] = '\n';
+//	int i;
+	//for (i = 0; i < 5 + val_len; i++) {printf("%i:%c\n", i, Net_Tx_Data[i]);}
+	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+
+}
+
+void send_data_packet_helper(char *method, char *val, int *position) {
+	if (val != 0) {
+		memcpy(Net_Tx_Data + *position, method, 3);
+		*position += 3;
+		memcpy(Net_Tx_Data + *position, ":", 1);
+		*position += 1;
+		memcpy(Net_Tx_Data + *position, val, 6);
+		*position += 6;
+		memcpy(Net_Tx_Data + *position, "\n", 1);
+		*position += 1;
+	}
+}
+
+void send_data_ack_helper(char *method, int *position) {
+	memcpy(Net_Tx_Data + *position, method, 3);
+	*position += 3;
+	memcpy(Net_Tx_Data + *position, "\n", 1);
+	*position += 1;
+}
+
+
+void recvDataPacket() {
+	int pos = 0;
+	memset(Net_Tx_Data, 0, 64);
+
+	Wiz_Recv_Blocking(SOCKET_ID, Net_Rx_Data);
+	printf("Receiving Data Packet!\n");
+
+	if(strstr((char *)Net_Rx_Data, EBRAKE) != NULL) {	// Emergency Brake
+		eBrakeFlag = 1;
+		printf("Emergency Brake!\n");
+		send_data_ack_helper(PAK, &pos);
+	}
+	if(strstr((char *)Net_Rx_Data, POWRUP) != NULL) {	// Pod Start Flag
+		powerUpFlag = 1;
+		send_data_ack_helper(PAK, &pos);
+		printf("Power Up!\n");
+	}
+	if(strstr((char *)Net_Rx_Data, PWRDWN) != NULL) {	// Pod Stop Flag
+		powerDownFlag = 1;
+		powerUpFlag = 0;
+		printf("Power Down!\n");
+	}
+	if(strstr((char *)Net_Rx_Data, SERPRO) != NULL) {	// Service Propulsion Start
+		serPropulsionWheels = 1;
+		send_data_ack_helper(WAK, &pos);
+		printf("Service Propulsion Activated!\n");
+	}
+	if(strstr((char *)Net_Rx_Data, SERSTP) != NULL) {	// Service Propulsion Stop
+		serPropulsionWheels = 0;
+		printf("Service Propulsion Disactivated!\n");
+	}
+
+	if(pos != 0) {
+		Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+	}
+}
+
+void sendDataPacket() {
+
+	sendDataFlag = 0;
+
+	// Copy strings to Net_Tx_Data
+	int pos = 0;
+	memset(Net_Tx_Data, 0, 256); // Make sure this clears enough space
+
+	/* Atmospheric, Miscellaneous Data */
+	sprintf(DataPacket.bm1, "%06.2f", sensorData.pressure1);
+	sprintf(DataPacket.bm2, "%06.2f", sensorData.pressure2);
+	sprintf(DataPacket.tm1, "%06.2f", sensorData.temp1);
+	sprintf(DataPacket.tm2, "%06.2f", sensorData.temp2);
+	sprintf(DataPacket.pwr, "%06.2f", sensorData.power);
+	/* Positional Data */
+	sprintf(DataPacket.pox, "%06.2f", sensorData.positionX);
+	sprintf(DataPacket.poy, "%06.2f", sensorData.positionY);
+	sprintf(DataPacket.poz, "%06.2f", sensorData.positionZ);
+	/* Velocity Data */
+	sprintf(DataPacket.vex, "%06.2f", sensorData.velocityX);
+	sprintf(DataPacket.vey, "%06.2f", sensorData.velocityY);
+	sprintf(DataPacket.vez, "%06.2f", sensorData.velocityZ);
+	/* Acceleration Data */
+	sprintf(DataPacket.acx, "%06.2f", sensorData.accelX);
+	sprintf(DataPacket.acy, "%06.2f", sensorData.accelY);
+	sprintf(DataPacket.acz, "%06.2f", sensorData.accelZ);
+	/* Attitudinal Data */
+	sprintf(DataPacket.rol, "%06.2f", sensorData.roll);
+	sprintf(DataPacket.pit, "%06.2f", sensorData.pitch);
+	sprintf(DataPacket.yaw, "%06.2f", sensorData.yaw);
+
+	/* Atmospheric, Miscellaneous Data */
+	send_data_packet_helper(BM1, DataPacket.bm1, &pos);
+	send_data_packet_helper(BM2, DataPacket.bm2, &pos);
+	send_data_packet_helper(TM1, DataPacket.tm1, &pos);
+	send_data_packet_helper(TM2, DataPacket.tm2, &pos);
+	send_data_packet_helper(PWR, DataPacket.pwr, &pos);
+	/* Positional Data */
+	send_data_packet_helper(POX, DataPacket.pox, &pos);
+	send_data_packet_helper(POY, DataPacket.poy, &pos);
+	send_data_packet_helper(POZ, DataPacket.poz, &pos);
+	/* Velocity Data */
+	send_data_packet_helper(VEX, DataPacket.vex, &pos);
+	send_data_packet_helper(VEY, DataPacket.vey, &pos);
+	send_data_packet_helper(VEZ, DataPacket.vez, &pos);
+	/* Acceleration Data */
+	send_data_packet_helper(ACX, DataPacket.acx, &pos);
+	send_data_packet_helper(ACY, DataPacket.acy, &pos);
+	send_data_packet_helper(ACZ, DataPacket.acz, &pos);
+	/* Attitudinal Data */
+	send_data_packet_helper(ROL, DataPacket.rol, &pos);
+	send_data_packet_helper(PIT, DataPacket.pit, &pos);
+	send_data_packet_helper(YAW, DataPacket.yaw, &pos);
+
+	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+
+}
+
+// Singular, will change to multiple, or do an interrupt or something
+void rec_method(char *method, char *val, int *val_len) {
+
+	memset (Net_Rx_Data, 0, DATA_BUF_SIZE);
+	if(Wiz_Check_Socket(SOCKET_ID)) {
+		Wiz_Recv_Blocking(SOCKET_ID, Net_Rx_Data);
+		memcpy(method, Net_Rx_Data, 3);
+		method[3] = '\0';
+		*val_len = 0;
+		while(Net_Rx_Data[*val_len] != '\n') (*val_len)++;
+		memcpy(val, Net_Rx_Data + 4, *val_len);
+		val[*val_len] = '\0';
+	}
+}
+
+/* Handle Wiznet Interrupt */
+void wizIntFunction() {
+	uint16_t offset = 0;// 0x0100*n;
+	uint8_t socket_int, n;
+
+	/* Read Socket Interrupts */
+	for(n = 0; n < 8; n++) {
+		if(activeSockets >> n & 0x01) {
+			offset = 0x0010 * n;
+
+			/* Read Socket n Interrupt Register */
+			Tx_Buf[4] = 0xFF;
+			spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
+			socket_int = Rx_Buf[4];
+
+			/* Handle Interrupt Request */
+			if( socket_int & SEND_OK ) {	 // Send Completed
+			}
+			if( socket_int & TIMEOUT ) { // Timeout Occurred
+			}
+			if( socket_int & RECV_PKT ) {	 // Packet Received
+				recvDataPacket();
+			}
+			if( socket_int & DISCON_SKT ) {	 // FIN/FIN ACK Received
+				if(connectionOpen)
+					connectionClosed = 1;
+				connectionOpen = 0;
+			}
+			if( socket_int & Sn_CON ) {	 // Socket Connection Completed
+				connectionOpen = 1;
+			}
+
+			/* Clear Socket n Interrupt Register */
+			Tx_Buf[4] = socket_int;
+			spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
+		}
+	}
+
+	wizIntFlag = 0;
+}
+
+uint8_t Wiz_Int_Clear(uint8_t n) {
+	uint16_t offset = 0x0100*n;
+
+	/* Read Socket n Interrupt Register */
+	Tx_Buf[4] = 0xFF;
+	spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
+	uint8_t result = Tx_Buf[4];
+
+//	/* Clear Socket n Interrupt Register */
+//	Tx_Buf[4] = result;
+//	spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
+
+	wizIntFlag = 0;
+	return result;
+}
+
+/* Memory Initialization */
+void Wiz_Memory_Init() {
+	uint16_t offset;
+	uint8_t n;
+
+	for(n = 0; n < 8; n++) {
+		offset = 0x0100*n;
+
+		/* Rx Buffer Init */
+		Tx_Buf[4] = 0x02;	// 2K
+		spi_Send_Blocking(Sn_RXMEM_SIZE + offset, 0x0001);
+
+		/* Tx Buffer Init */
+		Tx_Buf[4] = 0x02;	// 2K
+		spi_Send_Blocking(Sn_TXMEM_SIZE + offset, 0x0001);
+	}
+}
+
 void Wiz_TCP_Init(uint8_t n) {
+/* TCP Initialization */
 	uint8_t reserv_bit;
 	uint16_t offset = 0x0100*n;
 
@@ -229,28 +402,11 @@ void Wiz_TCP_Init(uint8_t n) {
 	/* Read Socket n Status Register (Sn_SR) */
 	Tx_Buf[4] = 0xFF;
 	spi_Recv_Blocking(Sn_SR_BASE + offset, 0x0001);
-	if(Rx_Buf[4] == 0x13)
+	if(Rx_Buf[4] == 0x13) {
 		printf("Socket %u TCP Initialized Successfully\n", n);
-	else
+		activeSockets |= 1 << n;
+	} else
 		printf("Socket %u TCP Initialization Failed\n", n);
-}
-
-/* Memory Initialization */
-void Wiz_Memory_Init() {
-	uint16_t offset;
-	uint8_t n;
-
-	for(n = 0; n < 8; n++) {
-		offset = 0x0100*n;
-
-		/* Rx Buffer Init */
-		Tx_Buf[4] = 0x02;	// 2K
-		spi_Send_Blocking(Sn_RXMEM_SIZE + offset, 0x0001);
-
-		/* Tx Buffer Init */
-		Tx_Buf[4] = 0x02;	// 2K
-		spi_Send_Blocking(Sn_TXMEM_SIZE + offset, 0x0001);
-	}
 }
 
 /* UDP Initialization */
@@ -280,9 +436,10 @@ void Wiz_UDP_Init(uint8_t n) {
 	/* Read Socket n Status Register (Sn_SR) */
 	Tx_Buf[4] = 0xFF;
 	spi_Recv_Blocking(Sn_SR_BASE + offset, 0x0001);
-	if(Rx_Buf[4] == 0x22)
+	if(Rx_Buf[4] == 0x22) {
 		printf("Socket %u UDP Initialized Successfully\n", n);
-	else
+		activeSockets |= 1 << n;
+	} else
 		printf("Socket %u UDP Initialization Failed\n", n);
 }
 
@@ -302,7 +459,7 @@ void Wiz_Destination_Init(uint8_t n) {
 	spi_Send_Blocking(Sn_DPORT_BASE + offset, 0x0002);
 }
 
-void Wiz_Socket_Check(uint8_t n) {
+void Wiz_Address_Check(uint8_t n) {
 	uint16_t offset = 0x0100*n;
 	uint16_t port;
 
@@ -345,11 +502,14 @@ void Wiz_TCP_Connect(uint8_t n) {
 	Tx_Buf[4] = CONNECT;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
 
+	/* TODO: If this fails, try to establish connection once more */
+	printf("Establishing TCP connection...\n");
 	do {
 		/* Wait for connection */
 		Rx_Buf[4] = 0xFF;
 		spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
 	} while((Rx_Buf[4] & 0x01) != 0x01);
+	printf("Connected\n");
 }
 
 /* Close TCP Socket */
@@ -397,35 +557,40 @@ void Wiz_Clear_Buffer(uint8_t n) {
 	spi_Send_Blocking(dst_ptr, BUFFER_SIZE);
 }
 
+
 /* Send Outgoing Data */
-uint16_t Wiz_Send(uint8_t n, char* message) {
+uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message) {
 	uint16_t length;
 	uint16_t offset = 0x0100*n;
-	uint16_t dst_mask, dst_ptr, wr_base, rd_ptr0, rd_ptr1;
+	uint16_t dst_mask, dst_ptr, wr_base;
+	uint16_t upper_size, left_size;
 
 	/* Read current Tx Write Pointer */
-	Tx_Buf[4] = 0xFF;
-	Tx_Buf[5] = 0xFF;
+	Tx_Buf[4] = Tx_Buf[5] = 0xFF;
 	spi_Recv_Blocking(Sn_TX_WR_BASE + offset, 0x0002);
 	wr_base = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
 
 	/* Calculate Tx Buffer Address */
 	dst_mask = wr_base & (TX_MAX_MASK);
 	dst_ptr = gSn_TX_BASE[n] + dst_mask;
-
-	/* Setup data and length for send */
-	sprintf(((char *)Tx_Buf) + 4, message);
-	length = strlen(message);
-	Tx_Buf[4 + length++] = '\r';
-	Tx_Buf[4 + length++] = '\n';
-	Tx_Buf[4 + length++] = '\0';
+	length = strlen((char *)message);
 
 	/* Load data into Tx Buffer */
 	if((dst_mask + length) > (TX_MAX_MASK + 1)) {
-		printf("Overflow!\n");
-		// TODO: Handle overflow
-		// Do stuff (In W5200 datasheet)
+
+		/* Copy upper_size bytes of src_addr to dest_addr */
+		upper_size = (TX_MAX_MASK + 1) - dst_mask;
+		memcpy((uint8_t *)Tx_Buf + 4, (char *)message, upper_size);
+		spi_Send_Blocking(dst_ptr, upper_size);
+
+		/* Copy left_size bytes of src_addr to gSn_TX_BASE */
+		left_size = length - upper_size;
+		memcpy((uint8_t *)Tx_Buf + 4, (char *)message + upper_size, left_size);
+		spi_Send_Blocking(gSn_TX_BASE[n], left_size);
+
 	} else {
+		/* Setup, send data to Wiznet */
+		sprintf(((char *)Tx_Buf) + 4, (char *)message);
 		spi_Send_Blocking(dst_ptr, length);
 	}
 
@@ -435,28 +600,19 @@ uint16_t Wiz_Send(uint8_t n, char* message) {
 	Tx_Buf[5] = ((uint8_t)(wr_base & 0x00FF));
 	spi_Send_Blocking(Sn_TX_WR_BASE + offset, 0x0002);
 
-	/* Read Tx Read Pointer */
-	Rx_Buf[4] = Rx_Buf[5] = 0xFF;
-	spi_Recv_Blocking(Sn_TX_RD_BASE + offset, 0x0002);
-	rd_ptr0 = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
-
 	/* SEND Command */
 	Tx_Buf[4] = SEND;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
 
-	/* Read Tx Read Pointer */
-	Rx_Buf[4] = Rx_Buf[5] = 0xFF;
-	spi_Recv_Blocking(Sn_TX_RD_BASE + offset, 0x0002);
-	rd_ptr1 = (((uint16_t)Rx_Buf[4]) << 8) + ((uint16_t)Rx_Buf[5]);
-
-	return rd_ptr1 - rd_ptr0;
+	return length;
 }
 
 /* Read Incoming Data */
-uint16_t Wiz_Recv(uint8_t n) {
+uint16_t Wiz_Recv_Blocking(uint8_t n, uint8_t *message) {
 	uint16_t length;
 	uint16_t offset = 0x0100*n;
 	uint16_t src_mask, src_ptr, rd_base;
+	uint16_t upper_size, left_size;
 
 	/* Read Socket Received Size */
 	Tx_Buf[4] = Tx_Buf[5] = 0xFF;
@@ -473,23 +629,34 @@ uint16_t Wiz_Recv(uint8_t n) {
 	src_mask = rd_base & (RX_MAX_MASK);
 	src_ptr = gSn_RX_BASE[n] + src_mask;
 
+	/* Clear output buffer (may not be necessary) */
+	memset(message, '\0', DATA_BUF_SIZE);
+
 	/* Load data into Tx Buffer */
 	if((src_mask + length) > (RX_MAX_MASK + 1)) {
-		printf("Overflow!\n");
-		// TODO: Handle overflow
-		// Do stuff (In W5200 datasheet)
+
+		/* Copy upper_size bytes of src_addr to dest_addr */
+		upper_size = (TX_MAX_MASK + 1) - src_mask;
+		spi_Recv_Blocking(src_ptr, upper_size);
+		memcpy((char *)message, (uint8_t *)Rx_Buf + 4, upper_size);
+
+		/* Copy left_size bytes of src_addr to gSn_TX_BASE */
+		left_size = length - upper_size;
+		spi_Recv_Blocking(gSn_RX_BASE[n], left_size);
+		memcpy((char *)message + upper_size, (uint8_t *)Rx_Buf + 4, left_size);
+
 	} else {
 		spi_Recv_Blocking(src_ptr, length);
+		memcpy(message, &Rx_Buf[4], length);	// SPI HDR 4B, TCP HDR 8B
 	}
-	memset(Rx_Data, '\0', DATA_BUF_SIZE);
-	memcpy(Rx_Data, &Rx_Buf[4], length);	// SPI HDR 4B, TCP HDR 8B
-//	Rx_Data[length-4] = '\0';
 
+	/* Update the Rx Read Pointer */
 	rd_base += length;
 	Tx_Buf[4] = ((uint8_t)((rd_base & 0xFF00) >> 8));
 	Tx_Buf[5] = ((uint8_t)(rd_base & 0x00FF));
 	spi_Send_Blocking(Sn_RX_RD_BASE + offset, 0x0002);
 
+	/* Send RECV Command */
 	Tx_Buf[4] = RECV;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
 
@@ -506,23 +673,36 @@ uint8_t Wiz_Check_Socket(uint8_t n) {
 	return 0;
 }
 
+void Wiz_Restart() {
+	/* Software Reset Wiznet (Mode Register) */
+	Tx_Buf[4] = 0x80; // Data
+	spi_Send_Blocking(MR, 0x0001);
+}
+
 /* Initialize Wiznet Device */
 void ethernetInit(uint8_t protocol, uint8_t socket) {
-	isXferCompleted = 0;
-
 	Wiz_SSP_Init();
+	Wiz_Restart();
+	uint16_t i, j;
+	for (i = 0; i < 60000; i++) {
+		for (j = 0; j < 60; j++) { }
+	}
+
 	Wiz_Init();
 	Wiz_Network_Init();
 	Wiz_Check_Network_Registers();
 	Wiz_Memory_Init();
-	if(protocol)
+	if(protocol) {
+		Wiz_Int_Init(socket);
 		Wiz_TCP_Init(socket);
-	else
+	} else {
 		Wiz_UDP_Init(socket);
+	}
 	Wiz_Clear_Buffer(socket);
 
 	if(protocol) {
 		Wiz_TCP_Connect(socket);
+		printf("Established TCP connection\n");
 	}
 }
 

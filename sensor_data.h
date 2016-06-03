@@ -18,6 +18,10 @@ typedef struct{
 
 typedef struct{
 
+  float roll;
+  float pitch;
+  float yaw;
+
   uint32_t dataPrintFlag;
 
   float longRangingJ22;
@@ -50,6 +54,7 @@ typedef struct{
   float temp2;
   float pressure1;
   float pressure2;
+  float power;
 
 } sensor;
 
