@@ -1,6 +1,6 @@
 #include "actuators.h"
 #include "board.h"
-#include "time.h"
+#include "timer.h"
 
 void actuatorsInit(){
 
@@ -51,10 +51,18 @@ void motorActuatorActuate(uint8_t start, uint8_t dir){
 	if(start) {
 		if(dir) {
 			printf("Started Forward\n");
+			Chip_GPIO_WritePortBit(LPC_GPIO, MOTOR_ACTUATOR_PORT, MOTOR_ACTUATOR_DIR_PIN, FORWARD);
+			Chip_GPIO_WritePortBit(LPC_GPIO, MOTOR_ACTUATOR_PORT, MOTOR_ACTUATOR_START_PIN, START);
+			Chip_GPIO_WritePortBit(LPC_GPIO, MOTOR_ACTUATOR_PORT, MOTOR_ACTUATOR_SLEEP_PIN, WAKE);
 		} else {
 			printf("Started Backward\n");
+			Chip_GPIO_WritePortBit(LPC_GPIO, MOTOR_ACTUATOR_PORT, MOTOR_ACTUATOR_DIR_PIN, BACKWARD);
+			Chip_GPIO_WritePortBit(LPC_GPIO, MOTOR_ACTUATOR_PORT, MOTOR_ACTUATOR_START_PIN, START);
+			Chip_GPIO_WritePortBit(LPC_GPIO, MOTOR_ACTUATOR_PORT, MOTOR_ACTUATOR_SLEEP_PIN, WAKE);
 		}
 	} else {
+		Chip_GPIO_WritePortBit(LPC_GPIO, MOTOR_ACTUATOR_PORT, MOTOR_ACTUATOR_START_PIN, STOP);
+		Chip_GPIO_WritePortBit(LPC_GPIO, MOTOR_ACTUATOR_PORT, MOTOR_ACTUATOR_SLEEP_PIN, SLEEP);
 		if(dir) {
 			printf("Stopped Forward\n");
 		} else {
@@ -87,6 +95,26 @@ void motorActuatorDisconnect(){
 			return;
 		}
 	}
+}
+
+void verticalActuatorsActuate(uint8_t start, uint8_t dir){
+	if(start) {
+		if(dir) {
+			printf("Started Forward\n");
+		} else {
+			printf("Started Backward\n");
+		}
+	} else {
+		if(dir) {
+			printf("Stopped Forward\n");
+		} else {
+			printf("Stopped Backward\n");
+		}
+	}
+}
+
+void verticalActuatorsInit(){
+
 }
 
 void verticalActuatorsUp(){
