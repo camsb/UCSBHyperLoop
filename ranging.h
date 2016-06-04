@@ -3,19 +3,19 @@
 
 #include "board.h"
 
-#define SHORT_FRONT_DIST		8.5
-#define SHORT_BACK_DIST			8.5
-#define SHORT_FRONT_HEIGHT		5.4
-#define SHORT_BACK_HEIGHT		5.4
-#define SHORT_FRONT_LEFT_DIST	5.1
-#define SHORT_FRONT_RIGHT_DIST	5.1
-#define SHORT_BACK_LEFT_DIST	5.1
-#define SHORT_BACK_RIGHT_DIST	5.1
-#define SHORT_RIGHT_DIST_AVG	(0.5*(SHORT_FRONT_LEFT_DIST + SHORT_FRONT_RIGHT_DIST))
-#define SHORT_RIGHT_AVG_INV		(1.0 / SHORT_RIGHT_DIST_AVG)
-#define SHORT_FRONT_DIST_INV	(1.0 / SHORT_FRONT_DIST)
-#define SHORT_BACK_DIST_INV		(1.0 / SHORT_BACK_DIST)
-#define SHORT_AXIS_SUM_INV		(1.0 / (SHORT_FRONT_DIST + SHORT_BACK_DIST))
+#define SHORT_FRONT_DIST		8.5f
+#define SHORT_BACK_DIST			8.5f
+#define SHORT_FRONT_HEIGHT		5.4f
+#define SHORT_BACK_HEIGHT		5.4f
+#define SHORT_FRONT_LEFT_DIST	5.1f
+#define SHORT_FRONT_RIGHT_DIST	5.1f
+#define SHORT_BACK_LEFT_DIST	5.1f
+#define SHORT_BACK_RIGHT_DIST	5.1f
+#define SHORT_RIGHT_DIST_AVG	((SHORT_BACK_RIGHT_DIST*SHORT_BACK_DIST + SHORT_FRONT_RIGHT_DIST*SHORT_FRONT_DIST))/(SHORT_BACK_DIST + SHORT_FRONT_DIST)
+//#define SHORT_RIGHT_AVG_INV		(1.0 / SHORT_RIGHT_DIST_AVG)
+//#define SHORT_FRONT_DIST_INV	(1.0 / SHORT_FRONT_DIST)
+//#define SHORT_BACK_DIST_INV		(1.0 / SHORT_BACK_DIST)
+//#define SHORT_AXIS_SUM_INV		(1.0 / (SHORT_FRONT_DIST + SHORT_BACK_DIST))
 
 #define LONG_FRONT_DIST			12.45
 #define LONG_BACK_DIST			12.45
@@ -33,12 +33,16 @@
 #define LONG_BACK_INITIAL	45.0	// cm
 #define SHORT_FRONT_INITIAL	2.5		// cm
 #define SHORT_BACK_INITIAL	2.5		// cm
-#define ALPHA 				.6
+#define ALPHA 				0
 #define BETA				(1 - ALPHA)
 
 float short_front_right_pyth;
 float short_back_right_pyth;
 float short_right_pyth_inv;
+float short_right_avg_inv;
+float short_front_dist_inv;
+float short_back_dist_inv;
+float short_axis_sum_inv;
 
 volatile uint8_t Burst_Mode_Flag, Interrupt_Continue_Flag;
 volatile uint8_t channelTC, dmaChannelNum;

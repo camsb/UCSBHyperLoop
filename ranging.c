@@ -8,7 +8,8 @@ float arcsin(float x) {
 	if(x < -1.0)
 		return -90.0;
 	uint16_t index = ((uint16_t)(((x + 1.0)/step) + 0.5));
-	printf("i: %d, x: %f\n", index, x);
+	if(index > 1023)
+		return arcSinLUT[1023];
 	return arcSinLUT[index];
 }
 
@@ -25,17 +26,19 @@ positionAttitudeData computePositionAttitudeRanging(rangingData longRangingData,
 	/* z Position */
 	float z_front = ((shortRangingData.frontRight + SHORT_FRONT_HEIGHT) + (shortRangingData.frontLeft + SHORT_FRONT_HEIGHT)) * 0.5;
 	float z_back  = ((shortRangingData.backRight + SHORT_BACK_HEIGHT) + (shortRangingData.backLeft + SHORT_BACK_HEIGHT)) * 0.5;
-	float z_com   = (z_front*SHORT_FRONT_DIST + z_back*SHORT_BACK_DIST) * SHORT_AXIS_SUM_INV;
+	float z_com   = (z_front*SHORT_FRONT_DIST + z_back*SHORT_BACK_DIST) * short_axis_sum_inv;
 
 	/* Pitch */
-	float pitch   = arcsin((z_back - z_com) * SHORT_BACK_DIST_INV);
+	float pitch   = arcsin((z_back - z_com) * short_back_dist_inv);
 
 	/* Roll */
 	float z_right = (short_front_right_pyth*(shortRangingData.frontRight + SHORT_FRONT_HEIGHT) +
 					 short_back_right_pyth*(shortRangingData.backRight + SHORT_BACK_HEIGHT)) *
 					 short_right_pyth_inv;
-	DEBUGOUT("z_right: %f, fr_pyth: %f, br_pyth: %f, sh_r_inv = %f\n", z_right, short_front_right_pyth, short_back_right_pyth, short_right_pyth_inv);
-	float roll	  = arcsin((z_right - z_com)*SHORT_RIGHT_AVG_INV);
+	float roll	  = arcsin((z_right - z_com) * short_right_avg_inv);
+
+	uint32_t i;
+	for(i = 0; i < 120000000; i++);
 
 	positionAttitudeData positionAttitude;
 	positionAttitude.y = y_com;
@@ -140,9 +143,13 @@ void rangingSensorsInit(void)  {
 	uint32_t _bitRate = ADC_MAX_SAMPLE_RATE;
 
 	/* Compute Constants */
-	short_front_right_pyth 	= sqrt((SHORT_FRONT_RIGHT_DIST*SHORT_FRONT_RIGHT_DIST) + (SHORT_FRONT_DIST*SHORT_FRONT_DIST));
-	short_back_right_pyth 	= sqrt((SHORT_BACK_RIGHT_DIST*SHORT_BACK_RIGHT_DIST) + (SHORT_BACK_DIST*SHORT_BACK_DIST));
-	short_right_pyth_inv 	= (2.0 / (short_front_right_pyth + short_back_right_pyth));
+	short_front_right_pyth 	= sqrt((SHORT_FRONT_RIGHT_DIST - SHORT_RIGHT_DIST_AVG)*(SHORT_FRONT_RIGHT_DIST - SHORT_RIGHT_DIST_AVG) + (SHORT_FRONT_DIST)*(SHORT_FRONT_DIST));
+	short_back_right_pyth 	= sqrt((SHORT_BACK_RIGHT_DIST - SHORT_RIGHT_DIST_AVG)*(SHORT_BACK_RIGHT_DIST - SHORT_RIGHT_DIST_AVG) + (SHORT_BACK_DIST)*(SHORT_BACK_DIST));
+	short_right_pyth_inv 	= (1.0 / (short_front_right_pyth + short_back_right_pyth));
+	short_right_avg_inv		= 1.0/((float)SHORT_RIGHT_DIST_AVG);
+	short_front_dist_inv	= 1.0/((float)SHORT_FRONT_DIST);
+	short_back_dist_inv		= 1.0/((float)SHORT_BACK_DIST);
+	short_axis_sum_inv		= 1.0/((float)(SHORT_FRONT_DIST + SHORT_BACK_DIST));
 
 	/* Enable all ranging sensor channels */
 	initADCChannel(ADC_CH0, 0, 23, IOCON_FUNC1, LONG_FRONT_INITIAL);	// Port-front long J25
