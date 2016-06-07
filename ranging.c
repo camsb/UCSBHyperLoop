@@ -56,10 +56,7 @@ void convertVoltageShort(uint8_t sensor)
 
 	float voltage = ((float)ShortRangingDataRaw[sensor]) / 1300;
 
-	if ((voltage < 0.34) || (voltage > 2.43)) {
-//		DEBUGOUT("%d sensor voltage of %.3f V is out of operating range.\n", sensor, voltage);
-	}
-	else {
+	if (!((voltage < 0.34) || (voltage > 2.43))){
 		index = (uint16_t)(voltage * 100.0 + 0.5) - 34;
 		ShortRangingMovingAverage[sensor] = ALPHA*ShortRangingMovingAverage[sensor] + BETA*shortRangingDistanceLUT[index];
 	}
@@ -72,10 +69,7 @@ void convertVoltageLong(uint8_t sensor)
 
 	float voltage = ((float)LongRangingDataRaw[sensor]) / 1300.0;
 
-	if ((voltage < 0.49) || (voltage > 2.73)) {
-//		DEBUGOUT("%d sensor voltage of %.3f V is out of operating range.\n", sensor, voltage);
-	}
-	else {
+	if (!((voltage < 0.49) || (voltage > 2.73))){
 		index = (uint16_t)(voltage * 100.0 + 0.5) - 49;
 		LongRangingMovingAverage[sensor] = ALPHA*LongRangingMovingAverage[sensor] + BETA*longRangingDistanceLUT[index];
 	}
