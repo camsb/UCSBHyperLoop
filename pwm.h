@@ -61,8 +61,6 @@ typedef enum
 void Init_PWM(LPC_PWM_T * pwm);
 void Init_Channel(LPC_PWM_T * pwm, uint8_t channel);
 void Set_Channel_PWM(LPC_PWM_T * pwm, uint8_t channel, float duty);
-void Chip_TIMER_PWMWrite(LPC_TIMER_T *pTMR, uint32_t pwmval);
-uint32_t Chip_TIMER_PWMRead(LPC_TIMER_T *pTMR);
 
 /* Initialize a pwm */
 void Chip_PWM_Init(LPC_PWM_T *pTMR);

@@ -5,7 +5,7 @@
 
 #define SAMPLE_SETTING 0
 
-uint16_t readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
+uint16_t readRegs( I2C_ID_T id, uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
 {
   uint8_t  buffer;
   uint16_t value;
@@ -13,50 +13,38 @@ uint16_t readRegs( uint8_t slaveAddr, uint8_t msbReg, uint8_t lsbReg )
   value = 0;
 
   // get MSB
-  Chip_I2C_MasterCmdRead( I2C1, slaveAddr, msbReg, &buffer, 1 );
+  Chip_I2C_MasterCmdRead( id, slaveAddr, msbReg, &buffer, 1 );
   value = ( ( uint16_t ) buffer ) << 8;
 
   // get LSB
-  Chip_I2C_MasterCmdRead( I2C1, slaveAddr, lsbReg, &buffer, 1 );
+  Chip_I2C_MasterCmdRead( id, slaveAddr, lsbReg, &buffer, 1 );
   value = value | ( uint16_t ) buffer;
 
   return value;
 }
 
 // set the initial calibration data
-void temperaturePressureInit()
+constants* temperaturePressureInit(I2C_ID_T id)
 {
-  c = ( constants * ) calloc ( 1, sizeof( constants ) );
-  c->AC1 = readRegs( BMP_ADDRESS, 0xAA, 0xAB );
-  c->AC2 = readRegs( BMP_ADDRESS, 0xAC, 0xAD );
-  c->AC3 = readRegs( BMP_ADDRESS, 0xAE, 0xAF );
-  c->AC4 = readRegs( BMP_ADDRESS, 0xB0, 0xB1 );
-  c->AC5 = readRegs( BMP_ADDRESS, 0xB2, 0xB3 );
-  c->AC6 = readRegs( BMP_ADDRESS, 0xB4, 0xB5 );
-  c->B1  = readRegs( BMP_ADDRESS, 0xB6, 0xB7 );
-  c->B2  = readRegs( BMP_ADDRESS, 0xB8, 0xB9 );
-  c->MB  = readRegs( BMP_ADDRESS, 0xBA, 0xBB );
-  c->MC  = readRegs( BMP_ADDRESS, 0xBC, 0xBD );
-  c->MD  = readRegs( BMP_ADDRESS, 0xBE, 0xBF );
+  constants* c = ( constants * ) calloc ( 1, sizeof( constants ) );
+
+  c->AC1 = readRegs( id, BMP_ADDRESS, 0xAA, 0xAB );
+  c->AC2 = readRegs( id, BMP_ADDRESS, 0xAC, 0xAD );
+  c->AC3 = readRegs( id, BMP_ADDRESS, 0xAE, 0xAF );
+  c->AC4 = readRegs( id, BMP_ADDRESS, 0xB0, 0xB1 );
+  c->AC5 = readRegs( id, BMP_ADDRESS, 0xB2, 0xB3 );
+  c->AC6 = readRegs( id, BMP_ADDRESS, 0xB4, 0xB5 );
+  c->B1  = readRegs( id, BMP_ADDRESS, 0xB6, 0xB7 );
+  c->B2  = readRegs( id, BMP_ADDRESS, 0xB8, 0xB9 );
+  c->MB  = readRegs( id, BMP_ADDRESS, 0xBA, 0xBB );
+  c->MC  = readRegs( id, BMP_ADDRESS, 0xBC, 0xBD );
+  c->MD  = readRegs( id, BMP_ADDRESS, 0xBE, 0xBF );
   c->B5  = 0; // set in getTemperature, used in getPressure
+
+  return c;
 }
 
-void printConstants()
-{
-  DEBUGOUT( "%i\n", c->AC1 );
-  DEBUGOUT( "%i\n", c->AC2 );
-  DEBUGOUT( "%i\n", c->AC3 );
-  DEBUGOUT( "%u\n", c->AC4 );
-  DEBUGOUT( "%u\n", c->AC5 );
-  DEBUGOUT( "%u\n", c->AC6 );
-  DEBUGOUT( "%i\n", c->B1 );
-  DEBUGOUT( "%i\n", c->B2 );
-  DEBUGOUT( "%i\n", c->MB );
-  DEBUGOUT( "%i\n", c->MC );
-  DEBUGOUT( "%i\n", c->MD );
-}
-
-uint32_t getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8_t len, uint8_t periph )
+uint32_t getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8_t recvLen, uint8_t sendLen, uint8_t periph )
 {
   int8_t   i;
   uint8_t  readVal;
@@ -64,22 +52,18 @@ uint32_t getDataValue( I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uint8
 
   returnVal = 0;
 
-  Chip_I2C_MasterSend( id, periph, writeBuf, len );
-
-  // delay to allow time for data to be set in correct registers
-  delay( 10 ); /* TODO We will have to change the delay function here to be interrupt based */
-
-  for( i = 0; i < len; i++ )
-  {
+  for( i = 0; i < recvLen; i++ )  {
     readVal   = 0;
     Chip_I2C_MasterCmdRead( id, periph, readBuf[ i ], &readVal, 1 );
-    returnVal = returnVal | ( ((uint32_t)readVal) << ( 8 * ( len - i - 1 ) ) );
+    returnVal = returnVal | ( ((uint32_t)readVal) << ( 8 * ( recvLen - i - 1 ) ) );
   }
+
+  Chip_I2C_MasterSend( id, periph, writeBuf, sendLen );
 
   return returnVal;
 }
 
-float calculatePressure( uint32_t uncalcPressure )
+float calculatePressure( constants* c, uint32_t uncalcPressure )
 {
   uint32_t  pressure;
   int32_t   X1;
@@ -115,28 +99,28 @@ float calculatePressure( uint32_t uncalcPressure )
   return ((float)pressure)/1000.0; // Need to divide by 1000 to return in kPa.
 }
 
-float getPressure()
+float getPressure( constants * c, I2C_ID_T id )
 {
   uint32_t  uncalcPressure;
   uint8_t   wBuffer[ 2 ];
   uint8_t   rBuffer[ 3 ];
 
-  wBuffer[ 0 ] = 0xF4; // BMP085_REGISTER_CONTROL -- initializes register address
-  wBuffer[ 1 ] = 0x34; // BMP085_REGISTER_READPRESSURECMD -- determine which option by putting data in register
+  /* Requests temperature values to be loaded. */
+  /* This removes the need for a delay. */
+  wBuffer[ 0 ] = 0xF4;
+  wBuffer[ 1 ] = 0x2E;
 
   rBuffer[ 0 ] = 0xF6; // BMP085_REGISTER_PRESSUREDATA
-  rBuffer[ 1 ] = 0xF7; //(just an explicit declaration of memory)
+  rBuffer[ 1 ] = 0xF7;
   rBuffer[ 2 ] = 0xF8;
 
-  uncalcPressure = getDataValue( I2C1, wBuffer, rBuffer, 3, BMP_ADDRESS );
+  uncalcPressure = getDataValue( id, wBuffer, rBuffer, 3, 2, BMP_ADDRESS );
 
-  // TODO: set to 0 precision
-  // bit shift back, for precision
   uncalcPressure = uncalcPressure >> 8;
-  return calculatePressure( uncalcPressure );
+  return calculatePressure( c, uncalcPressure );
 }
 
-float calculateTemperature( uint32_t uncalcTemperature )
+float calculateTemperature( constants* c, uint32_t uncalcTemperature )
 {
   int32_t  temperature;
   int32_t   X1;
@@ -150,20 +134,21 @@ float calculateTemperature( uint32_t uncalcTemperature )
   return ((float)temperature)/10.0; // Need to divide by 10 to return units in C.
 }
 
-float getTemperature(I2C_ID_T id)
+float getTemperature( constants * c, I2C_ID_T id )
 {
-  uint32_t  uncalcTemperature;
-  uint8_t   wBuffer[ 2 ];
-  uint8_t   rBuffer[ 2 ];
+	uint32_t  uncalcTemperature;
+	uint8_t   wBuffer[ 2 ];
+	uint8_t   rBuffer[ 2 ];
 
-  wBuffer[ 0 ] = 0xF4;
-  wBuffer[ 1 ] = 0x2E;
+	/* Requests pressure values to be loaded. */
+	wBuffer[ 0 ] = 0xF4; // BMP085_REGISTER_CONTROL -- initializes register address
+	wBuffer[ 1 ] = 0x34; // BMP085_REGISTER_READPRESSURECMD -- determine which option by putting data in register
 
-  rBuffer[ 0 ] = 0xF6;
-  rBuffer[ 1 ] = 0xF7;
+	rBuffer[ 0 ] = 0xF6;
+	rBuffer[ 1 ] = 0xF7;
 
-  uncalcTemperature = getDataValue( id, wBuffer, rBuffer, 2, BMP_ADDRESS );
+	uncalcTemperature = getDataValue( id, wBuffer, rBuffer, 2, 2, BMP_ADDRESS );
 
-  return calculateTemperature( uncalcTemperature );
+	return calculateTemperature( c, uncalcTemperature );
 }
 
