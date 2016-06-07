@@ -1,7 +1,7 @@
 #include "initialization.h"
 #include "sensor_data.h"
 #include "accelerometer.h"
-#include "time.h"
+#include "timer.h"
 #include "ranging.h"
 #include "temp_press.h"
 #include "kinematics.h"
@@ -23,6 +23,7 @@ void collectData(){
 
 	XYZ acceleration, velocity, position;
 	rangingData shortRangingData, longRangingData;
+	positionAttitudeData positionAttitude;
 
 	if (SMOOSHED_ONE_ACTIVE) {
 
@@ -61,17 +62,17 @@ void collectData(){
 	}
 
 	if(RANGING_SENSORS_ACTIVE) {
-		longRangingData = getLongDistance();
-		sensorData.longRangingJ25 = longRangingData.sensor0;
-		sensorData.longRangingJ30 = longRangingData.sensor1;
-		sensorData.longRangingJ22 = longRangingData.sensor2;
-		sensorData.longRangingJ31 = longRangingData.sensor3;
 
+		longRangingData = getLongDistance();
 		shortRangingData = getShortDistance();
-		sensorData.shortRangingJ36 = shortRangingData.sensor0;
-		sensorData.shortRangingJ37 = shortRangingData.sensor1;
-		sensorData.shortRangingJ34 = shortRangingData.sensor2;
-		sensorData.shortRangingJ35 = shortRangingData.sensor3;
+		positionAttitude = computePositionAttitudeRanging(longRangingData, shortRangingData);
+
+		sensorData.positionY = positionAttitude.y;
+		sensorData.positionZ = positionAttitude.z;
+		sensorData.roll = positionAttitude.roll;
+		sensorData.pitch = positionAttitude.pitch;
+		sensorData.yaw = positionAttitude.yaw;
+
 	}
 
 	getPressureFlag = !getPressureFlag; // Toggling between pressure and temperature register loading.

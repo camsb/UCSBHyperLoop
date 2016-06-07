@@ -18,21 +18,7 @@ typedef struct{
 
 typedef struct{
 
-  float roll;
-  float pitch;
-  float yaw;
-
   uint32_t dataPrintFlag;
-
-  float longRangingJ22;
-  float longRangingJ25;
-  float longRangingJ30;
-  float longRangingJ31;
-
-  float shortRangingJ34;
-  float shortRangingJ35;
-  float shortRangingJ36;
-  float shortRangingJ37;
 
   float initialAccelX;
   float initialAccelY;
@@ -49,6 +35,10 @@ typedef struct{
   float positionX;
   float positionY;
   float positionZ;
+
+  float roll;
+  float pitch;
+  float yaw;
 
   float temp1;
   float temp2;

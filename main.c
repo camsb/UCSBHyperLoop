@@ -106,14 +106,6 @@ int main(void)
             collectData();
 
             if (sensorData.dataPrintFlag == 2) { // Print every 2/1 = 2 seconds.
-				DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
-				DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
-				DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
-				DEBUGOUT( "longRangingJ31 = %f\n", sensorData.longRangingJ31 );
-				DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
-				DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
-				DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
-				DEBUGOUT( "shortRangingJ37 = %f\n", sensorData.shortRangingJ37 );
 				DEBUGOUT( "temperature1 = %f\n", sensorData.temp1 );
 				DEBUGOUT( "temperature2 = %f\n", sensorData.temp2 );
 				DEBUGOUT( "pressure1 = %f\n", sensorData.pressure1 );
@@ -125,8 +117,11 @@ int main(void)
 				DEBUGOUT( "velocityY = %f\t", sensorData.velocityY );
 				DEBUGOUT( "velocityZ = %f\n", sensorData.velocityZ );
 				DEBUGOUT( "positionX = %f\t", sensorData.positionX );
-				DEBUGOUT( "positionY = %f\t", sensorData.positionY );
-				DEBUGOUT( "positionZ = %f\n", sensorData.positionZ );
+	            DEBUGOUT( "positionY = %f\t", sensorData.positionY );
+	            DEBUGOUT( "positionZ = %f\n", sensorData.positionZ );
+	            DEBUGOUT( "Roll = %f\t", sensorData.roll );
+	            DEBUGOUT( "Pitch = %f\t", sensorData.pitch );
+	            DEBUGOUT( "Yaw = %f\n", sensorData.yaw );
 				DEBUGOUT( "\n" );
 				sensorData.dataPrintFlag = 0;
             }

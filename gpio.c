@@ -1,6 +1,7 @@
 #include "gpio.h"
 #include "photo_electric.h"
 #include "ethernet.h"
+#include "timer.h"
 
 void GPIO_IRQHandler(void)
 {

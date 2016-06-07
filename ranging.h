@@ -3,14 +3,46 @@
 
 #include "board.h"
 
+#define SHORT_FRONT_DIST		8.5f
+#define SHORT_BACK_DIST			8.5f
+#define SHORT_FRONT_HEIGHT		5.4f
+#define SHORT_BACK_HEIGHT		5.4f
+#define SHORT_FRONT_LEFT_DIST	5.1f
+#define SHORT_FRONT_RIGHT_DIST	5.1f
+#define SHORT_BACK_LEFT_DIST	5.1f
+#define SHORT_BACK_RIGHT_DIST	5.1f
+#define SHORT_RIGHT_DIST_AVG	((SHORT_BACK_RIGHT_DIST*SHORT_BACK_DIST + SHORT_FRONT_RIGHT_DIST*SHORT_FRONT_DIST))/(SHORT_BACK_DIST + SHORT_FRONT_DIST)
+//#define SHORT_RIGHT_AVG_INV		(1.0 / SHORT_RIGHT_DIST_AVG)
+//#define SHORT_FRONT_DIST_INV	(1.0 / SHORT_FRONT_DIST)
+//#define SHORT_BACK_DIST_INV		(1.0 / SHORT_BACK_DIST)
+//#define SHORT_AXIS_SUM_INV		(1.0 / (SHORT_FRONT_DIST + SHORT_BACK_DIST))
+
+#define LONG_FRONT_DIST			12.45
+#define LONG_BACK_DIST			12.45
+#define LONG_FRONT_LEFT_DIST	4.3
+#define LONG_FRONT_RIGHT_DIST	4.3
+#define LONG_BACK_LEFT_DIST		4.3
+#define LONG_BACK_RIGHT_DIST	4.3
+#define LONG_FRONT_DIST_INV		(1.0 / LONG_FRONT_DIST)
+#define LONG_BACK_DIST_INV		(1.0 / LONG_BACK_DIST)
+#define LONG_AXIS_SUM_INV		(1.0 / (LONG_FRONT_DIST + LONG_BACK_DIST))
+
 #define _LPC_ADC_ID 		LPC_ADC
 #define _LPC_ADC_IRQ 		ADC_IRQn
 #define LONG_FRONT_INITIAL	45.0	// cm
 #define LONG_BACK_INITIAL	45.0	// cm
 #define SHORT_FRONT_INITIAL	2.5		// cm
 #define SHORT_BACK_INITIAL	2.5		// cm
-#define ALPHA 				.6
+#define ALPHA 				0
 #define BETA				(1 - ALPHA)
+
+float short_front_right_pyth;
+float short_back_right_pyth;
+float short_right_pyth_inv;
+float short_right_avg_inv;
+float short_front_dist_inv;
+float short_back_dist_inv;
+float short_axis_sum_inv;
 
 volatile uint8_t Burst_Mode_Flag, Interrupt_Continue_Flag;
 volatile uint8_t channelTC, dmaChannelNum;
@@ -24,12 +56,50 @@ ADC_CLOCK_SETUP_T ADCSetup;
 
 typedef struct{
 
-  float sensor0;
-  float sensor1;
-  float sensor2;
-  float sensor3;
+  float frontLeft;
+  float frontRight;
+  float backLeft;
+  float backRight;
 
 } rangingData;
+
+typedef struct{
+
+	float y;
+	float z;
+	float roll;
+	float pitch;
+	float yaw;
+
+} positionAttitudeData;
+
+static const float arcSinLUT[] =
+{	-90.00, -82.82, -79.84, -77.55, -75.61, -73.90, -72.35, -70.93, -69.60, -68.34,
+	-67.16, -66.03, -64.94, -63.90, -62.90, -61.93, -60.99, -60.07, -59.18, -58.32,
+	-57.47, -56.65, -55.84, -55.05, -54.27, -53.51, -52.76, -52.02, -51.30, -50.58,
+	-49.88, -49.19, -48.51, -47.83, -47.17, -46.51, -45.86, -45.22, -44.58, -43.96,
+	-43.34, -42.72, -42.11, -41.51, -40.91, -40.32, -39.73, -39.15, -38.57, -38.00,
+	-37.43, -36.87, -36.31, -35.75, -35.20, -34.65, -34.11, -33.57, -33.03, -32.50,
+	-31.97, -31.44, -30.91, -30.39, -29.87, -29.35, -28.84, -28.33, -27.82, -27.31,
+	-26.81, -26.30, -25.80, -25.31, -24.81, -24.32, -23.82, -23.33, -22.84, -22.36,
+	-21.87, -21.39, -20.91, -20.43, -19.95, -19.47, -19.00, -18.52, -18.05, -17.58,
+	-17.10, -16.64, -16.17, -15.70, -15.23, -14.77, -14.30, -13.84, -13.38, -12.92,
+	-12.46, -12.00, -11.54, -11.08, -10.62, -10.16, -9.71, -9.25, -8.80, -8.34,
+	-7.89, -7.44, -6.98, -6.53, -6.08, -5.63, -5.17, -4.72, -4.27, -3.82,
+	-3.37, -2.92, -2.47, -2.02, -1.57, -1.12, -0.67, 0.00, 0.00, 0.67,
+	1.12, 1.57, 2.02, 2.47, 2.92, 3.37, 3.82, 4.27, 4.72, 5.17,
+	5.63, 6.08, 6.53, 6.98, 7.44, 7.89, 8.34, 8.80, 9.25, 9.71,
+	10.16, 10.62, 11.08, 11.54, 12.00, 12.46, 12.92, 13.38, 13.84, 14.30,
+	14.77, 15.23, 15.70, 16.17, 16.64, 17.10, 17.58, 18.05, 18.52, 19.00,
+	19.47, 19.95, 20.43, 20.91, 21.39, 21.87, 22.36, 22.84, 23.33, 23.82,
+	24.32, 24.81, 25.31, 25.80, 26.30, 26.81, 27.31, 27.82, 28.33, 28.84,
+	29.35, 29.87, 30.39, 30.91, 31.44, 31.97, 32.50, 33.03, 33.57, 34.11,
+	34.65, 35.20, 35.75, 36.31, 36.87, 37.43, 38.00, 38.57, 39.15, 39.73,
+	40.32, 40.91, 41.51, 42.11, 42.72, 43.34, 43.96, 44.58, 45.22, 45.86,
+	46.51, 47.17, 47.83, 48.51, 49.19, 49.88, 50.58, 51.30, 52.02, 52.76,
+	53.51, 54.27, 55.05, 55.84, 56.65, 57.47, 58.32, 59.18, 60.07, 60.99,
+	61.93, 62.90, 63.90, 64.94, 66.03, 67.16, 68.34, 69.60, 70.93, 72.35,
+	73.90, 75.61, 77.55, 79.84, 82.82, 90.00 };
 
 /* Starts at 0.34V, goes to 2.43V, increments in intervals of 0.01V */
 static const float shortRangingDistanceLUT[] =
@@ -81,6 +151,9 @@ static const float longRangingDistanceLUT[] =
      19.491, 19.362, 19.234, 19.107, 18.981, 18.855, 18.731, 18.607, 18.484, 18.362,
      18.241, 18.120, 18.000, 17.882, 17.764 };
 
+
+float arcsin(float x);
+positionAttitudeData computePositionAttitudeRanging();
 rangingData getLongDistance();
 void convertVoltage(uint16_t data, uint8_t sensor);
 rangingData getShortDistance();

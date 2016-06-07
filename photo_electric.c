@@ -1,6 +1,6 @@
 #include "photo_electric.h"
 #include "gpio.h"
-#include "time.h"
+#include "timer.h"
 #include "kinematics.h"
 
 // Do we need this function?
