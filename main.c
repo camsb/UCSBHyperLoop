@@ -36,7 +36,7 @@ int main(void)
     if(PWM_ACTIVE){
         Init_PWM(LPC_PWM1);
         Init_Channel(LPC_PWM1, 1);
-        Set_Channel_PWM(LPC_PWM1, 1, 0.5);
+        Set_Channel_PWM(LPC_PWM1, 1, 0);
     }
     if(GATHER_DATA_ACTIVE){
     	gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 1);

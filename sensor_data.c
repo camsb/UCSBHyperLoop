@@ -5,6 +5,13 @@
 #include "ranging.h"
 #include "temp_press.h"
 #include "kinematics.h"
+#include "pwm.h"
+#include "timer.h"
+#include "stdio.h"
+
+float PWMVal = 0.3;
+int rampUp = 1;
+int stageTime = 0;
 
 void collectCalibrationData( I2C_ID_T id ){
 	XYZ initialAccel;
@@ -79,8 +86,29 @@ void collectData(){
 }
 
 void TIMER1_IRQHandler(void){
-	collectDataFlag = 1;
+	// collectDataFlag = 1;
+	if(!rampUp){
+		PWMVal = 0;
+		printf("The system is off.\n");
+	}
+	else if(PWMVal >= 1){
+		printf("Reached final stage, shutting off in next stage.\n");
+		rampUp = 0;
+	}
+	else if(stageTime == 2){
+		printf("Incrementing the PWM value to %f\n", PWMVal + 0.1);
+		PWMVal += 0.1;
+		stageTime = 0;
+	}
+	else{
+		stageTime++;
+	}
+
+	Set_Channel_PWM(LPC_PWM1, 1, PWMVal);
 	Chip_TIMER_ClearMatch( LPC_TIMER1, 1 );
+	// Set_Channel_PWM(LPC_PWM1, 1, PWMVal);
+	// Chip_TIMER_ClearMatch( LPC_TIMER1, 1 );
+
 }
 
 void gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate){

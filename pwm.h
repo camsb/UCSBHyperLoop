@@ -25,7 +25,9 @@ typedef struct {                          /*!< TIMERn Structure       */
 	__IO uint32_t CTCR;
 } LPC_PWM_T;
 
-#define ON_RESET_VALUE 3500
+//#define ON_RESET_VALUE 3500
+//#define ON_RESET_VALUE 12000000
+#define ON_RESET_VALUE 2000
 
 /** PWM0, PWM1 structures */
 #define LPC_PWM0 			  ((LPC_PWM_T *) LPC_PWM0_BASE)
