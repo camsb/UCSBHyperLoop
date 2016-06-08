@@ -2,11 +2,11 @@
  *
  * UCSB Hyperloop Controller
  *
- * Celeste "Not Again" Bean
- * Connor "TCP/IP Expert" Buckland
- * "Big" Ben Hartl
- * Cameron "Deep Fried Board" McCarthy
- * Connor "Funny Guy" Mulcahey
+ * Celeste Bean
+ * Connor Buckland
+ * Ben Hartl
+ * Cameron McCarthy
+ * Connor Mulcahey
  *
  */
 
@@ -27,6 +27,7 @@
 #include "ranging.h"
 #include "braking.h"
 
+
 int main(void)
 {
     /* Initialize the board and clock */
@@ -34,9 +35,31 @@ int main(void)
     Board_Init();
 
     if(PWM_ACTIVE){
+
         Init_PWM(LPC_PWM1);
+
         Init_Channel(LPC_PWM1, 1);
+        Init_Channel(LPC_PWM1, 2);
+        Init_Channel(LPC_PWM1, 3);
+        Init_Channel(LPC_PWM1, 4);
+        Init_Channel(LPC_PWM1, 5);
+        Init_Channel(LPC_PWM1, 6);
+
         Set_Channel_PWM(LPC_PWM1, 1, 0);
+        Set_Channel_PWM(LPC_PWM1, 2, 0);
+        Set_Channel_PWM(LPC_PWM1, 3, 0);
+        Set_Channel_PWM(LPC_PWM1, 4, 0);
+        Set_Channel_PWM(LPC_PWM1, 5, 0);
+        Set_Channel_PWM(LPC_PWM1, 6, 0);
+
+        GPIO_Output_Init(4, ACTUATOR_DIRECTION_PIN); // Direction
+        GPIO_Output_Init(4, ACTUATOR_PWM_PIN); // PWM
+        GPIO_Output_Init(4, ACTUATOR_SLEEP_PIN); // Sleep (High = actuate, low = sleep)
+
+        Chip_GPIO_SetPinState(LPC_GPIO, 4, ACTUATOR_DIRECTION_PIN, 0);
+        Chip_GPIO_SetPinState(LPC_GPIO, 4, ACTUATOR_PWM_PIN, 0);
+        Chip_GPIO_SetPinState(LPC_GPIO, 4, ACTUATOR_SLEEP_PIN, 0);
+
     }
     if(GATHER_DATA_ACTIVE){
     	gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 1);

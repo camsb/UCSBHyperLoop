@@ -15,6 +15,7 @@ void Init_Channel(LPC_PWM_T * pwm, uint8_t channel){
 	Chip_PWM_SetMatch(pwm, channel, 0);
 	Chip_PWM_LatchEnable(pwm, channel, PWM_OUT_ENABLED);
 	Chip_PWM_SetControlMode(pwm, channel, PWM_SINGLE_EDGE_CONTROL_MODE, PWM_OUT_ENABLED);
+//	Set_Channel_PWM(LPC_PWM1, channel, 0);
 }
 
 /* Initialize PWM */

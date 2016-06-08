@@ -3,6 +3,10 @@
 
 #include "board.h"
 
+#define 	ACTUATOR_DIRECTION_PIN	29
+#define		ACTUATOR_PWM_PIN		30
+#define		ACTUATOR_SLEEP_PIN		31
+
 void 	collectCalibrationData(I2C_ID_T id);
 void    collectData();
 void    TIMER1_IRQHandler(void);
