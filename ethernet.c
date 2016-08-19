@@ -1,7 +1,9 @@
+#include "initialization.h"
 #include "ethernet.h"
 #include "sensor_data.h"
 #include <string.h>
 #include "stdio.h"
+#include "sha256.h"
 #include "timer.h"
 
 /* Rx Buffer Addresses */
@@ -189,42 +191,137 @@ void send_data_ack_helper(char *method, int *position) {
 	*position += 1;
 }
 
+int packetAuthentic(char *packet) {
+	// verify packet in tegrity
+	char *toked = strtok(packet, '\n');
+	printf("Secure control messege...\n");
+	printf("     sha: %s\n", toked[0]);
+	printf("     msg: %s\n", toked[1]);
+	// ...assuming length is at least 2, not very safe though
+
+	// generate our own hash of the command
+	BYTE sha_result_buf[SHA256_BLOCK_SIZE];
+	SHA256_CTX ctx;
+	sha256_init(&ctx);
+	sha256_update(&ctx, toked[1], 6); // actuator methods have length of 6
+	sha256_final(&ctx, sha_result_buf);
+
+	// convert ascii of sha_result_buf into string
+	int i;
+	char sha_result_as_ascii_hex[64];
+	for (i = 0; i < 32; i++) {
+		sprintf(sha_result_as_ascii_hex + i, "%02X", sha_result_buf[i]);
+	}
+	printf("    our sha of msg: %s\n", sha_result_as_ascii_hex);
+
+	// compare our sha with the one sent in
+	return strcmp(sha_result_as_ascii_hex,  toked[0]);
+}
 
 void recvDataPacket() {
+
+	printf("Receiving Data Packet!\n");
+
 	int pos = 0;
 	memset(Net_Tx_Data, 0, 64);
 
 	Wiz_Recv_Blocking(SOCKET_ID, Net_Rx_Data);
-	printf("Receiving Data Packet!\n");
 
-	if(strstr((char *)Net_Rx_Data, EBRAKE) != NULL) {	// Emergency Brake
-		eBrakeFlag = 1;
-		printf("Emergency Brake!\n");
-		send_data_ack_helper(PAK, &pos);
-	}
-	if(strstr((char *)Net_Rx_Data, POWRUP) != NULL) {	// Pod Start Flag
-		powerUpFlag = 1;
-		send_data_ack_helper(PAK, &pos);
-		printf("Power Up!\n");
-	}
-	if(strstr((char *)Net_Rx_Data, PWRDWN) != NULL) {	// Pod Stop Flag
-		powerDownFlag = 1;
-		powerUpFlag = 0;
-		printf("Power Down!\n");
-	}
-	if(strstr((char *)Net_Rx_Data, SERPRO) != NULL) {	// Service Propulsion Start
-		serPropulsionWheels = 1;
-		send_data_ack_helper(WAK, &pos);
-		printf("Service Propulsion Activated!\n");
-	}
-	if(strstr((char *)Net_Rx_Data, SERSTP) != NULL) {	// Service Propulsion Stop
-		serPropulsionWheels = 0;
-		printf("Service Propulsion Disactivated!\n");
+
+	if(SECURITY_ACTIVE && !Authenticated) {
+
+		// only allow the challenge packet if looking to authenticate
+
+		char *clg_loc;
+
+		if((clg_loc = strstr((char *)Net_Rx_Data, CLG)) != NULL) {	// Authentication challenge
+			printf("Authentication challenge!\n");
+			ChallengeAccepted = 1;
+			Wiz_Sha_Authenticate(clg_loc);
+		}
+
+		if (ChallengeAccepted && strstr((char *)Net_Rx_Data, AUT) != NULL) {	// Authenticated
+			printf("Authentication success!\n");
+			Authenticated = true;
+		}
+
+	} else {
+
+		// if security active and authenticated, must verify authenticity of messages
+		if (SECURITY_ACTIVE && Authenticated && !packetAuthentic((char *)Net_Rx_Data)) return;
+
+		if(strstr((char *)Net_Rx_Data, EBRAKE) != NULL) {	// Emergency Brake
+			eBrakeFlag = 1;
+			printf("Emergency Brake!\n");
+			send_data_ack_helper(PAK, &pos);
+		}
+		if(strstr((char *)Net_Rx_Data, POWRUP) != NULL) {	// Pod Start Flag
+			powerUpFlag = 1;
+			send_data_ack_helper(PAK, &pos);
+			printf("Power Up!\n");
+		}
+		if(strstr((char *)Net_Rx_Data, PWRDWN) != NULL) {	// Pod Stop Flag
+			powerDownFlag = 1;
+			powerUpFlag = 0;
+			printf("Power Down!\n");
+		}
+		if(strstr((char *)Net_Rx_Data, SERPRO) != NULL) {	// Service Propulsion Start
+			serPropulsionWheels = 1;
+			send_data_ack_helper(WAK, &pos);
+			printf("Service Propulsion Activated!\n");
+		}
+		if(strstr((char *)Net_Rx_Data, SERSTP) != NULL) {	// Service Propulsion Stop
+			serPropulsionWheels = 0;
+			printf("Service Propulsion Disactivated!\n");
+		}
+
+		if(pos != 0) {
+			Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+		}
 	}
 
-	if(pos != 0) {
-		Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+}
+
+void Wiz_Sha_Authenticate(char *clg_loc) {
+
+	int len = 48;
+	BYTE challenge_secret[len];
+
+	// receive challenge CLG:<challenge>
+
+	memcpy(challenge_secret, clg_loc + 4, 16);
+
+	// compute challenge + secret hash
+
+	memcpy(challenge_secret + 16, SHA256_SECRET, 32);
+
+	BYTE sha_result_buf[SHA256_BLOCK_SIZE];
+
+	SHA256_CTX ctx;
+	sha256_init(&ctx);
+	sha256_update(&ctx, challenge_secret, len);
+	sha256_final(&ctx, sha_result_buf);
+
+	// send back AUT:sha(<challenge><secret>)
+	// sha must be sent in ascii otherwise zeros screw with the delimiter
+
+	BYTE sha_result_ascii[SHA256_BLOCK_SIZE*2]; // each character is now 8 bits instead of 4
+
+	int i;
+	for (i = 0; i <= SHA256_BLOCK_SIZE; i++) {
+		sprintf(sha_result_ascii + i*2, "%02x", sha_result_buf[i]);
 	}
+
+	memset(Net_Tx_Data, 0, DATA_BUF_SIZE);
+	memcpy(Net_Tx_Data, AUT, 3);
+	Net_Tx_Data[3] = ':';
+	memcpy(Net_Tx_Data + 4, sha_result_ascii, SHA256_BLOCK_SIZE*2);
+	Net_Tx_Data[4 + SHA256_BLOCK_SIZE*2] = '\n';
+
+	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+
+	// recvDataPacket handles the successful auth ack
+
 }
 
 void sendDataPacket() {
@@ -234,6 +331,9 @@ void sendDataPacket() {
 	// Copy strings to Net_Tx_Data
 	int pos = 0;
 	memset(Net_Tx_Data, 0, 256); // Make sure this clears enough space
+
+	// because of struct padding, it'd be difficult to run a sha on the whole message for the sensor data
+		// what is more important is that we authenticate actuator commands
 
 	/* Atmospheric, Miscellaneous Data */
 	sprintf(DataPacket.bm1, "%06.2f", sensorData.pressure1);
@@ -302,6 +402,7 @@ void rec_method(char *method, char *val, int *val_len) {
 
 /* Handle Wiznet Interrupt */
 void wizIntFunction() {
+
 	uint16_t offset = 0;// 0x0100*n;
 	uint8_t socket_int, n;
 
@@ -321,6 +422,7 @@ void wizIntFunction() {
 			if( socket_int & TIMEOUT ) { // Timeout Occurred
 			}
 			if( socket_int & RECV_PKT ) {	 // Packet Received
+				printf("Received data packet...\n");
 				recvDataPacket();
 			}
 			if( socket_int & DISCON_SKT ) {	 // FIN/FIN ACK Received
@@ -339,6 +441,8 @@ void wizIntFunction() {
 	}
 
 	wizIntFlag = 0;
+	// was set to zero when called
+	// once done handling interrupts, we set it back to 1
 }
 
 uint8_t Wiz_Int_Clear(uint8_t n) {
@@ -405,8 +509,9 @@ void Wiz_TCP_Init(uint8_t n) {
 	if(Rx_Buf[4] == 0x13) {
 		printf("Socket %u TCP Initialized Successfully\n", n);
 		activeSockets |= 1 << n;
-	} else
+	} else {
 		printf("Socket %u TCP Initialization Failed\n", n);
+	}
 }
 
 /* UDP Initialization */
@@ -533,6 +638,8 @@ void Wiz_TCP_Close(uint8_t n) {
 	/* Close Socket */
 	Tx_Buf[4] = CLOSE;
 	spi_Send_Blocking(Sn_CR_BASE + offset, 0x0001);
+
+	printf("Disconnected\n");
 }
 
 /* Close UDP Socket */
@@ -690,7 +797,7 @@ void ethernetInit(uint8_t protocol, uint8_t socket) {
 
 	Wiz_Init();
 	Wiz_Network_Init();
-	Wiz_Check_Network_Registers();
+//	Wiz_Check_Network_Registers();
 	Wiz_Memory_Init();
 	if(protocol) {
 		Wiz_Int_Init(socket);

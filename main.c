@@ -26,11 +26,13 @@
 #include "gpio.h"
 #include "ranging.h"
 #include "braking.h"
+#include "sha256.h"
 
 int main(void)
 {
     /* Initialize the board and clock */
-    SystemCoreClockUpdate();
+
+ 	SystemCoreClockUpdate();
     Board_Init();
 
     if(PWM_ACTIVE){
@@ -69,69 +71,75 @@ int main(void)
 
     /* Handle all Wiznet Interrupts, including RECV */
     if(wizIntFlag) {
+//    	printf("first wizIntFlag\n");
 		wizIntFunction();
 	}
 
-    DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
-    DEBUGOUT("_______________________________________\n\n");
+//    DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
+//    DEBUGOUT("_______________________________________\n\n");
 
     while( 1 )
     {
 
-    	/* Need to do this cleanly, on a timer to prevent multiple attempts before a response */
-    	if(!connectionOpen && !connectionClosed && sendDataFlag) {
-    		sendDataFlag = 0;
-    		ethernetInit(PROTO_TCP, 0);
+//    	/* Need to do this cleanly, on a timer to prevent multiple attempts before a response */
+//    	if(!connectionOpen && !connectionClosed && sendDataFlag) {
+//    		sendDataFlag = 0;
+//    		ethernetInit(PROTO_TCP, SOCKET_ID);
+//    	}
+//    	printf("%d\n", Chip_GPIO_GetPinState(LPC_GPIO, WIZNET_INT_PORT, WIZNET_INT_PIN));
+		/* Handle all Wiznet Interrupts, including RECV */
+		if(1/*wizIntFlag*/) {
+//			printf("Wiznet interrupt\n");
+			wizIntFunction();
+		}
+
+    	// Don't advance to other network stuff until authenticated if we have authentication on
+    	if ((SECURITY_ACTIVE && Authenticated) || !SECURITY_ACTIVE) {
+
+			/* If Data Send Requested, Send Data */
+			if((sendDataFlag && connectionOpen)) {
+				sendDataPacket();
+			}
+
+			/* Handle Photoelectric Strip Detected */
+			if(stripDetectedFlag) {
+				stripDetected();
+//				DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
+
+			}
+
+			if(collectDataFlag){
+
+				collectData();
+
+				if (sensorData.dataPrintFlag == 2) { // Print every 2/1 = 2 seconds.
+//					DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
+//					DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
+//					DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
+//					DEBUGOUT( "longRangingJ31 = %f\n", sensorData.longRangingJ31 );
+//					DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
+//					DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
+//					DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
+//					DEBUGOUT( "shortRangingJ37 = %f\n", sensorData.shortRangingJ37 );
+//					DEBUGOUT( "temperature1 = %f\n", sensorData.temp1 );
+//					DEBUGOUT( "temperature2 = %f\n", sensorData.temp2 );
+//					DEBUGOUT( "pressure1 = %f\n", sensorData.pressure1 );
+//					DEBUGOUT( "pressure2 = %f\n", sensorData.pressure2 );
+//					DEBUGOUT( "accelX = %f\t", sensorData.accelX );
+//					DEBUGOUT( "accelY = %f\t", sensorData.accelY );
+//					DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
+//					DEBUGOUT( "velocityX = %f\t", sensorData.velocityX );
+//					DEBUGOUT( "velocityY = %f\t", sensorData.velocityY );
+//					DEBUGOUT( "velocityZ = %f\n", sensorData.velocityZ );
+//					DEBUGOUT( "positionX = %f\t", sensorData.positionX );
+//					DEBUGOUT( "positionY = %f\t", sensorData.positionY );
+//					DEBUGOUT( "positionZ = %f\n", sensorData.positionZ );
+//					DEBUGOUT( "\n" );
+					sensorData.dataPrintFlag = 0;
+				}
+
+			}
     	}
-
-        /* Handle all Wiznet Interrupts, including RECV */
-        if(wizIntFlag) {
-    		wizIntFunction();
-    	}
-
-        /* If Data Send Requested, Send Data */
-    	if((sendDataFlag && connectionOpen)) {
-    		sendDataPacket();
-    	}
-
-    	/* Handle Photoelectric Strip Detected */
-        if(stripDetectedFlag) {
-            stripDetected();
-        	DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
-
-        }
-
-        if(collectDataFlag){
-
-            collectData();
-
-            if (sensorData.dataPrintFlag == 2) { // Print every 2/1 = 2 seconds.
-				DEBUGOUT( "longRangingJ22 = %f\t", sensorData.longRangingJ22 );
-				DEBUGOUT( "longRangingJ25 = %f\t", sensorData.longRangingJ25 );
-				DEBUGOUT( "longRangingJ30 = %f\t", sensorData.longRangingJ30 );
-				DEBUGOUT( "longRangingJ31 = %f\n", sensorData.longRangingJ31 );
-				DEBUGOUT( "shortRangingJ34 = %f\t", sensorData.shortRangingJ34 );
-				DEBUGOUT( "shortRangingJ35 = %f\t", sensorData.shortRangingJ35 );
-				DEBUGOUT( "shortRangingJ36 = %f\t", sensorData.shortRangingJ36 );
-				DEBUGOUT( "shortRangingJ37 = %f\n", sensorData.shortRangingJ37 );
-				DEBUGOUT( "temperature1 = %f\n", sensorData.temp1 );
-				DEBUGOUT( "temperature2 = %f\n", sensorData.temp2 );
-				DEBUGOUT( "pressure1 = %f\n", sensorData.pressure1 );
-				DEBUGOUT( "pressure2 = %f\n", sensorData.pressure2 );
-				DEBUGOUT( "accelX = %f\t", sensorData.accelX );
-				DEBUGOUT( "accelY = %f\t", sensorData.accelY );
-				DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
-				DEBUGOUT( "velocityX = %f\t", sensorData.velocityX );
-				DEBUGOUT( "velocityY = %f\t", sensorData.velocityY );
-				DEBUGOUT( "velocityZ = %f\n", sensorData.velocityZ );
-				DEBUGOUT( "positionX = %f\t", sensorData.positionX );
-				DEBUGOUT( "positionY = %f\t", sensorData.positionY );
-				DEBUGOUT( "positionZ = %f\n", sensorData.positionZ );
-				DEBUGOUT( "\n" );
-				sensorData.dataPrintFlag = 0;
-            }
-
-        }
 
     }
 

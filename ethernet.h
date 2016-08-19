@@ -135,8 +135,15 @@
 /* Web Application Level Acknowledgements */
 #define WAK				"WAK"		// Service Propulsion Acknowledgement
 #define PAK				"PAK"		// Power Up Acknowledgement
+/* Authentication */
+#define AUT 			"AUT"		// Authenticate, pass SHA to server, or receive blank for ack
+#define CLG				"CLG"       // Authentication challenge
 
 #define SOCKET_ID 		0
+
+uint8_t ChallengeAccepted;
+uint8_t Authenticated;
+
 
 struct data_packet {
 	// all pointers are ini
@@ -214,6 +221,7 @@ void Wiz_TCP_Close(uint8_t n);
 void Wiz_UDP_Close(uint8_t n);
 void Wiz_Clear_Buffer(uint8_t n);
 void ethernetInit(uint8_t protocol, uint8_t socket);
+void Wiz_Sha_Authenticate(char *clg_loc);
 void Wiz_Deinit(uint8_t protocol, uint8_t socket);
 void spi_Send_Blocking(uint16_t address, uint16_t length);
 void spi_Recv_Blocking(uint16_t address, uint16_t length);
