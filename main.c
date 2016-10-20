@@ -26,6 +26,7 @@
 #include "gpio.h"
 #include "ranging.h"
 #include "braking.h"
+#include "slave_board.h"
 
 int main(void)
 {
@@ -65,6 +66,10 @@ int main(void)
     if(GPIO_INT_ACTIVE){
 		/* Enable GPIO Interrupts */
 		GPIO_Interrupt_Enable();
+    }
+    if(SLAVE_BOARD_ACTIVE){
+    	// Enable SPI communication with submodule boards
+    	//submodule_board_init();
     }
 
     /* Handle all Wiznet Interrupts, including RECV */
