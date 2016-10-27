@@ -3,24 +3,26 @@
 #include "stdio.h"
 #include "timer.h"
 
-// J157 is SSP2:
-//   *** J175 Label *** (upside-down
+// J157 is SSP1:
+//   *** J157 Label *** (upside-down
 // SSEL / MISO / MOSI / SCLK
 
+// On Uno:
+// 10 / 12 / 11 /13
 
 
 /* SSP Initialization */
 void submodule_board_init(){
-	Board_SSP_Init(LPC_SSP2);
-	Chip_SSP_Init(LPC_SSP2);
+	Board_SSP_Init(LPC_SSP1);
+	Chip_SSP_Init(LPC_SSP1);
 
 	ssp_format.frameFormat = SSP_FRAMEFORMAT_SPI;
 	ssp_format.bits = SSP_DATA_BITS;
 	ssp_format.clockMode = SSP_CLOCK_MODE0;
-	Chip_SSP_SetFormat(LPC_SSP2, ssp_format.bits, ssp_format.frameFormat, ssp_format.clockMode);
+	Chip_SSP_SetFormat(LPC_SSP1, ssp_format.bits, ssp_format.frameFormat, ssp_format.clockMode);
 
-	Chip_SSP_Enable(LPC_SSP2);
-	Chip_SSP_SetMaster(LPC_SSP2, 1);
+	Chip_SSP_Enable(LPC_SSP1);
+	Chip_SSP_SetMaster(LPC_SSP1, 1);
 }
 
 void submodule_board_read(){
