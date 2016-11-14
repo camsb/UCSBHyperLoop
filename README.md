@@ -7,13 +7,13 @@ We are an interdisiplinary team of 32 students and professors competing in Space
 The eight Computer/Electrical Engineering students responsible for this repository include:
  
 Celeste Bean     https://github.com/celestebean  
-Yang Ren         https://github.com/yangr13
-Tristan Seroff   https://github.com/t-seroff
-Asitha Kaduwela  https://github.com/akaduwela
-Jesus Diera      https://github.com/jdiera
-Kevin Kha        https://github.com/killer225whale
-Brian Canty      https://github.com/ece-god
-Ricky Castro     https://github.com/
+Yang Ren         https://github.com/yangr13  
+Tristan Seroff   https://github.com/t-seroff  
+Asitha Kaduwela  https://github.com/akaduwela  
+Jesus Diera      https://github.com/jdiera  
+Kevin Kha        https://github.com/killer225whale  
+Brian Canty      https://github.com/ece-god  
+Ricky Castro     https://github.com/  
 
 ## What is the Hyperloop?
 The Hyperloop is a proposed advanced method of high speed transportation between cities that are less than about 900 miles apart (e.g. Los Angeles and San Francisco). The system uses a capsule that is propelled through a low pressure steel tube as it rests on frictionless air bearings or magnets.
