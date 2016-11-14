@@ -2,15 +2,18 @@
 ![pod_gif_here](http://www.ucsbhyperloop.com/assets/ucsbhyperloop-d2207c2e7ad8ddb19f23f307bd09f1a862927b595cb68cd3478cf50093f5d581.gif)
 
 ## Who are We?
-We are an interdisiplinary team of 30 students and professors competing in SpaceX's Hyperloop Pod Competition. The competition involves designing and building a pod to be tested on a track constructed at SpaceX's Hawthorne headquarters in June 2016. Our main website can be found at http://www.ucsbhyperloop.com/
+We are an interdisiplinary team of 32 students and professors competing in SpaceX's Hyperloop Pod Competition. The competition involves designing and building a pod to be tested on a track constructed at SpaceX's Hawthorne headquarters in June 2016. Our main website can be found at http://www.ucsbhyperloop.com/
 
-The five Computer Engineering/Science students responsible for this repository include:
-
-Benjamin Hartl   https://github.com/benjaminhartl  
-Cameron McCarthy https://github.com/camsb  
+The eight Computer/Electrical Engineering students responsible for this repository include:
+ 
 Celeste Bean     https://github.com/celestebean  
-Connor Buckland  https://github.com/cbuckland  
-Connor Mulcahey  https://github.com/connormulcahey  
+Yang Ren         https://github.com/yangr13
+Tristan Seroff   https://github.com/t-seroff
+Asitha Kaduwela  https://github.com/akaduwela
+Jesus Diera      https://github.com/jdiera
+Kevin Kha        https://github.com/killer225whale
+Brian Canty      https://github.com/ece-god
+Ricky Castro     https://github.com/
 
 ## What is the Hyperloop?
 The Hyperloop is a proposed advanced method of high speed transportation between cities that are less than about 900 miles apart (e.g. Los Angeles and San Francisco). The system uses a capsule that is propelled through a low pressure steel tube as it rests on frictionless air bearings or magnets.
@@ -30,7 +33,27 @@ Our design involves two LPC4088 microcontroller chips for all sensor, communicat
 1. Download the Github application (https://desktop.github.com/) and make sure to that the Git Shell application is installed as well.
 2. You'll need the Git Shell since Windows does not have git command line tools natively installed.
 
-## Setting Up LPCXpresso with LPCOpen and Making a Project.
+## Download LPCOpen
+1. Follow this link: http:/www.lpcware.com/lpcopen
+2. Click "Click here to go to the LPCOpen product family download page".
+3. LPCOpen v2.xx for LPC40xx family devices.
+4. Under the latest available table, click the v2.10 download link for LPCXpresso v7.0.2_102. 
+5. Move "lpcopen_2_10_lpcxpresso_ea_devkit_4088" zip folder to somewhere other than your Downloads folder.
+
+## Setting Up LPCXpresso
+1. Open LPCXpresso and select your workspace.
+2. Click File -> Import... -> General -> Existing Projects into Workspace -> Next -> Select archive file: -> Browse
+3. Navigate to and select the "lpcopen_2_10_lpcxpresso_ea_devkit_4088" zip folder you downloaded.
+4. Deselect any projects you don't want to import (you only need "lpc_board_ea_devkit_4088" and "lpc_chip_40xx" but the other projects contain helpful example code).
+5. Click Finish.
+
+## Cloning the Git Repositiory 
+1. First, navigate to the LPCXpresso workspace directory (on the Git Powershell for PC or Terminal for Mac) where the imported projects are contained. For me, it was /Users/myname/LPCXpresso/.
+2. Go to the git respository online (https://github.com/camsb/UCSBHyperLoop) and copy the link by the "HTTPS" button. Currently this shows (https://github.com/camsb/UCSBHyperLoop.git).
+3. In the directory you navigated to, perform the following command: "git clone https://github.com/camsb/UCSBHyperLoop.git"
+5. You now have the latest source code and a working project.
+
+## Legacy Instructions: Setting Up LPCXpresso with LPCOpen and Making a Project.
 1. Open LPCXpresso and select your workspace. 
 2. Select File -> New Project.
 3. Select LPCXpresso C Project under the C/C++ tab.
@@ -52,10 +75,3 @@ Our design involves two LPC4088 microcontroller chips for all sensor, communicat
 19. Click next and keep all default option on the "Other options" screen.
 20. Click next and keep both options unchecked on the Printf options screen.
 21. Click Finish.
-
-## Cloning the Git Repositiory 
-1. First, navigate to the directory (on the Git Powershell for PC or Terminal for Mac) where the src folder is contained. For me, it was /Users/myname/LPCXpresso/ucsb_hyperloop. This should be wherever the project you just made is saved under wherever your current workspace is saved. Remove this src folder which was created when the project was first instantiated.
-2. Go to the git respository online (https://github.com/camsb/UCSBHyperLoop) and copy the link by the "HTTPS" button. Currently this shows (https://github.com/camsb/UCSBHyperLoop.git).
-3. In the directory you navigated to, perform the following command: "git clone https://github.com/camsb/UCSBHyperLoop.git"
-4. Rename this directory back to "src".
-5. You now have the latest source code and a working project.
