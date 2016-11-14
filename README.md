@@ -34,7 +34,7 @@ Our design involves two LPC4088 microcontroller chips for all sensor, communicat
 2. You'll need the Git Shell since Windows does not have git command line tools natively installed.
 
 ## Download LPCOpen
-1. Follow this link: http:/www.lpcware.com/lpcopen
+1. Follow this link: http://www.lpcware.com/lpcopen
 2. Click "Click here to go to the LPCOpen product family download page".
 3. LPCOpen v2.xx for LPC40xx family devices.
 4. Under the latest available table, click the v2.10 download link for LPCXpresso v7.0.2_102. 
