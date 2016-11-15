@@ -55,14 +55,15 @@ Our design involves two LPC4088 microcontroller chips for all sensor, communicat
 1. First, navigate to the LPCXpresso workspace directory (on the Git Powershell for PC or Terminal for Mac) where the imported LPCOpen projects are contained. For me, it was /Users/myname/LPCXpresso/.
 2. Go to the git respository online (https://github.com/camsb/UCSBHyperLoop) and copy the link by the "HTTPS" button. Currently this shows (https://github.com/camsb/UCSBHyperLoop.git).
 3. In the directory you navigated to, perform the following command: "git clone https://github.com/camsb/UCSBHyperLoop.git".
+4. Rename the new "UCSBHyperLoop" project directory to "ucsb_hyperloop".
 5. You now have the latest source code and a working project.
 
-## [Legacy Instructions] Making a Project
+## [Extra Info] Making a New Project for the LPC4088
 1. Open LPCXpresso and select your workspace. 
 2. Select File -> New Project.
 3. Select LPCXpresso C Project under the C/C++ tab.
 4. Under the LPC4x section, select LPC407x_8x, then select LPCOpen -> C Project.
-5. Name your project "ucsb_hyperloop".
+5. Name your project (e.g. "ucsb_hyperloop").
 6. Select LPC4088 again.
 7. Under LPCOpen Chip Library Project, select Browse... and find "lpc_chip_40xx" and click OK.
 8. Under LPCOpen Board Library Project, select Browse... and find "lpc_board_ea_devkit_4088" and click OK.
