@@ -13,7 +13,7 @@ The eight Computer/Electrical Engineering students currently responsible for thi
 - [Jesus Diera](https://github.com/jdiera)  
 - [Kevin Kha](https://github.com/killer225whale)  
 - [Brian Canty](https://github.com/ece-god)  
-- [Ricky Castro](https://github.com/)  
+- [Ricky Castro](https://github.com/ricky-27)  
 
 Previous students who managed this repository include:
 - [Benjamin Hartl](https://github.com/benjaminhartl)
