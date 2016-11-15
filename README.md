@@ -4,7 +4,7 @@
 ## Who are We?
 We are an interdisiplinary team of 32 students and professors competing in SpaceX's Hyperloop Pod Competition. The competition involves designing and building a pod to be tested on a track constructed at SpaceX's Hawthorne headquarters in June 2017. Our main website can be found at http://www.ucsbhyperloop.com/
 
-The eight Computer/Electrical Engineering students responsible for this repository include:
+The eight Computer/Electrical Engineering students currently responsible for this repository include:
  
 - [Celeste Bean](https://github.com/celestebean)  
 - [Yang Ren](https://github.com/yangr13)  
@@ -14,6 +14,12 @@ The eight Computer/Electrical Engineering students responsible for this reposito
 - [Kevin Kha](https://github.com/killer225whale)  
 - [Brian Canty](https://github.com/ece-god)  
 - [Ricky Castro](https://github.com/)  
+
+Previous students who managed this repository include:
+- [Benjamin Hartl](https://github.com/benjaminhartl)
+- [Cameron McCarthy](https://github.com/camsb)
+- [Connor Buckland](https://github.com/cbuckland)
+- [Connor Mulcahey](https://github.com/connormulcahey)
 
 ## What is the Hyperloop?
 The Hyperloop is a proposed advanced method of high speed transportation between cities that are less than about 900 miles apart (e.g. Los Angeles and San Francisco). The system uses a capsule that is propelled through a low pressure steel tube as it rests on frictionless air bearings or magnets.
@@ -48,7 +54,7 @@ Our design involves two LPC4088 microcontroller chips for all sensor, communicat
 5. Click Finish.
 
 ## Cloning the Git Repositiory 
-1. First, navigate to the LPCXpresso workspace directory (on the Git Powershell for PC or Terminal for Mac) where the imported projects are contained. For me, it was /Users/myname/LPCXpresso/.
+1. First, navigate to the LPCXpresso workspace directory (on the Git Powershell for PC or Terminal for Mac) where the imported LPCOpen projects are contained. For me, it was /Users/myname/LPCXpresso/.
 2. Go to the git respository online (https://github.com/camsb/UCSBHyperLoop) and copy the link by the "HTTPS" button. Currently this shows (https://github.com/camsb/UCSBHyperLoop.git).
 3. In the directory you navigated to, perform the following command: "git clone https://github.com/camsb/UCSBHyperLoop.git".
 5. You now have the latest source code and a working project.
