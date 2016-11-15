@@ -39,19 +39,17 @@ Our design involves two LPC4088 microcontroller chips for all sensor, communicat
 1. Download the Github application (https://desktop.github.com/) and make sure to that the Git Shell application is installed as well.
 2. You'll need the Git Shell since Windows does not have git command line tools natively installed.
 
-## Downloading LPCOpen
+## Setting Up LPCXpresso with LPCOpen
 1. Follow this link (http://www.lpcware.com/lpcopen).
 2. Click "Click here to go to the LPCOpen product family download page".
 3. LPCOpen v2.xx for LPC40xx family devices.
 4. Under the latest available table, click the v2.10 download link for LPCXpresso v7.0.2_102. 
-5. Move "lpcopen_2_10_lpcxpresso_ea_devkit_4088" zip folder to somewhere other than your Downloads folder.
-
-## Setting Up LPCXpresso with LPCOpen
-1. Open LPCXpresso and select your workspace.
-2. Click File -> Import... -> General -> Existing Projects into Workspace -> Next -> Select archive file: -> Browse.
-3. Navigate to and select the "lpcopen_2_10_lpcxpresso_ea_devkit_4088" zip folder you downloaded.
-4. Deselect any projects you don't want to import (you only need "lpc_board_ea_devkit_4088" and "lpc_chip_40xx" but the other projects contain helpful example code).
-5. Click Finish.
+5. Move the "lpcopen_2_10_lpcxpresso_ea_devkit_4088" zip folder to somewhere other than your Downloads folder.
+6. Open LPCXpresso and select your workspace.
+7. Click File -> Import... -> General -> Existing Projects into Workspace -> Next -> Select archive file: -> Browse.
+8. Navigate to and select the "lpcopen_2_10_lpcxpresso_ea_devkit_4088" zip folder you downloaded.
+9. Deselect any projects you don't want to import (you only need "lpc_board_ea_devkit_4088" and "lpc_chip_40xx" but the other projects contain helpful example code).
+10. Click Finish.
 
 ## Cloning the Git Repositiory 
 1. First, navigate to the LPCXpresso workspace directory (on the Git Powershell for PC or Terminal for Mac) where the imported LPCOpen projects are contained. For me, it was /Users/myname/LPCXpresso/.
@@ -59,25 +57,17 @@ Our design involves two LPC4088 microcontroller chips for all sensor, communicat
 3. In the directory you navigated to, perform the following command: "git clone https://github.com/camsb/UCSBHyperLoop.git".
 5. You now have the latest source code and a working project.
 
-## [Legacy Instructions] Setting Up LPCXpresso with LPCOpen and Making a Project
+## [Legacy Instructions] Making a Project
 1. Open LPCXpresso and select your workspace. 
 2. Select File -> New Project.
 3. Select LPCXpresso C Project under the C/C++ tab.
 4. Under the LPC4x section, select LPC407x_8x, then select LPCOpen -> C Project.
 5. Name your project "ucsb_hyperloop".
 6. Select LPC4088 again.
-7. Now you will have to download LPCOpen. Click the link on the bottom of the window (http:/www.lpcware.com/lpcopen).
-8. Click "Click here to go to the LPCOpen product family download page".
-9. LPCOpen v2.xx for LPC40xx family devices.
-10. Under the latest available table, click the v2.10 download link for LPCXpresso v7.0.2_102. 
-11. Move "lpcopen_2_10_lpcxpresso_ea_devkit_4088" zip folder to somewhere other than your Downloads folder.
-12. Back to LPCXpresso, under LPCOpen Chip Library Project, click Import.
-13. Browse for the zip archive and select wherever you moved it to and click Finish.
-14. Now all the example code and chip/board code should be in your workspace.
-15. Under LPCOpen Chip Library Project, select Browse... and find "lpc_chip_40xx" and click OK.
-16. Under LPCOpen Board Library Project, select Browse... and find "lpc_board_ea_devkit_4088" and click OK.
-17. Click Next on the CMSIS DSP window. 
-18. Click next on the Floating Point Unit window (Enabled SoftABI should be selected by default).
-19. Click next and keep all default option on the "Other options" screen.
-20. Click next and keep both options unchecked on the Printf options screen.
-21. Click Finish.
+7. Under LPCOpen Chip Library Project, select Browse... and find "lpc_chip_40xx" and click OK.
+8. Under LPCOpen Board Library Project, select Browse... and find "lpc_board_ea_devkit_4088" and click OK.
+9. Click Next on the CMSIS DSP window. 
+10. Click next on the Floating Point Unit window (Enabled SoftABI should be selected by default).
+11. Click next and keep all default option on the "Other options" screen.
+12. Click next and keep both options unchecked on the Printf options screen.
+13. Click Finish.
