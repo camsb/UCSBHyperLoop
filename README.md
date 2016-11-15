@@ -33,14 +33,14 @@ Our design involves two LPC4088 microcontroller chips for all sensor, communicat
 1. Download the Github application (https://desktop.github.com/) and make sure to that the Git Shell application is installed as well.
 2. You'll need the Git Shell since Windows does not have git command line tools natively installed.
 
-## Download LPCOpen
+## Downloading LPCOpen
 1. Follow this link (http://www.lpcware.com/lpcopen).
 2. Click "Click here to go to the LPCOpen product family download page".
 3. LPCOpen v2.xx for LPC40xx family devices.
 4. Under the latest available table, click the v2.10 download link for LPCXpresso v7.0.2_102. 
 5. Move "lpcopen_2_10_lpcxpresso_ea_devkit_4088" zip folder to somewhere other than your Downloads folder.
 
-## Setting Up LPCXpresso
+## Setting Up LPCXpresso with LPCOpen
 1. Open LPCXpresso and select your workspace.
 2. Click File -> Import... -> General -> Existing Projects into Workspace -> Next -> Select archive file: -> Browse.
 3. Navigate to and select the "lpcopen_2_10_lpcxpresso_ea_devkit_4088" zip folder you downloaded.
