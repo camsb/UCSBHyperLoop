@@ -27,6 +27,8 @@
 #include "ranging.h"
 #include "braking.h"
 
+#include "pcb_arduino_i2c.h"
+
 int main(void)
 {
     /* Initialize the board and clock */
@@ -71,6 +73,10 @@ int main(void)
     if(wizIntFlag) {
 		wizIntFunction();
 	}
+
+    if(PCB_ARDUINO_I2C_ACTIVE) {
+    	i2cInit(I2C0, SPEED_100KHZ);
+    }
 
     DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
@@ -126,6 +132,12 @@ int main(void)
 				sensorData.dataPrintFlag = 0;
             }
 
+        }
+        if(PCB_ARDUINO_I2C_ACTIVE) {
+        	// Send print command to Arduino Slave.
+        	uint8_t msg[] = "Hello world!\n";
+        	sendPrintCmd(I2C0, 2, msg, 14);
+        	sendPrint2Cmd(I2C0, 2);
         }
 
     }
