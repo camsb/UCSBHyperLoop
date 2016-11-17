@@ -26,6 +26,7 @@
 #include "gpio.h"
 #include "ranging.h"
 #include "braking.h"
+#include "bms.h"
 
 int main(void)
 {
@@ -65,6 +66,9 @@ int main(void)
     if(GPIO_INT_ACTIVE){
 		/* Enable GPIO Interrupts */
 		GPIO_Interrupt_Enable();
+    }
+    if(BMS_ACTIVE){
+        i2cInit(I2C0, SPEED_100KHZ);
     }
 
     /* Handle all Wiznet Interrupts, including RECV */
@@ -126,6 +130,10 @@ int main(void)
 				sensorData.dataPrintFlag = 0;
             }
 
+        }
+
+        if (BMS_ACTIVE){
+            testBMS();
         }
 
     }
