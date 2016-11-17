@@ -19,12 +19,7 @@
 					<folderInfo id="com.crt.advproject.config.exe.debug.977623367." name="/" resourcePath="">
 						<toolChain errorParsers="" id="com.crt.advproject.toolchain.exe.debug.1416146589" name="Code Red MCU Tools" superClass="com.crt.advproject.toolchain.exe.debug">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF" id="com.crt.advproject.platform.exe.debug.920072938" name="ARM-based MCU (Debug)" superClass="com.crt.advproject.platform.exe.debug"/>
-							<builder buildPath="${workspace_loc:/ucsb_hyperloop}/Debug" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator" id="com.crt.advproject.builder.exe.debug.261054057" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.crt.advproject.builder.exe.debug">
-								<outputEntries>
-									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
-									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
-								</outputEntries>
-							</builder>
+							<builder buildPath="${workspace_loc:/ucsb_hyperloop}/Debug" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator" id="com.crt.advproject.builder.exe.debug.261054057" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.crt.advproject.builder.exe.debug"/>
 							<tool id="com.crt.advproject.cpp.exe.debug.834846969" name="MCU C++ Compiler" superClass="com.crt.advproject.cpp.exe.debug"/>
 							<tool command="arm-none-eabi-gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="com.crt.advproject.gcc.exe.debug.1545978532" name="MCU C Compiler" superClass="com.crt.advproject.gcc.exe.debug">
 								<option id="com.crt.advproject.gcc.arch.1481936817" name="Architecture" superClass="com.crt.advproject.gcc.arch" value="com.crt.advproject.gcc.target.cm4" valueType="enumerated"/>
@@ -41,11 +36,8 @@
 								<option id="gnu.c.compiler.option.misc.other.1322410947" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections -fsingle-precision-constant" valueType="string"/>
 								<option id="com.crt.advproject.gcc.hdrlib.1653649525" name="Library headers" superClass="com.crt.advproject.gcc.hdrlib" value="com.crt.advproject.gcc.hdrlib.newlib" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.237138272" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_chip_40xx}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_board_ea_devkit_4088}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_board_ea_devkit_4088/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_chip_40xx/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 								</option>
 								<option id="com.crt.advproject.gcc.fpu.589934929" name="Floating point" superClass="com.crt.advproject.gcc.fpu" value="com.crt.advproject.gcc.fpu.fpv4" valueType="enumerated"/>
 								<option id="com.crt.advproject.gcc.specs.1544349176" name="Specs" superClass="com.crt.advproject.gcc.specs" value="Newlib" valueType="enumerated"/>
@@ -58,10 +50,6 @@
 								<option id="com.crt.advproject.gas.hdrlib.1488476890" name="Library headers" superClass="com.crt.advproject.gas.hdrlib" value="com.crt.advproject.gas.hdrlib.newlib" valueType="enumerated"/>
 								<option id="com.crt.advproject.gas.fpu.1740380609" name="Floating point" superClass="com.crt.advproject.gas.fpu" value="com.crt.advproject.gas.fpu.fpv4" valueType="enumerated"/>
 								<option id="com.crt.advproject.gas.specs.1970136725" name="Specs" superClass="com.crt.advproject.gas.specs" value="Newlib" valueType="enumerated"/>
-								<option id="gnu.both.asm.option.include.paths.1195573588" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_chip_40xx}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_board_ea_devkit_4088}&quot;"/>
-								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1136052715" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 								<inputType id="com.crt.advproject.assembler.input.323497365" name="Additional Assembly Source Files" superClass="com.crt.advproject.assembler.input"/>
 							</tool>
@@ -80,8 +68,8 @@
 								</option>
 								<option id="com.crt.advproject.link.gcc.hdrlib.91363265" name="Library" superClass="com.crt.advproject.link.gcc.hdrlib" value="com.crt.advproject.gcc.link.hdrlib.newlib.semihost" valueType="enumerated"/>
 								<option id="gnu.c.link.option.libs.846687976" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="lpc_chip_40xx"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="lpc_board_ea_devkit_4088"/>
+									<listOptionValue builtIn="false" value="lpc_board_ea_devkit_4088"/>
+									<listOptionValue builtIn="false" value="lpc_chip_40xx"/>
 								</option>
 								<option id="gnu.c.link.option.paths.2128442797" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_board_ea_devkit_4088/Debug}&quot;"/>
@@ -98,27 +86,11 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="fatfs"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="lpc_board_ea_devkit_4088;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/lpc_board_ea_devkit_4088"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/lpc_board_ea_devkit_4088/Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="lpc_board_ea_devkit_4088" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="lpc_chip_40xx;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/lpc_chip_40xx"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/lpc_chip_40xx/Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="lpc_chip_40xx" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
 		<cconfiguration id="com.crt.advproject.config.exe.release.1351920537">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.crt.advproject.config.exe.release.1351920537" moduleId="org.eclipse.cdt.core.settings" name="Release">
@@ -157,7 +129,6 @@
 								<option id="gnu.c.compiler.option.include.paths.1058568499" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_board_ea_devkit_4088/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_chip_40xx/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 								</option>
 								<option id="com.crt.advproject.gcc.fpu.506841534" name="Floating point" superClass="com.crt.advproject.gcc.fpu" value="com.crt.advproject.gcc.fpu.fpv4" valueType="enumerated"/>
 								<inputType id="com.crt.advproject.compiler.input.1153022148" superClass="com.crt.advproject.compiler.input"/>
@@ -168,7 +139,6 @@
 								<option id="gnu.both.asm.option.flags.crt.986212273" name="Assembler flags" superClass="gnu.both.asm.option.flags.crt" value="-c -x assembler-with-cpp -D__NEWLIB__ -D__MULTICORE_NONE -DNDEBUG -D__CODE_RED" valueType="string"/>
 								<option id="com.crt.advproject.gas.hdrlib.491919729" name="Library headers" superClass="com.crt.advproject.gas.hdrlib" value="com.crt.advproject.gas.hdrlib.newlib" valueType="enumerated"/>
 								<option id="com.crt.advproject.gas.fpu.1754735568" name="Floating point" superClass="com.crt.advproject.gas.fpu" value="com.crt.advproject.gas.fpu.fpv4" valueType="enumerated"/>
-								<option id="gnu.both.asm.option.include.paths.916406004" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.334449354" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 								<inputType id="com.crt.advproject.assembler.input.1911734359" name="Additional Assembly Source Files" superClass="com.crt.advproject.assembler.input"/>
 							</tool>
@@ -189,8 +159,6 @@
 								<option id="gnu.c.link.option.libs.1301590637" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="lpc_board_ea_devkit_4088"/>
 									<listOptionValue builtIn="false" value="lpc_chip_40xx"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="&quot;${workspace_loc:/ucsb_hyperloop/liblpc_board_ea_devkit_4088.a}&quot;"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="liblpc_chip_40xx.a"/>
 								</option>
 								<option id="gnu.c.link.option.paths.13726472" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lpc_board_ea_devkit_4088/Release}&quot;"/>
@@ -206,7 +174,6 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="fatfs"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
@@ -216,6 +183,9 @@
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="ucsb_hyperloop.com.crt.advproject.projecttype.exe.834090219" name="Executable" projectType="com.crt.advproject.projecttype.exe"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="com.crt.config">
@@ -235,52 +205,52 @@
 &lt;memoryInstance derived_from="RAM" id="RamPeriph32" location="0x20000000" size="0x8000"/&gt;&#13;
 &lt;prog_flash blocksz="0x1000" location="0x0" maxprgbuff="0x1000" progwithcode="TRUE" size="0x10000"/&gt;&#13;
 &lt;prog_flash blocksz="0x8000" location="0x10000" maxprgbuff="0x1000" progwithcode="TRUE" size="0x70000"/&gt;&#13;
-&lt;peripheralInstance derived_from="V7M_MPU" id="MPU" location="0xe000ed90"/&gt;&#13;
-&lt;peripheralInstance derived_from="V7M_NVIC" id="NVIC" location="0xe000e000"/&gt;&#13;
-&lt;peripheralInstance derived_from="V7M_DCR" id="DCR" location="0xe000edf0"/&gt;&#13;
-&lt;peripheralInstance derived_from="V7M_ITM" id="ITM" location="0xe0000000"/&gt;&#13;
-&lt;peripheralInstance derived_from="FLASHCTRL" id="FLASHCTRL" location="0x200000"/&gt;&#13;
-&lt;peripheralInstance derived_from="GPDMA" id="GPDMA" location="0x20080000"/&gt;&#13;
-&lt;peripheralInstance derived_from="ETHERNET" id="ETHERNET" location="0x20084000"/&gt;&#13;
-&lt;peripheralInstance derived_from="LCD" id="LCD" location="0x20088000"/&gt;&#13;
-&lt;peripheralInstance derived_from="USB" id="USB" location="0x2008c000"/&gt;&#13;
-&lt;peripheralInstance derived_from="CRC" id="CRC" location="0x20090000"/&gt;&#13;
-&lt;peripheralInstance derived_from="GPIO" id="GPIO" location="0x20098000"/&gt;&#13;
-&lt;peripheralInstance derived_from="EMC" id="EMC" location="0x2009c000"/&gt;&#13;
-&lt;peripheralInstance derived_from="WWDT" id="WWDT" location="0x40000000"/&gt;&#13;
-&lt;peripheralInstance derived_from="TIMER0" id="TIMER0" location="0x40004000"/&gt;&#13;
-&lt;peripheralInstance derived_from="TIMER1" id="TIMER1" location="0x40008000"/&gt;&#13;
-&lt;peripheralInstance derived_from="UART0" id="UART0" location="0x4000c000"/&gt;&#13;
-&lt;peripheralInstance derived_from="UART1" id="UART1" location="0x40010000"/&gt;&#13;
-&lt;peripheralInstance derived_from="PWM0" id="PWM0" location="0x40014000"/&gt;&#13;
-&lt;peripheralInstance derived_from="PWM1" id="PWM1" location="0x40018000"/&gt;&#13;
-&lt;peripheralInstance derived_from="I2C0" id="I2C0" location="0x4001c000"/&gt;&#13;
-&lt;peripheralInstance derived_from="COMPARATOR" id="COMPARATOR" location="0x40020000"/&gt;&#13;
-&lt;peripheralInstance derived_from="RTC" id="RTC" location="0x40024000"/&gt;&#13;
-&lt;peripheralInstance derived_from="GPIOINT" id="GPIOINT" location="0x40028080"/&gt;&#13;
-&lt;peripheralInstance derived_from="IOCON" id="IOCON" location="0x4002c000"/&gt;&#13;
-&lt;peripheralInstance derived_from="SSP1" id="SSP1" location="0x40030000"/&gt;&#13;
-&lt;peripheralInstance derived_from="ADC" id="ADC" location="0x40034000"/&gt;&#13;
-&lt;peripheralInstance derived_from="CANAFRAM" id="CANAFRAM" location="0x40038000"/&gt;&#13;
-&lt;peripheralInstance derived_from="CANAF" id="CANAF" location="0x4003c000"/&gt;&#13;
-&lt;peripheralInstance derived_from="CCAN" id="CCAN" location="0x40040000"/&gt;&#13;
-&lt;peripheralInstance derived_from="CAN1" id="CAN1" location="0x40044000"/&gt;&#13;
-&lt;peripheralInstance derived_from="CAN2" id="CAN2" location="0x40048000"/&gt;&#13;
-&lt;peripheralInstance derived_from="I2C1" id="I2C1" location="0x4005c000"/&gt;&#13;
-&lt;peripheralInstance derived_from="SSP0" id="SSP0" location="0x40088000"/&gt;&#13;
-&lt;peripheralInstance derived_from="DAC" id="DAC" location="0x4008c000"/&gt;&#13;
-&lt;peripheralInstance derived_from="TIMER2" id="TIMER2" location="0x40090000"/&gt;&#13;
-&lt;peripheralInstance derived_from="TIMER3" id="TIMER3" location="0x40094000"/&gt;&#13;
-&lt;peripheralInstance derived_from="UART2" id="UART2" location="0x40098000"/&gt;&#13;
-&lt;peripheralInstance derived_from="UART3" id="UART3" location="0x4009c000"/&gt;&#13;
-&lt;peripheralInstance derived_from="I2C2" id="I2C2" location="0x400a0000"/&gt;&#13;
-&lt;peripheralInstance derived_from="UART4" id="UART4" location="0x400a4000"/&gt;&#13;
-&lt;peripheralInstance derived_from="I2S" id="I2S" location="0x400a8000"/&gt;&#13;
-&lt;peripheralInstance derived_from="SSP2" id="SSP2" location="0x400ac000"/&gt;&#13;
-&lt;peripheralInstance derived_from="MCPWM" id="MCPWM" location="0x400b8000"/&gt;&#13;
-&lt;peripheralInstance derived_from="QEI" id="QEI" location="0x400bc000"/&gt;&#13;
-&lt;peripheralInstance derived_from="SDMMC" id="SDMMC" location="0x400c0000"/&gt;&#13;
-&lt;peripheralInstance derived_from="SYSCON" id="SYSCON" location="0x400fc000"/&gt;&#13;
+&lt;peripheralInstance derived_from="V7M_MPU" determined="infoFile" id="MPU" location="0xe000ed90"/&gt;&#13;
+&lt;peripheralInstance derived_from="V7M_NVIC" determined="infoFile" id="NVIC" location="0xe000e000"/&gt;&#13;
+&lt;peripheralInstance derived_from="V7M_DCR" determined="infoFile" id="DCR" location="0xe000edf0"/&gt;&#13;
+&lt;peripheralInstance derived_from="V7M_ITM" determined="infoFile" id="ITM" location="0xe0000000"/&gt;&#13;
+&lt;peripheralInstance derived_from="FLASHCTRL" determined="infoFile" id="FLASHCTRL" location="0x200000"/&gt;&#13;
+&lt;peripheralInstance derived_from="GPDMA" determined="infoFile" id="GPDMA" location="0x20080000"/&gt;&#13;
+&lt;peripheralInstance derived_from="ETHERNET" determined="infoFile" id="ETHERNET" location="0x20084000"/&gt;&#13;
+&lt;peripheralInstance derived_from="LCD" determined="infoFile" id="LCD" location="0x20088000"/&gt;&#13;
+&lt;peripheralInstance derived_from="USB" determined="infoFile" id="USB" location="0x2008c000"/&gt;&#13;
+&lt;peripheralInstance derived_from="CRC" determined="infoFile" id="CRC" location="0x20090000"/&gt;&#13;
+&lt;peripheralInstance derived_from="GPIO" determined="infoFile" id="GPIO" location="0x20098000"/&gt;&#13;
+&lt;peripheralInstance derived_from="EMC" determined="infoFile" id="EMC" location="0x2009c000"/&gt;&#13;
+&lt;peripheralInstance derived_from="WWDT" determined="infoFile" id="WWDT" location="0x40000000"/&gt;&#13;
+&lt;peripheralInstance derived_from="TIMER0" determined="infoFile" id="TIMER0" location="0x40004000"/&gt;&#13;
+&lt;peripheralInstance derived_from="TIMER1" determined="infoFile" id="TIMER1" location="0x40008000"/&gt;&#13;
+&lt;peripheralInstance derived_from="UART0" determined="infoFile" id="UART0" location="0x4000c000"/&gt;&#13;
+&lt;peripheralInstance derived_from="UART1" determined="infoFile" id="UART1" location="0x40010000"/&gt;&#13;
+&lt;peripheralInstance derived_from="PWM0" determined="infoFile" id="PWM0" location="0x40014000"/&gt;&#13;
+&lt;peripheralInstance derived_from="PWM1" determined="infoFile" id="PWM1" location="0x40018000"/&gt;&#13;
+&lt;peripheralInstance derived_from="I2C0" determined="infoFile" id="I2C0" location="0x4001c000"/&gt;&#13;
+&lt;peripheralInstance derived_from="COMPARATOR" determined="infoFile" id="COMPARATOR" location="0x40020000"/&gt;&#13;
+&lt;peripheralInstance derived_from="RTC" determined="infoFile" id="RTC" location="0x40024000"/&gt;&#13;
+&lt;peripheralInstance derived_from="GPIOINT" determined="infoFile" id="GPIOINT" location="0x40028080"/&gt;&#13;
+&lt;peripheralInstance derived_from="IOCON" determined="infoFile" id="IOCON" location="0x4002c000"/&gt;&#13;
+&lt;peripheralInstance derived_from="SSP1" determined="infoFile" id="SSP1" location="0x40030000"/&gt;&#13;
+&lt;peripheralInstance derived_from="ADC" determined="infoFile" id="ADC" location="0x40034000"/&gt;&#13;
+&lt;peripheralInstance derived_from="CANAFRAM" determined="infoFile" id="CANAFRAM" location="0x40038000"/&gt;&#13;
+&lt;peripheralInstance derived_from="CANAF" determined="infoFile" id="CANAF" location="0x4003c000"/&gt;&#13;
+&lt;peripheralInstance derived_from="CCAN" determined="infoFile" id="CCAN" location="0x40040000"/&gt;&#13;
+&lt;peripheralInstance derived_from="CAN1" determined="infoFile" id="CAN1" location="0x40044000"/&gt;&#13;
+&lt;peripheralInstance derived_from="CAN2" determined="infoFile" id="CAN2" location="0x40048000"/&gt;&#13;
+&lt;peripheralInstance derived_from="I2C1" determined="infoFile" id="I2C1" location="0x4005c000"/&gt;&#13;
+&lt;peripheralInstance derived_from="SSP0" determined="infoFile" id="SSP0" location="0x40088000"/&gt;&#13;
+&lt;peripheralInstance derived_from="DAC" determined="infoFile" id="DAC" location="0x4008c000"/&gt;&#13;
+&lt;peripheralInstance derived_from="TIMER2" determined="infoFile" id="TIMER2" location="0x40090000"/&gt;&#13;
+&lt;peripheralInstance derived_from="TIMER3" determined="infoFile" id="TIMER3" location="0x40094000"/&gt;&#13;
+&lt;peripheralInstance derived_from="UART2" determined="infoFile" id="UART2" location="0x40098000"/&gt;&#13;
+&lt;peripheralInstance derived_from="UART3" determined="infoFile" id="UART3" location="0x4009c000"/&gt;&#13;
+&lt;peripheralInstance derived_from="I2C2" determined="infoFile" id="I2C2" location="0x400a0000"/&gt;&#13;
+&lt;peripheralInstance derived_from="UART4" determined="infoFile" id="UART4" location="0x400a4000"/&gt;&#13;
+&lt;peripheralInstance derived_from="I2S" determined="infoFile" id="I2S" location="0x400a8000"/&gt;&#13;
+&lt;peripheralInstance derived_from="SSP2" determined="infoFile" id="SSP2" location="0x400ac000"/&gt;&#13;
+&lt;peripheralInstance derived_from="MCPWM" determined="infoFile" id="MCPWM" location="0x400b8000"/&gt;&#13;
+&lt;peripheralInstance derived_from="QEI" determined="infoFile" id="QEI" location="0x400bc000"/&gt;&#13;
+&lt;peripheralInstance derived_from="SDMMC" determined="infoFile" id="SDMMC" location="0x400c0000"/&gt;&#13;
+&lt;peripheralInstance derived_from="SYSCON" determined="infoFile" id="SYSCON" location="0x400fc000"/&gt;&#13;
 &lt;/chip&gt;&#13;
 &lt;processor&gt;&lt;name gcc_name="cortex-m4"&gt;Cortex-M4&lt;/name&gt;&#13;
 &lt;family&gt;Cortex-M&lt;/family&gt;&#13;
@@ -297,20 +267,5 @@
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/ucsb_hyperloop"/>
 		</configuration>
-	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.1351920537;com.crt.advproject.config.exe.release.1351920537.;com.crt.advproject.gcc.exe.release.773313971;com.crt.advproject.compiler.input.1153022148">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.crt.advproject.GCCManagedMakePerProjectProfile"/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.977623367;com.crt.advproject.config.exe.debug.977623367.;com.crt.advproject.gas.exe.debug.1417310965;com.crt.advproject.assembler.input.323497365">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.crt.advproject.GCCManagedMakePerProjectProfile"/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.1351920537;com.crt.advproject.config.exe.release.1351920537.;com.crt.advproject.gas.exe.release.1523828804;com.crt.advproject.assembler.input.1911734359">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.crt.advproject.GCCManagedMakePerProjectProfile"/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.977623367;com.crt.advproject.config.exe.debug.977623367.;com.crt.advproject.gcc.exe.debug.1545978532;com.crt.advproject.compiler.input.1809157030">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.crt.advproject.GCCManagedMakePerProjectProfile"/>
-		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>
