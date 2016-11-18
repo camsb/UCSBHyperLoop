@@ -26,6 +26,7 @@
 #include "gpio.h"
 #include "ranging.h"
 #include "braking.h"
+#include "sdcard.h"
 
 int main(void)
 {
@@ -71,6 +72,10 @@ int main(void)
     if(wizIntFlag) {
 		wizIntFunction();
 	}
+
+    if(SDCARD_ACTIVE) {
+    	sdcardInit();
+    }
 
     DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
@@ -126,6 +131,12 @@ int main(void)
 				sensorData.dataPrintFlag = 0;
             }
 
+        }
+
+        if(SDCARD_ACTIVE) {
+        	readTest();
+        	writeTest();
+        	while(1);
         }
 
     }
