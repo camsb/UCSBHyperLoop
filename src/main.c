@@ -26,7 +26,7 @@
 #include "gpio.h"
 #include "ranging.h"
 #include "braking.h"
-#include "bms.h"
+#include "battery.h"
 
 int main(void)
 {
@@ -69,6 +69,8 @@ int main(void)
     }
     if(BMS_ACTIVE){
         i2cInit(I2C0, SPEED_100KHZ);
+        testBMS();
+        batteryInit();
     }
 
     /* Handle all Wiznet Interrupts, including RECV */
@@ -132,9 +134,25 @@ int main(void)
 
         }
 
-        if (BMS_ACTIVE){
-            testBMS();
+        if( BMS_ACTIVE ){
+//            DEBUGOUT( "\n" );
+//            DEBUGOUT( "\n" );
+//            DEBUGOUT( "\n" );
+//            DEBUGOUT( "Battery Interrupt Received!\n" );
+//          processBatteryInterrupt();
+            printRegValues();
+            getBatteryData();
+            DEBUGOUT( "Total Voltage = %f\n",
+                    battery.VC1 + battery.VC2 + battery.VC3 + battery.VC4 + battery.VC5  );
+            DEBUGOUT( "VC1    = %f volts\n", battery.VC1 );
+            DEBUGOUT( "VC2    = %f volts\n", battery.VC2 );
+            DEBUGOUT( "VC3    = %f volts\n", battery.VC3 );
+            DEBUGOUT( "VC4    = %f volts\n", battery.VC4 );
+            DEBUGOUT( "VC5    = %f volts\n", battery.VC5 );
+            DEBUGOUT( "GAIN   = %d micro volts\n", ( int ) ( battery.GAIN * 1000000 ) );
+            DEBUGOUT( "OFFSET = %d milli volts\n", ( int ) ( battery.OFFSET * 1000 ) );
         }
+
 
     }
 
