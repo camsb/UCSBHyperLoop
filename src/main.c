@@ -27,6 +27,7 @@
 #include "ranging.h"
 #include "braking.h"
 #include "sdcard.h"
+#include "communication.h"
 
 int main(void)
 {
@@ -77,7 +78,7 @@ int main(void)
     	sdcardInit();
     }
 
-    DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
+    DEBUGOUT("UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
     while( 1 )
@@ -95,9 +96,10 @@ int main(void)
     	}
 
         /* If Data Send Requested, Send Data */
-    	if((sendDataFlag && connectionOpen)) {
-    		sendDataPacket();
-    	}
+        /* Function to write to SD card and Web App will be here*/
+//    	if((sendDataFlag && connectionOpen)) {
+//    		sendToWebAppSDCard();
+//    	}
 
     	/* Handle Photoelectric Strip Detected */
         if(stripDetectedFlag) {
@@ -134,8 +136,9 @@ int main(void)
         }
 
         if(SDCARD_ACTIVE) {
-        	readTest();
-        	writeTest();
+        	DEBUGOUT("Starting sendToWebAppSDCard\n");
+        	sendToWebAppSDCard();
+        	DEBUGOUT("Completed sendToWebAppSDCard\n");
         	while(1);
         }
 

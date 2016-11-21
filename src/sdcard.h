@@ -22,6 +22,8 @@ FIL sd_files[MAX_FILES];
 void sdcardInit();
 void readTest();
 void writeTest();
+void writeData(char* filename, const void *buff, int size);
+void readData(char* filename);
 
 // Open/close a new set of files for this session.
 void initSessionFiles();

@@ -105,7 +105,13 @@
 #define BM1 			"BM1"	// Pressure
 #define BM2 			"BM2"	// Pressure
 #define TM1 			"TM1"	// Temperature
-#define TM2 			"TM2"	// Temperature
+#define TM2 			"TM2"	// Temperature 2
+#define TM3				"TM3"   // Temperature 3
+#define TM4				"TM4"   // Temperature 4
+#define TH1 			"TH1"	// Thermistor
+#define TH2 			"TH2"	// Thermistor 2
+#define TH3				"TH3"   // Thermistor 3
+#define TH4				"TH4"   // Thermistor 4
 /* Positional Data */
 #define POX 			"POX"	// x Position
 #define POY 			"POY"	// y Position
@@ -148,7 +154,13 @@ struct data_packet {
 	char bm1[6];	// Pressure1
 	char bm2[6];	// Pressure2
 	char tm1[6];	// Temperature
-	char tm2[6];	// Temperature
+	char tm2[6];	// Temperature2
+	char tm3[6];	// Temperature3
+	char tm4[6];	// Temperature4
+	char th1[6];	// Thermistor1
+	char th2[6];	// Thermistor2
+	char th3[6];	// Thermistor3
+	char th4[6];	// Thermistor4
 	char pwr[6];	// Power Consumption
 	/* Positional Data */
 	char pox[6];	// x Position

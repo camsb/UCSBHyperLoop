@@ -240,6 +240,12 @@ void sendDataPacket() {
 	sprintf(DataPacket.bm2, "%06.2f", sensorData.pressure2);
 	sprintf(DataPacket.tm1, "%06.2f", sensorData.temp1);
 	sprintf(DataPacket.tm2, "%06.2f", sensorData.temp2);
+	sprintf(DataPacket.tm3, "%06.2f", sensorData.temp3);
+	sprintf(DataPacket.tm4, "%06.2f", sensorData.temp4);
+	sprintf(DataPacket.th1, "%06.2f", sensorData.therm1);
+	sprintf(DataPacket.th2, "%06.2f", sensorData.therm2);
+	sprintf(DataPacket.th3, "%06.2f", sensorData.therm3);
+	sprintf(DataPacket.th4, "%06.2f", sensorData.therm4);
 	sprintf(DataPacket.pwr, "%06.2f", sensorData.power);
 	/* Positional Data */
 	sprintf(DataPacket.pox, "%06.2f", sensorData.positionX);
@@ -263,6 +269,12 @@ void sendDataPacket() {
 	send_data_packet_helper(BM2, DataPacket.bm2, &pos);
 	send_data_packet_helper(TM1, DataPacket.tm1, &pos);
 	send_data_packet_helper(TM2, DataPacket.tm2, &pos);
+	send_data_packet_helper(TM3, DataPacket.tm3, &pos);
+	send_data_packet_helper(TM4, DataPacket.tm4, &pos);
+	send_data_packet_helper(TH1, DataPacket.th1, &pos);
+	send_data_packet_helper(TH2, DataPacket.th2, &pos);
+	send_data_packet_helper(TH3, DataPacket.th3, &pos);
+	send_data_packet_helper(TH4, DataPacket.th4, &pos);
 	send_data_packet_helper(PWR, DataPacket.pwr, &pos);
 	/* Positional Data */
 	send_data_packet_helper(POX, DataPacket.pox, &pos);

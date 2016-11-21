@@ -176,6 +176,99 @@ void sdcardInit() {
 	initSessionFiles();
 }
 
+void writeData(char* filename, const void *buff, int size){
+	FRESULT rc;		/* Result code */
+	DIR dir;		/* Directory object */
+	FILINFO fno;	/* File information object */
+	char debugBuf[64];
+	UINT bw, i;
+	debugstr("Create a new file filename.\r\n");
+	rc = f_open(&fileObj, filename, FA_WRITE | FA_CREATE_ALWAYS);
+	if (rc) {
+		die(rc);
+	}
+	else {
+
+		debugstr("Write a sensor data\r\n");
+
+
+		rc = f_write(&fileObj, buff, size, &bw);
+
+		if (rc) {
+			die(rc);
+		}
+		else {
+			sprintf(debugBuf, "%u bytes written.\r\n", bw);
+			debugstr(debugBuf);
+		}
+		debugstr("Close the file.\r\n");
+		rc = f_close(&fileObj);
+		if (rc) {
+			die(rc);
+		}
+	}
+	debugstr("Open root directory.\r\n");
+	rc = f_opendir(&dir, "");
+	if (rc) {
+		die(rc);
+	}
+	else {
+		debugstr("Directory listing...\r\n");
+		for (;; ) {
+			/* Read a directory item */
+			rc = f_readdir(&dir, &fno);
+			if (rc || !fno.fname[0]) {
+				break;					/* Error or end of dir */
+			}
+			if (fno.fattrib & AM_DIR) {
+				sprintf(debugBuf, "   <dir>  %s\r\n", fno.fname);
+			}
+			else {
+				sprintf(debugBuf, "   %8lu  %s\r\n", fno.fsize, fno.fname);
+			}
+			debugstr(debugBuf);
+		}
+		if (rc) {
+			die(rc);
+		}
+	}
+	debugstr("Test completed.\r\n");
+}
+void readData(char *filename){
+	FRESULT rc;		/* Result code */
+	UINT br, i;
+	uint8_t *ptr;
+
+	debugstr("Open an existing file.\r\n");
+
+	rc = f_open(&fileObj, filename, FA_READ);
+	if (rc) {
+		die(rc);
+	}
+	else {
+		for (;; ) {
+			/* Read a chunk of file */
+			rc = f_read(&fileObj, buffer, sizeof buffer, &br);
+			if (rc || !br) {
+				break;					/* Error or end of file */
+			}
+			ptr = (uint8_t *) buffer;
+			for (i = 0; i < br; i++) {	/* Type the data */
+				DEBUGOUT("%c", ptr[i]);
+			}
+		}
+		if (rc) {
+			die(rc);
+		}
+
+		debugstr("Close the file.\r\n");
+		rc = f_close(&fileObj);
+		if (rc) {
+			die(rc);
+		}
+	}
+}
+
 void readTest() {
 	FRESULT rc;		/* Result code */
 	DIR dir;		/* Directory object */
@@ -222,14 +315,14 @@ void writeTest() {
 	uint8_t *ptr;
 	char debugBuf[64];
 
-	debugstr("\r\nCreate a new file (hello.txt).\r\n");
+	debugstr("Create a new file (hello.txt).\r\n");
 	rc = f_open(&fileObj, "HELLO.TXT", FA_WRITE | FA_CREATE_ALWAYS);
 	if (rc) {
 		die(rc);
 	}
 	else {
 
-		debugstr("\r\nWrite a text data. (Hello world!)\r\n");
+		debugstr("Write a text data. (Hello world!)\r\n");
 
 			rc = f_write(&fileObj, "Hello world!\r\n", 14, &bw);
 		if (rc) {
@@ -239,19 +332,19 @@ void writeTest() {
 			sprintf(debugBuf, "%u bytes written.\r\n", bw);
 			debugstr(debugBuf);
 		}
-		debugstr("\r\nClose the file.\r\n");
+		debugstr("Close the file.\r\n");
 		rc = f_close(&fileObj);
 		if (rc) {
 			die(rc);
 		}
 	}
-	debugstr("\r\nOpen root directory.\r\n");
+	debugstr("Open root directory.\r\n");
 	rc = f_opendir(&dir, "");
 	if (rc) {
 		die(rc);
 	}
 	else {
-		debugstr("\r\nDirectory listing...\r\n");
+		debugstr("Directory listing...\r\n");
 		for (;; ) {
 			/* Read a directory item */
 			rc = f_readdir(&dir, &fno);
@@ -270,7 +363,7 @@ void writeTest() {
 			die(rc);
 		}
 	}
-	debugstr("\r\nTest completed.\r\n");
+	debugstr("Test completed.\r\n");
 }
 
 void initSessionFiles() {

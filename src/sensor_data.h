@@ -42,6 +42,14 @@ typedef struct{
 
   float temp1;
   float temp2;
+  float temp3;
+  float temp4;
+
+  float therm1;
+  float therm2;
+  float therm3;
+  float therm4;
+
   float pressure1;
   float pressure2;
   float power;
