@@ -28,6 +28,7 @@
 #include "braking.h"
 
 #include "pcb_arduino_i2c.h"
+#include "HEMS.h"
 
 int main(void)
 {
@@ -76,6 +77,10 @@ int main(void)
 
     if(PCB_ARDUINO_I2C_ACTIVE) {
     	i2cInit(I2C0, SPEED_100KHZ);
+    }
+
+    if(PCB_DAC_I2C_ACTIVE) {
+    	initialize_HEMS();
     }
 
     DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
@@ -138,6 +143,10 @@ int main(void)
         	uint8_t msg[] = "Hello world!\n";
         	sendPrintCmd(I2C0, 2, msg, 14);
         	sendPrint2Cmd(I2C0, 2);
+        }
+        if(PCB_DAC_I2C_ACTIVE) {
+        	// Send command to DAC.
+        	//DAC_write(uint8_t DAC_address, uint16_t output_voltage); address is 110001[A0] where [A0] is 0 or 1
         }
 
     }
