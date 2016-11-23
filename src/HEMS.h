@@ -1,12 +1,12 @@
 //Hyperloop Hover Engine Monitoring System
 //Kevin Kha
-#define ARDUINO
+//#define ARDUINO
 #ifdef ARDUINO
 #include "Arduino.h"
 #include "Wire.h"
 
 #else //LPC Libraries below
-
+#include "i2c.h"
 #endif //ARDUINO
 
 #include "math.h"
@@ -49,9 +49,7 @@ DAC MCP4725: 1 1 0 0 A2(0) A1(1) A0		-110001?-   //A2 and A1 are internal hardwa
 		   vv  vvvv
 I2C_DIP: 0b??XX????   //X = don't cares; can be anything. They're not connected.*/
 
-const uint8_t ADC_Address[4] = {0x8, 0xA, 0x1A, 0x28};
-const uint8_t IOX_Address[8] = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27};
-const uint8_t DAC_Address[2] = {0x62, 0x63};
+
 
 typedef struct{
 	uint8_t I2C_DIP;
@@ -94,19 +92,9 @@ SLP = Sleep Mode (We won't put this into sleep mode, so = 0)
 #define LTC2309_CHN_6	0xB0
 #define LTC2309_CHN_7	0xF0
 
-//To select the channel, we can OR ADC_CONFIG with channel selection bits.
-const uint8_t ADC_CHANNEL_SELECT[8] = {
-	LTC2309_CHN_0 | ADC_CONFIG,
-	LTC2309_CHN_1 | ADC_CONFIG,
-	LTC2309_CHN_2 | ADC_CONFIG,
-	LTC2309_CHN_3 | ADC_CONFIG,
-	LTC2309_CHN_4 | ADC_CONFIG,
-	LTC2309_CHN_5 | ADC_CONFIG,
-	LTC2309_CHN_6 | ADC_CONFIG,
-	LTC2309_CHN_7 | ADC_CONFIG};
 
 //ADC Associated Functions:
-uint16_t ADC_read(uint8_t ADC_address, uint8_t ADC_channel);
+uint16_t ADC_read(uint8_t ADCaddress, uint8_t ADCchannel);
 
 
 
@@ -170,7 +158,7 @@ There are other modes that allow for greater configuration (like writing to the 
 #define DAC_CONFIG 0x00 //0b00000000
 
 //DAC Associated Functions:
-void DAC_write(uint8_t DAC_address, uint16_t output_voltage);
+void DAC_write(uint8_t DACaddress, uint16_t output_voltage);
 
 
 

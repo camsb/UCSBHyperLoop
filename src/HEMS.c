@@ -2,8 +2,21 @@
 //Kevin Kha
 
 #include "HEMS.h"
-#include "gpio.h"
+
 // Global variables.
+const uint8_t ADC_Address[4] = {0x8, 0xA, 0x1A, 0x28};
+const uint8_t IOX_Address[8] = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27};
+const uint8_t DAC_Address[2] = {0x62, 0x63};
+//To select the channel, we can OR ADC_CONFIG with channel selection bits.
+const uint8_t ADC_CHANNEL_SELECT[8] = {
+	LTC2309_CHN_0 | ADC_CONFIG,
+	LTC2309_CHN_1 | ADC_CONFIG,
+	LTC2309_CHN_2 | ADC_CONFIG,
+	LTC2309_CHN_3 | ADC_CONFIG,
+	LTC2309_CHN_4 | ADC_CONFIG,
+	LTC2309_CHN_5 | ADC_CONFIG,
+	LTC2309_CHN_6 | ADC_CONFIG,
+	LTC2309_CHN_7 | ADC_CONFIG};
 
 void initialize_HEMS(){
 	#ifdef ARDUINO
@@ -12,10 +25,10 @@ void initialize_HEMS(){
 	#else //LPC code
 	i2cInit(I2C0, SPEED_400KHZ);
 	#endif //ARDUINO
-	return IOX_value;
+	//return IOX_value;
 }
 
-uint16_t ADC_read(uint8_t ADC_address, uint8_t ADC_channel){
+uint16_t ADC_read(uint8_t ADCaddress, uint8_t ADCchannel){
 	#ifdef ARDUINO
 	Wire.beginTransmission(ADC_address);
     Wire.write(ADC_CHANNEL_SELECT[ADC_channel]);
@@ -26,59 +39,21 @@ uint16_t ADC_read(uint8_t ADC_address, uint8_t ADC_channel){
 	#else //LPC code
     DEBUGOUT("DAC_write\n");
     uint16_t ADC_value;
-    Chip_I2C_MasterCmdRead(I2C0, ADC_address, ADC_CHANNEL_SELECT[ADC_channel], &ADC_value, 2);
+    Chip_I2C_MasterCmdRead(I2C0, ADCaddress, ADC_CHANNEL_SELECT[ADCchannel], &ADC_value, 2);
 	#endif
 	return ADC_value;
 }
 
 
-void IOX_setup(uint8_t IOX_address){
+void DAC_write(uint8_t DACaddress, uint16_t output_voltage){
 	#ifdef ARDUINO
-	Wire.beginTransmission(IOX_address);
-	Wire.write(); //IOCON register location
-	Wire.write(IOX_CONFIG);
-	Wire.endTransmission(true);
-
-	#else //LPC code
-
-	#endif //ARDUINO
-}
-
-uint16_t IOX_read(uint8_t IOX_address){
-	#ifdef ARDUINO
-	Wire.beginTransmission(IOX_address);
-	Wire.write(); //GPIOAB register location
-	Wire.endTransmission(true);
-
-	#else //LPC code
-
-	#endif //ARDUINO
-}
-
-
-void DAC_write(uint8_t DAC_address, uint16_t output_voltage){
-	#ifdef ARDUINO
-	Wire.beginTransmission(DAC_address);
+	Wire.beginTransmission(DACaddress);
     Wire.write(DAC_CONFIG | (output_voltage >> 8));
     Wire.write(output_voltage % 1024);
     Wire.endTransmission(true);
 
     #else //LPC code
     DEBUGOUT("DAC_write\n");
-    Chip_I2C_MasterSend(I2C0, DAC_address, &output_voltage, 2);
+    Chip_I2C_MasterSend(I2C0, DACaddress, &output_voltage, 2);
     #endif //ARDUINO
 }
-
-/*
-void record_temperatures(int *temperature_array) {
-  unsigned long int ratio, thermistance;
-  for (int temp_counter = 0; temp_counter < NUM_THERMISTORS; temp_counter++) {
-    ratio = analogRead(thermistor_pins[temp_counter]);
-    thermistance = (1023 - ratio) * REFERENCE_RESISTANCE / ratio;
-    temperature_array[temp_counter] = ((100 - THERMISTOR_AVG_WEIGHT) * (THERMISTOR_BETA / (log(thermistance) - THERMISTOR_OFFSET) - 272) + THERMISTOR_AVG_WEIGHT * temperature_array[temp_counter]) / 100;
-  }
-}
-void record_amps(int* recorded_amps) {
-  *recorded_amps = (analogRead(AMMETER) * 5000.0 / 1023 - AMMETER_VCC / 2) * AMMETER_CONVERSION;
-}
-*/
