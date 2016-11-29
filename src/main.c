@@ -69,7 +69,7 @@ int main(void)
     }
     if(SLAVE_BOARD_ACTIVE){
     	// Enable SPI communication with submodule boards
-    	//submodule_board_init();
+    	submodule_board_init();
     }
 
     /* Handle all Wiznet Interrupts, including RECV */
@@ -82,6 +82,10 @@ int main(void)
 
     while( 1 )
     {
+
+        if(SLAVE_BOARD_ACTIVE){
+            submodule_board_read();
+        }
 
     	/* Need to do this cleanly, on a timer to prevent multiple attempts before a response */
     	if(!connectionOpen && !connectionClosed && sendDataFlag) {
