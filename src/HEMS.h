@@ -14,28 +14,30 @@
 #ifndef HEMS_H_
 #define HEMS_H_
 
+#define SAFE_TEMPERATURE 100      //[C]
+#define SAFE_CURRENT 60 //[A]
+
 #define NUM_THERMISTORS 4
-#define REFERENCE_RESISTANCE 5100 //ohms
-#define AMMETER_SENSITIVITY 26.4 //mV/A
-#define AMMETER_CONVERSION 1/AMMETER_SENSITIVITY
-#define AMMETER_VCC 3.3
+#define REFERENCE_RESISTANCE 5100 //[ohms]
+#define THERMISTOR_BETA 3380
+#define THERMISTOR_OFFSET -2.126
+
+#define AMMETER_SENSITIVITY 8.7		//[mV/A] for the 150B version of the sensor
+#define AMMETER_CONVERSION 0.115	//[A/mV] 1/AMMETER_SENSITIVITY
+#define AMMETER_VCC 3.3           //Ammeter referenced to 3.3V; everything else runs off 5V
+
+#define TACHOMETER_TICKS 3
 
 //ADC Channel Assignments
 #define COILS_FRONT 0
 #define COILS_BACK 1
 #define INTERIOR_WALL_RIGHT 2
 #define INTERIOR_WALL_LEFT 3
-#define AMMETER 4
+#define AMMETER_CHANNEL 7
 
-//Global Constants:
+//Averaging:
 #define TACHOMETER_AVG_WEIGHT 40 //Out of 100 (value = (old_value * AVG_WEIGHT + (100 - AVG_WEIGHT) * new_value)/100 Set to 0 if you don't want exponential averaging.
 #define THERMISTOR_AVG_WEIGHT 40 //Out of 100 (value = (old_value * AVG_WEIGHT + (100 - AVG_WEIGHT) * new_value)/100
-#define TACHOMETER_HANDLER_OVERHEAD_US 0 //approximate overhead time for
-
-#define THERMISTOR_BETA 3380
-#define THERMISTOR_OFFSET -2.126
-
-void initialize_HEMS();
 
 
 /*I2C Parameters
@@ -52,18 +54,29 @@ I2C_DIP: 0b??XX????   //X = don't cares; can be anything. They're not connected.
 
 
 typedef struct{
-	uint8_t I2C_DIP;
-	//ADC LTC2309 -
-	uint8_t ADC_device_0;
-	//IOX MCP23017 - Tachometer
-	uint8_t IOX_device_0;
-	//DAC MCP4725 - Throttle
-	uint8_t DAC_device_0;
-} Engine_Control_System;
+  //I2C Parameters
+  uint8_t bus;                    //Which I2C bus
+  uint8_t ADC_0_device_address;   //ADC LTC2309 - Thermistors, Ammeter
+  uint8_t DAC_0_device_address;   //DAC MCP4725 - Throttle
+  uint8_t IOX_0_device_address;   //IOX MCP23017 - Tachometer
 
+  //Data Storage
+  uint8_t temperatures[NUM_THERMISTORS];
+  uint8_t amps;
+  float throttle_voltage;
+  uint8_t rpm;
 
+  //Helper Data
+  float timestamp;
+  uint16_t tachometer_counter;
 
+  //Diagnostics
+  uint8_t alarm;
+} HEMS;
 
+HEMS* initialize_HEMS(uint8_t I2C_BUS, uint8_t I2C_DIP); //See below for I2C DIP addressing
+void update_HEMS(HEMS* engine);
+float runtime();
 
 /*ADC LTC2309
 I2C Protocol:
@@ -94,8 +107,7 @@ SLP = Sleep Mode (We won't put this into sleep mode, so = 0)
 
 
 //ADC Associated Functions:
-uint16_t ADC_read(uint8_t ADCaddress, uint8_t ADCchannel);
-
+uint16_t ADC_read(uint8_t i2c_bus, uint8_t ADC_address, uint8_t ADC_channel);
 
 
 /*IOX MCP23017
@@ -134,9 +146,8 @@ SEQOP = Sets whether addresses increment. (We only ever want to read the GPIO wh
 #define MCP23017_OLATB 0x15
 
 //IOX Associated Functions:
-void IOX_setup(uint8_t IOX_address);
-uint16_t IOX_read(uint8_t IOX_address);
-
+void IOX_setup(uint8_t i2c_bus, uint8_t IOX_address);
+uint16_t IOX_read(uint8_t i2c_bus, uint8_t IOX_address);
 
 
 /*DAC MCP4725
@@ -157,9 +168,11 @@ There are other modes that allow for greater configuration (like writing to the 
 
 #define DAC_CONFIG 0x00 //0b00000000
 
-//DAC Associated Functions:
-void DAC_write(uint8_t DACaddress, uint16_t output_voltage);
+#define DAC_MIN 0.00
+#define DAC_MAX 5.00
 
+//DAC Associated Functions:
+void DAC_write(uint8_t i2c_bus, uint8_t DAC_address, uint16_t output_voltage);
 
 
 #endif //HEMS_H

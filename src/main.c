@@ -80,7 +80,8 @@ int main(void)
     }
 
     if(PCB_DAC_I2C_ACTIVE) {
-    	initialize_HEMS();
+    //	initialize_HEMS();
+    	HEMS* test = initialize_HEMS(0,0);
     }
 
     DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
@@ -146,7 +147,8 @@ int main(void)
         }
         if(PCB_DAC_I2C_ACTIVE) {
         	// Send command to DAC.
-        	//DAC_write(uint8_t DAC_address, uint16_t output_voltage); address is 110001[A0] where [A0] is 0 or 1
+        	DAC_write(0,98, 2025); //address is 110001[A0] where [A0] is 0 or 1; 1100010 is 98
+        	//update_HEMS(test);
         }
 
     }
