@@ -1,6 +1,7 @@
 //Hyperloop Hover Engine Monitoring System
 //Kevin Kha
 //#define ARDUINO
+
 #ifdef ARDUINO
 #include "Arduino.h"
 #include "Wire.h"
@@ -22,8 +23,8 @@
 #define THERMISTOR_BETA 3380
 #define THERMISTOR_OFFSET -2.126
 
-#define AMMETER_SENSITIVITY 8.7		//[mV/A] for the 150B version of the sensor
-#define AMMETER_CONVERSION 0.115	//[A/mV] 1/AMMETER_SENSITIVITY
+#define AMMETER_SENSITIVITY 8.8		//[mV/A] for the 150B version of the sensor
+#define AMMETER_CONVERSION 0.1136	//[A/mV] 1/AMMETER_SENSITIVITY
 #define AMMETER_VCC 3.3           //Ammeter referenced to 3.3V; everything else runs off 5V
 
 #define TACHOMETER_TICKS 3
