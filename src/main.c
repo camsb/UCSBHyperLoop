@@ -26,6 +26,9 @@
 #include "gpio.h"
 #include "ranging.h"
 #include "braking.h"
+#include "sdcard.h"
+#include "communication.h"
+#include "rtc.h"
 
 int main(void)
 {
@@ -72,7 +75,11 @@ int main(void)
 		wizIntFunction();
 	}
 
-    DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
+    if(SDCARD_ACTIVE) {
+    	sdcardInit();
+    }
+
+    DEBUGOUT("UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
     while( 1 )
@@ -86,12 +93,14 @@ int main(void)
 
         /* Handle all Wiznet Interrupts, including RECV */
         if(wizIntFlag) {
+        	DEBUGOUT("here\n");
     		wizIntFunction();
     	}
 
         /* If Data Send Requested, Send Data */
+        /* Function to write to SD card and Web App will be here*/
     	if((sendDataFlag && connectionOpen)) {
-    		sendDataPacket();
+    		//sendToWebAppSDCard();
     	}
 
     	/* Handle Photoelectric Strip Detected */
@@ -126,6 +135,13 @@ int main(void)
 				sensorData.dataPrintFlag = 0;
             }
 
+        }
+
+        if(SDCARD_ACTIVE) {
+        	DEBUGOUT("Starting sendToWebAppSDCard\n");
+        	sendToWebAppSDCard();
+        	DEBUGOUT("Completed sendToWebAppSDCard\n");
+        	while(1);
         }
 
     }

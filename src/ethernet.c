@@ -3,6 +3,7 @@
 #include <string.h>
 #include "stdio.h"
 #include "timer.h"
+#include "rtc.h"
 
 /* Rx Buffer Addresses */
 uint16_t gSn_RX_BASE[] = {
@@ -195,12 +196,112 @@ void recvDataPacket() {
 	memset(Net_Tx_Data, 0, 64);
 
 	Wiz_Recv_Blocking(SOCKET_ID, Net_Rx_Data);
+//	int i;
+//	for (i = 0; i < DATA_BUF_SIZE; i++) {
+//		printf("%i:%c\n", i, Net_Rx_Data[i]);
+//	}
 	printf("Receiving Data Packet!\n");
 
 	if(strstr((char *)Net_Rx_Data, EBRAKE) != NULL) {	// Emergency Brake
 		eBrakeFlag = 1;
 		printf("Emergency Brake!\n");
-		send_data_ack_helper(PAK, &pos);
+		send_data_ack_helper(BAK, &pos);
+	}
+	if(strstr((char *)Net_Rx_Data, INITTIME) != NULL) {	// Initialize Time
+		printf("Initialize Time!\n");
+		printf("Time recieved: %s\n", Net_Rx_Data);
+		int iterator, yearVal, monthVal, mDayVal, wDayVal, hourVal, minVal, secVal;
+		int timeIterator = 0;
+		// year: 4 dig, month: 0-11, month day: 1-31, week day: 0-6, hour: 0-23, minute: 0-59, second: 0-59
+		for(iterator = 0; iterator < 30; iterator++){
+			if(Net_Rx_Data[iterator] == ':'){
+				if(timeIterator == 0){
+					yearVal = (int)(Net_Rx_Data[iterator+1] - '0')*1000;
+					yearVal += (int)(Net_Rx_Data[iterator+2] - '0')*100;
+					yearVal += (int)(Net_Rx_Data[iterator+3] - '0')*10;
+					yearVal += (int)(Net_Rx_Data[iterator+4] - '0');
+//					printf("year = %d\n", yearVal);
+				}
+				if(timeIterator == 1){
+					// One Digit
+					if(Net_Rx_Data[iterator+2] == ':'){
+						monthVal = (int)(Net_Rx_Data[iterator+1] - '0');
+					}
+					// Two Digits
+					else{
+						monthVal = (int)(Net_Rx_Data[iterator+1] - '0')*10;
+						monthVal += (int)(Net_Rx_Data[iterator+2] - '0');
+					}
+					monthVal++;
+//					printf("month = %d\n", monthVal);
+				}
+				if(timeIterator == 2){
+					// One Digit
+					if(Net_Rx_Data[iterator+2] == ':'){
+						mDayVal = (int)(Net_Rx_Data[iterator+1] - '0');
+					}
+					// Two Digits
+					else{
+						mDayVal = (int)(Net_Rx_Data[iterator+1] - '0')*10;
+						mDayVal += (int)(Net_Rx_Data[iterator+2] - '0');
+					}
+//					printf("month day = %d\n", mDayVal);
+				}
+				if(timeIterator == 3){
+					wDayVal = (int)(Net_Rx_Data[iterator+1] - '0');
+					wDayVal++;
+//					printf("week day = %d\n", wDayVal);
+				}
+				if(timeIterator == 4){
+					// One Digit
+					if(Net_Rx_Data[iterator+2] == ':'){
+						hourVal = (int)(Net_Rx_Data[iterator+1] - '0');
+					}
+					// Two Digits
+					else{
+						hourVal = (int)(Net_Rx_Data[iterator+1] - '0')*10;
+						hourVal += (int)(Net_Rx_Data[iterator+2] - '0');
+					}
+//					printf("hour = %d\n", hourVal);
+				}
+				if(timeIterator == 5){
+					// One Digit
+					if(Net_Rx_Data[iterator+2] == ':'){
+						minVal = (int)(Net_Rx_Data[iterator+1] - '0');
+					}
+					// Two Digits
+					else{
+						minVal = (int)(Net_Rx_Data[iterator+1] - '0')*10;
+						minVal += (int)(Net_Rx_Data[iterator+2] - '0');
+					}
+//					printf("minute = %d\n", minVal);
+				}
+				if(timeIterator == 6){
+					// One Digit
+					if(Net_Rx_Data[iterator+2] == ':'){
+						secVal = (int)(Net_Rx_Data[iterator+1] - '0');
+					}
+					// Two Digits
+					else{
+						secVal = (int)(Net_Rx_Data[iterator+1] - '0')*10;
+						secVal += (int)(Net_Rx_Data[iterator+2] - '0');
+					}
+//					printf("second = %d\n", secVal);
+				}
+				timeIterator++;
+			}
+		}
+		rtc_initialize();
+		RTC theTime;
+		theTime.year = (WORD)yearVal;
+		theTime.month = (BYTE)monthVal;
+		theTime.mday = (BYTE)mDayVal;
+		theTime.wday = (BYTE)wDayVal;
+		theTime.hour = (BYTE)hourVal;
+		theTime.min = (BYTE)minVal;
+		theTime.sec = (BYTE)secVal;
+		rtc_settime(&theTime);
+		send_data_ack_helper(TAK, &pos);
 	}
 	if(strstr((char *)Net_Rx_Data, POWRUP) != NULL) {	// Pod Start Flag
 		powerUpFlag = 1;
@@ -240,6 +341,12 @@ void sendDataPacket() {
 	sprintf(DataPacket.bm2, "%06.2f", sensorData.pressure2);
 	sprintf(DataPacket.tm1, "%06.2f", sensorData.temp1);
 	sprintf(DataPacket.tm2, "%06.2f", sensorData.temp2);
+	sprintf(DataPacket.tm3, "%06.2f", sensorData.temp3);
+	sprintf(DataPacket.tm4, "%06.2f", sensorData.temp4);
+	sprintf(DataPacket.th1, "%06.2f", sensorData.therm1);
+	sprintf(DataPacket.th2, "%06.2f", sensorData.therm2);
+	sprintf(DataPacket.th3, "%06.2f", sensorData.therm3);
+	sprintf(DataPacket.th4, "%06.2f", sensorData.therm4);
 	sprintf(DataPacket.pwr, "%06.2f", sensorData.power);
 	/* Positional Data */
 	sprintf(DataPacket.pox, "%06.2f", sensorData.positionX);
@@ -263,6 +370,12 @@ void sendDataPacket() {
 	send_data_packet_helper(BM2, DataPacket.bm2, &pos);
 	send_data_packet_helper(TM1, DataPacket.tm1, &pos);
 	send_data_packet_helper(TM2, DataPacket.tm2, &pos);
+	send_data_packet_helper(TM3, DataPacket.tm3, &pos);
+	send_data_packet_helper(TM4, DataPacket.tm4, &pos);
+	send_data_packet_helper(TH1, DataPacket.th1, &pos);
+	send_data_packet_helper(TH2, DataPacket.th2, &pos);
+	send_data_packet_helper(TH3, DataPacket.th3, &pos);
+	send_data_packet_helper(TH4, DataPacket.th4, &pos);
 	send_data_packet_helper(PWR, DataPacket.pwr, &pos);
 	/* Positional Data */
 	send_data_packet_helper(POX, DataPacket.pox, &pos);
@@ -317,18 +430,23 @@ void wizIntFunction() {
 
 			/* Handle Interrupt Request */
 			if( socket_int & SEND_OK ) {	 // Send Completed
+				printf("send ok interrupt\n");
 			}
 			if( socket_int & TIMEOUT ) { // Timeout Occurred
+				printf("Timeout interrupt\n");
 			}
 			if( socket_int & RECV_PKT ) {	 // Packet Received
+				printf("Packet interrupt\n");
 				recvDataPacket();
 			}
 			if( socket_int & DISCON_SKT ) {	 // FIN/FIN ACK Received
+				printf("Discon interrupt\n");
 				if(connectionOpen)
 					connectionClosed = 1;
 				connectionOpen = 0;
 			}
 			if( socket_int & Sn_CON ) {	 // Socket Connection Completed
+				printf("socket connection completed interrupt\n");
 				connectionOpen = 1;
 			}
 
