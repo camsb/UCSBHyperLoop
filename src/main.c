@@ -38,6 +38,9 @@ int main(void)
     SystemCoreClockUpdate();
     Board_Init();
 
+    // Initialize LPC_TIMER0 as a runtime timer.
+    runtimeTimerInit();
+
     if(PWM_ACTIVE){
         Init_PWM(LPC_PWM1);
         Init_Channel(LPC_PWM1, 1);

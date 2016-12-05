@@ -70,10 +70,10 @@ void update_HEMS(HEMS* engine) {
 
   //Record Motor RPM
   uint16_t current_tachometer_counter = IOX_read(I2C_ID_SELECT[engine->bus],engine->IOX_0_device_address);
-//  float current_time = runtime();
-//  uint16_t current_rpm = 60.0 * (current_tachometer_counter - engine->tachometer_counter) / (current_time - engine->timestamp) / TACHOMETER_TICKS;
-//  engine->rpm = ((100 - TACHOMETER_AVG_WEIGHT) * current_rpm + TACHOMETER_AVG_WEIGHT * engine->rpm) / 100;
-//  engine->timestamp = current_time;
+  float current_time = runtime();
+  uint16_t current_rpm = 60.0 * (current_tachometer_counter - engine->tachometer_counter) / (current_time - engine->timestamp) / TACHOMETER_TICKS;
+  engine->rpm = ((100 - TACHOMETER_AVG_WEIGHT) * current_rpm + TACHOMETER_AVG_WEIGHT * engine->rpm) / 100;
+  engine->timestamp = current_time;
   engine->tachometer_counter = current_tachometer_counter;
 }
 
@@ -132,7 +132,7 @@ float runtime() {
   runtime_in_seconds = micros() / 1000000.0;
 
 #else //LPC
-
+  runtime_in_seconds = getRuntime() * 1000.0;
 
 #endif
   return runtime_in_seconds;
