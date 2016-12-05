@@ -28,6 +28,7 @@
 #include "braking.h"
 #include "sdcard.h"
 #include "communication.h"
+#include "rtc.h"
 
 int main(void)
 {
@@ -92,14 +93,15 @@ int main(void)
 
         /* Handle all Wiznet Interrupts, including RECV */
         if(wizIntFlag) {
+        	DEBUGOUT("here\n");
     		wizIntFunction();
     	}
 
         /* If Data Send Requested, Send Data */
         /* Function to write to SD card and Web App will be here*/
-//    	if((sendDataFlag && connectionOpen)) {
-//    		sendToWebAppSDCard();
-//    	}
+    	if((sendDataFlag && connectionOpen)) {
+    		//sendToWebAppSDCard();
+    	}
 
     	/* Handle Photoelectric Strip Detected */
         if(stripDetectedFlag) {

@@ -138,9 +138,12 @@
 #define PWRDWN			"PWRDWN"	// Power Down Flag
 #define SERPRO			"SERPRO"	// Service Propulsion
 #define SERSTP			"SERSTP"	// Service Propulsion Stop
-/* Web Application Level Acknowledgements */
-#define WAK				"WAK"		// Service Propulsion Acknowledgement
-#define PAK				"PAK"		// Power Up Acknowledgement
+#define INITTIME		"INITTIME"	// Initialize Timer
+/* Web Application Level Acknowledgments */
+#define WAK				"WAK"		// Service Propulsion Acknowledgment
+#define BAK				"BAK"		// Emergency Brake Acknowledgment
+#define PAK				"PAK"		// Power Up Acknowledgment
+#define TAK				"TAK"		// Timer initiated Acknowledgment
 
 #define SOCKET_ID 		0
 
