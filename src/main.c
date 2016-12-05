@@ -32,7 +32,9 @@
 
 int main(void)
 {
-    /* Initialize the board and clock */
+	HEMS* test;
+
+	/* Initialize the board and clock */
     SystemCoreClockUpdate();
     Board_Init();
 
@@ -78,12 +80,13 @@ int main(void)
     if(PCB_ARDUINO_I2C_ACTIVE) {
     	i2cInit(I2C0, SPEED_100KHZ);
     }
-    i2cInit(I2C0, SPEED_100KHZ);
-    HEMS* test = initialize_HEMS(0,0);
 
     if(PCB_DAC_I2C_ACTIVE) {
     //	initialize_HEMS();
-
+    	i2cInit(I2C0, SPEED_100KHZ);
+    	i2cInit(I2C1, SPEED_100KHZ);
+    	i2cInit(I2C2, SPEED_100KHZ);
+    	test = initialize_HEMS(I2C2,0);
     }
 
     DEBUGOUT("\n UCSB Hyperloop Controller Initialized\n");
@@ -150,8 +153,19 @@ int main(void)
         if(PCB_DAC_I2C_ACTIVE) {
         	// Send command to DAC.
         	//DAC_write(0,98, 2025); //address is 110001[A0] where [A0] is 0 or 1; 1100010 is 98
-        	test->throttle_voltage = 3.6;
+        	//DEBUGOUT("Setting Throttle Voltage\n");
+        	test->throttle_voltage = 2.3;
         	update_HEMS(test);
+
+        	//Data Storage
+        	int i;
+        	for(i=0; i< NUM_THERMISTORS; i++) {
+        		DEBUGOUT("Thermistor #%d: %d\n", i, test->temperatures[i]);
+        	}
+        	DEBUGOUT("Current Sensor: %d\n", test->amps);
+        	DEBUGOUT("Tachometer Counter: %d\n", test->tachometer_counter);
+
+        	DEBUGOUT("\n");
         }
 
     }

@@ -34,7 +34,7 @@ HEMS* initialize_HEMS(uint8_t I2C_BUS, uint8_t I2C_DIP) {
   engine->DAC_0_device_address = DAC_Address_Select[(I2C_DIP >> 3) & 0b1];
   engine->IOX_0_device_address = IOX_Address_Select[(I2C_DIP >> 0) & 0b111];
 
- // IOX_setup(I2C_BUS, engine->IOX_0_device_address);
+  IOX_setup(I2C_BUS, engine->IOX_0_device_address);
 
   engine->throttle_voltage = 0;
   engine->timestamp = 0;
@@ -56,7 +56,7 @@ void update_HEMS(HEMS* engine) {
     int new_temperature = THERMISTOR_BETA / (log(thermistance) - THERMISTOR_OFFSET) - 272;
     engine->temperatures[temp_counter] = ((100 - THERMISTOR_AVG_WEIGHT) * new_temperature + THERMISTOR_AVG_WEIGHT * engine->temperatures[temp_counter]) / 100;
 
-    if (new_temperature > SAFE_TEMPERATURE)
+    if (engine->temperatures[temp_counter] > SAFE_TEMPERATURE)
       engine->alarm |= 0b00000001;
   }
 
@@ -69,12 +69,12 @@ void update_HEMS(HEMS* engine) {
     engine->alarm |= 0b00000010;
 
   //Record Motor RPM
-//  uint16_t current_tachometer_counter = IOX_read(I2C_ID_SELECT[engine->bus],engine->IOX_0_device_address);
+  uint16_t current_tachometer_counter = IOX_read(I2C_ID_SELECT[engine->bus],engine->IOX_0_device_address);
 //  float current_time = runtime();
 //  uint16_t current_rpm = 60.0 * (current_tachometer_counter - engine->tachometer_counter) / (current_time - engine->timestamp) / TACHOMETER_TICKS;
 //  engine->rpm = ((100 - TACHOMETER_AVG_WEIGHT) * current_rpm + TACHOMETER_AVG_WEIGHT * engine->rpm) / 100;
 //  engine->timestamp = current_time;
-//  engine->tachometer_counter = current_tachometer_counter;
+  engine->tachometer_counter = current_tachometer_counter;
 }
 
 uint16_t ADC_read(uint8_t bus, uint8_t ADC_address, uint8_t ADC_channel){
@@ -87,9 +87,10 @@ uint16_t ADC_read(uint8_t bus, uint8_t ADC_address, uint8_t ADC_channel){
 	  input_buffer[0] = Wire.read();  //D11 D10 D9 D8 D7 D6 D5 D4
 	input_buffer[1] = Wire.read(); //D3 D2 D1 D0 X X X X
 	#else //LPC code
-    DEBUGOUT("DAC_write\n");
-    Chip_I2C_MasterCmdRead(I2C_ID_SELECT[bus], ADC_address, ADC_CHANNEL_SELECT[ADC_channel], input_buffer, 2);
-	#endif
+    //DEBUGOUT("ADC_read\n");
+	Chip_I2C_MasterSend(I2C_ID_SELECT[bus], ADC_address, &ADC_CHANNEL_SELECT[ADC_channel], 1);
+    Chip_I2C_MasterRead(I2C_ID_SELECT[bus], ADC_address, input_buffer, 2);
+    #endif
 
     uint16_t ADC_value = (input_buffer[0] << 4) | (input_buffer[1] >> 4);
 	return ADC_value;
@@ -145,7 +146,7 @@ void DAC_write(uint8_t bus, uint8_t DAC_address, uint16_t output_voltage){
     Wire.endTransmission(true);
 
     #else //LPC code
-    DEBUGOUT("DAC_write\n");
+    //DEBUGOUT("DAC_write\n");
     Chip_I2C_MasterSend(I2C_ID_SELECT[bus], DAC_address, buffer_out, 2);
     #endif //ARDUINO
 }
