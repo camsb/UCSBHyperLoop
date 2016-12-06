@@ -6,7 +6,7 @@ void runtimeTimerInit() {
 	uint32_t timerFreq = Chip_Clock_GetSystemClockRate();
 
 	Chip_TIMER_Init(LPC_TIMER0);
-	Chip_TIMER_PrescaleSet(LPC_TIMER0, timerFreq/1000);	// Increment counter every millisecond.
+	Chip_TIMER_PrescaleSet(LPC_TIMER0, timerFreq/1200);	// Increment counter every millisecond.
 	Chip_TIMER_Enable(LPC_TIMER0);
 }
 
