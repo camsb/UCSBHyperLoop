@@ -31,6 +31,7 @@
 #define SAFE_TEMPERATURE 100      //[C]
 #define SAFE_CURRENT 60           //[A]
 
+#define NUM_THERMISTORS 1
 #define REFERENCE_RESISTANCE 5100 //[ohms]
 #define THERMISTOR_BETA 3380
 #define THERMISTOR_OFFSET -2.126

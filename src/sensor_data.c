@@ -63,9 +63,9 @@ void collectData(){
 
 	if(RANGING_SENSORS_ACTIVE) {
 
-		longRangingData = getLongDistance();
-		shortRangingData = getShortDistance();
-		positionAttitude = computePositionAttitudeRanging(longRangingData, shortRangingData);
+		sensorData.longRangingData = getLongDistance();
+		sensorData.shortRangingData = getShortDistance();
+		positionAttitude = computePositionAttitudeRanging(sensorData.longRangingData, sensorData.shortRangingData);
 
 		sensorData.positionY = positionAttitude.y;
 		sensorData.positionZ = positionAttitude.z;
@@ -74,6 +74,13 @@ void collectData(){
 		sensorData.yaw = positionAttitude.yaw;
 
 	}
+
+    if(MOTOR_BOARD_I2C_ACTIVE) {
+    	update_HEMS(motor0);
+    	update_HEMS(motor1);
+    	update_HEMS(motor2);
+    	update_HEMS(motor3);
+    }
 
 	getPressureFlag = !getPressureFlag; // Toggling between pressure and temperature register loading.
 
