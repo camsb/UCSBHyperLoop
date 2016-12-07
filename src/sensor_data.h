@@ -2,6 +2,8 @@
 #define SENSOR_DATA_H_
 
 #include "board.h"
+#include "ranging.h"
+#include "HEMS.h"
 
 void 	collectCalibrationData(I2C_ID_T id);
 void    collectData();
@@ -45,14 +47,17 @@ typedef struct{
   float temp3;
   float temp4;
 
-  float therm1;
-  float therm2;
-  float therm3;
-  float therm4;
+  float tacho1;
+  float tacho2;
+  float tacho3;
+  float tacho4;
 
   float pressure1;
   float pressure2;
   float power;
+
+  rangingData shortRangingData;
+  rangingData longRangingData;
 
 } sensor;
 

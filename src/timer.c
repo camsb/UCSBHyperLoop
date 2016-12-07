@@ -2,6 +2,18 @@
 #include "sensor_data.h"
 #include "ethernet.h"
 
+void runtimeTimerInit() {
+	uint32_t timerFreq = Chip_Clock_GetSystemClockRate();
+
+	Chip_TIMER_Init(LPC_TIMER0);
+	Chip_TIMER_PrescaleSet(LPC_TIMER0, timerFreq/1200);	// Increment counter every millisecond.
+	Chip_TIMER_Enable(LPC_TIMER0);
+}
+
+uint32_t getRuntime() {
+	return Chip_TIMER_ReadCount(LPC_TIMER0);
+}
+
 void Reset_Timer_Counter(LPC_TIMER_T *pTMR) {
   pTMR->TC = 0; // Reset Timer Counter
 //  pTMR->PC = 0; // Reset Prescale Counter

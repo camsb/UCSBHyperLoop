@@ -36,13 +36,16 @@ int main(void)
     SystemCoreClockUpdate();
     Board_Init();
 
+    // Initialize LPC_TIMER0 as a runtime timer.
+    runtimeTimerInit();
+
     if(PWM_ACTIVE){
         Init_PWM(LPC_PWM1);
         Init_Channel(LPC_PWM1, 1);
         Set_Channel_PWM(LPC_PWM1, 1, 0.5);
     }
     if(GATHER_DATA_ACTIVE){
-    	gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 1);
+    	gatherSensorDataTimerInit(LPC_TIMER1, TIMER1_IRQn, 10);
     }
     if(SMOOSHED_ONE_ACTIVE){
     	i2cInit(I2C1, SPEED_100KHZ);
@@ -77,6 +80,23 @@ int main(void)
 
     if(SDCARD_ACTIVE) {
     	sdcardInit();
+    }
+
+    if(MOTOR_BOARD_I2C_ACTIVE) {
+    	//i2cInit(I2C0, SPEED_100KHZ);
+    	i2cInit(I2C1, SPEED_100KHZ);
+    	i2cInit(I2C2, SPEED_100KHZ);
+    	motors[0] = initialize_HEMS(I2C1,0);
+    	motors[1] = initialize_HEMS(I2C1,0b01001001);
+    	motors[2] = initialize_HEMS(I2C2,0);
+    	motors[3] = initialize_HEMS(I2C2,1);
+
+    	// Enable GPIO interrupt.
+    	Chip_GPIOINT_SetIntRising(LPC_GPIOINT, 2, 1 << 11);
+    	NVIC_ClearPendingIRQ(GPIO_IRQn);
+    	NVIC_EnableIRQ(GPIO_IRQn);
+
+    	prototypeRunFlag = 0;
     }
 
     DEBUGOUT("UCSB Hyperloop Controller Initialized\n");
@@ -114,6 +134,7 @@ int main(void)
 
             collectData();
 
+#if 0
             if (sensorData.dataPrintFlag == 2) { // Print every 2/1 = 2 seconds.
 				DEBUGOUT( "temperature1 = %f\n", sensorData.temp1 );
 				DEBUGOUT( "temperature2 = %f\n", sensorData.temp2 );
@@ -134,7 +155,68 @@ int main(void)
 				DEBUGOUT( "\n" );
 				sensorData.dataPrintFlag = 0;
             }
+#endif	// 0
+        }
+        if(PROTOTYPE_TEST) {
+    		uint8_t prototypeRunTempAlert = 0;
 
+    		// Check if any temperature is over 80C.
+    		int i, j;
+    		for(i=0; i<NUM_MOTORS; i++) {
+    			for(j=0; j<NUM_THERMISTORS; j++) {
+    				if(motors[i]->temperatures[j] > 80) {
+    					prototypeRunFlag = 0;	// The (pre)run has ended due to over-temperature.
+    					prototypeRunTempAlert = 1;
+    					DEBUGOUT("OVER-TEMPERATURE ALERT\n");
+    					break;
+    				}
+    			}
+    			if(prototypeRunTempAlert == 1) break;
+    		}
+
+    		// Check if prototype test is running AND temperature is below 80C.
+        	if(prototypeRunTempAlert == 0 && prototypeRunFlag == 1) {
+        		int time_sec = getRuntime()/1000;
+
+				if(PROTOTYPE_PRERUN) {	// PRERUN
+					if (time_sec < prototypeRunStartTime + 10) {	// Spin up to tenth power.
+						motors[0]->target_throttle_voltage = 0.5;
+						motors[1]->target_throttle_voltage = 0.5;
+						motors[2]->target_throttle_voltage = 0.5;
+						motors[3]->target_throttle_voltage = 0.5;
+					} else {	// Spin down.
+						motors[0]->target_throttle_voltage = 0;
+						motors[1]->target_throttle_voltage = 0;
+						motors[2]->target_throttle_voltage = 0;
+						motors[3]->target_throttle_voltage = 0;
+
+						prototypeRunFlag = 0;	// The prerun has ended.
+						DEBUGOUT("PRERUN HAS ENDED\n");
+					}
+				} else {				// RUN
+					if (time_sec < prototypeRunStartTime + 60) {	// Spin up to half power.
+						motors[0]->target_throttle_voltage = 2.5;
+						motors[1]->target_throttle_voltage = 2.5;
+						motors[2]->target_throttle_voltage = 2.5;
+						motors[3]->target_throttle_voltage = 2.5;
+					} else {	// Spin down.
+						motors[0]->target_throttle_voltage = 0;
+						motors[1]->target_throttle_voltage = 0;
+						motors[2]->target_throttle_voltage = 0;
+						motors[3]->target_throttle_voltage = 0;
+
+						prototypeRunFlag = 0;	// The run has ended.
+						DEBUGOUT("RUN HAS ENDED\n");
+					}
+				}
+
+        	} else {	// The motors should not be spinning right now.
+				motors[0]->target_throttle_voltage = 0;
+				motors[1]->target_throttle_voltage = 0;
+				motors[2]->target_throttle_voltage = 0;
+				motors[3]->target_throttle_voltage = 0;
+        	}
+        	DEBUGOUT("Throttle voltage: %0.2f\n", motors[0]->target_throttle_voltage);
         }
 
         if(SDCARD_ACTIVE) {

@@ -16,14 +16,14 @@ struct comm_packet {
 	/* Atmospheric Data */
 	char bm1[6];	// Pressure1
 	char bm2[6];	// Pressure2
-	char tm1[6];	// Temperature
+	char tm1[6];	// Temperature1
 	char tm2[6];	// Temperature2
 	char tm3[6];	// Temperature3
 	char tm4[6];	// Temperature4
-	char th1[6];	// Thermistor1
-	char th2[6];	// Thermistor2
-	char th3[6];	// Thermistor3
-	char th4[6];	// Thermistor4
+	char ta1[6];	// Tachometer1
+	char ta2[6];	// Tachometer2
+	char ta3[6];	// Tachometer3
+	char ta4[6];	// Tachometer4
 	char pwr[6];	// Power Consumption
 	/* Positional Data */
 	char pox[6];	// x Position

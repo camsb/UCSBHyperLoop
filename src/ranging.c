@@ -37,8 +37,8 @@ positionAttitudeData computePositionAttitudeRanging(rangingData longRangingData,
 					 short_right_pyth_inv;
 	float roll	  = arcsin((z_right - z_com) * short_right_avg_inv);
 
-	uint32_t i;
-	for(i = 0; i < 120000000; i++);
+	//uint32_t i;
+	//for(i = 0; i < 120000000; i++);
 
 	positionAttitudeData positionAttitude;
 	positionAttitude.y = y_com;
