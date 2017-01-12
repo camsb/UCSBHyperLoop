@@ -11,7 +11,7 @@
 #define ADC_GAIN1_MASK		0x0C		// 0b 0000 1100
 #define ADC_GAIN2_MASK		0xE0		// 0b 1110 0000
 #define BATT_ADDRESS    	0x08
-#define BATT_GPIO_PIN		11
+#define BATT_GPIO_PIN		11              // GPIO pin is Port 2 Pin 11 (pin 4 on header J164)
 #define BATT_GPIO_PORT		2
 #define BATT_IRQ_HANDLER	GPIO_IRQHandler
 #define BATT_I2C			I2C0

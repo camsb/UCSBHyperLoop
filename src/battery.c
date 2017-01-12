@@ -85,7 +85,7 @@ uint32_t getBMSDataValue(I2C_ID_T id, uint8_t * writeBuf, uint8_t * readBuf, uin
  */
 void batteryInit()
 {
-//	batteryFlag = 1;
+    //batteryFlag = 1;
 	batteryFlag = 0;
 	uint8_t regValue;
 	uint8_t wBuffer[ 2 ];
@@ -95,7 +95,6 @@ void batteryInit()
     // Read the chip die temperature
     int temp = readBMSRegs(I2C0, 0x08, 0x2C, 0x2D);
     DEBUGOUT("Temp is: %d \n", temp);
-
 
 	Chip_IOCON_PinMuxSet( LPC_IOCON, BATT_GPIO_PORT, BATT_GPIO_PIN, IOCON_FUNC0 );
 	Chip_GPIO_SetPinDIRInput( LPC_GPIO, BATT_GPIO_PORT, BATT_GPIO_PIN );
@@ -117,13 +116,21 @@ void batteryInit()
 	Chip_I2C_MasterCmdRead( BATT_I2C, BATT_ADDRESS, REG_SYS_CTRL2, &regValue, 1 );
 	DEBUGOUT( "ENABLE DSG_ON Read Back = %x\n", regValue );
 	/////////////////////////////////////////////////////
-
+#define BMS_INT
+#ifdef BMS_INT
 	/* Configure the GPIO interrupt */
-//	Chip_GPIOINT_SetIntRising(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
-//
-//	/* Enable interrupt in the NVIC */
-//	NVIC_ClearPendingIRQ(BATT_NVIC);
-//	NVIC_EnableIRQ(BATT_NVIC);
+	//Chip_GPIOINT_SetIntRising(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
+    Chip_GPIOINT_SetIntRising(LPC_GPIOINT, 2, 1 << 11);
+
+
+	/* Enable interrupt in the NVIC */
+	NVIC_ClearPendingIRQ(BATT_NVIC);
+	NVIC_EnableIRQ(BATT_NVIC);
+
+    //Chip_GPIOINT_SetIntFalling(LPC_GPIOINT, BATT_GPIO_PORT, 1 << BATT_GPIO_PIN);
+
+
+#endif
 
 	battery.GAIN   = getGain();
 	battery.OFFSET = getOffset();
@@ -132,18 +139,20 @@ void batteryInit()
 	setVoltageLimit( VOLTAGE_MAX, REG_OV_TRIP );
 	setVoltageLimit( VOLTAGE_MIN, REG_UV_TRIP );
 
+#ifdef BMS_INT
 	// set the times that the batteries will need to be past their limits to send interrupts
-//	setProtectDelayTimes();
+	setProtectDelayTimes();
+#endif
 
 	// set the ADC_EN bit in SYS_CTRL1 to 1 to activate the over voltage and under voltage limits
 	enableMask( ADC_EN, REG_SYS_CTRL1 );
 
 	// Coulomb Counter Reading:
 	// NOT 1 Shot: whenever we want
-		//	disableMask( CC_EN, REG_SYS_CTRL2 );
-		//	enableMask( CC_ONESHOT, REG_SYS_CTRL2 );
+        disableMask( CC_EN, REG_SYS_CTRL2 );
+        enableMask( CC_ONESHOT, REG_SYS_CTRL2 );
 	// Always On mode: every 250ms
-		//	enableMask( CC_EN, REG_SYS_CTRL2 );
+    //	enableMask( CC_EN, REG_SYS_CTRL2 );
 
 	// Discharge FET driver or discharge signal control
 
@@ -367,43 +376,49 @@ void processBatteryInterrupt()
 
 	if( regValue == 0 )
 	{
-		DEBUGOUT( "REG_SYS_STAT  = 0x%X\n\n", regValue );
+		//DEBUGOUT( "REG_SYS_STAT  = 0x%X\n\n", regValue );
+	    DEBUGOUT( "Interrupt fired but BMS has no alert to report. Wiring error?\n");
 	}
+	else{
+	    // The BMS reports a cause for the alert! Parse it.
+	    // Check which interrupt regValue was
 
-	// Check which interrupt regValue was
-	if( regValue & ALERT_CC )
-	{
-		DEBUGOUT( "ALERT_CC: Coulomb Counter!\n" );
-	}
-	if( regValue & DEVICE_XREADY )
-	{
-		DEBUGOUT( "DEVICE_XREADY: Internal Chip Fault!\n" );
-		DEBUGOUT( "               Disables CHG_ON and DSG_ON to 0!\n" );
-	}
-	if( regValue & OVRD_ALERT )
-	{
-		DEBUGOUT( "OVRD_ALERT: Pin is forced high externally while low!\n" );
-		DEBUGOUT( "            Disables CHG_ON and DSG_ON to 0!\n" );
-	}
-	if( regValue & ALERT_UV )
-	{
-		DEBUGOUT( "ALERT_UV: Under Voltage!\n" );
-		DEBUGOUT( "          Disables DSG_ON to 0\n" );
-	}
-	if( regValue & ALERT_OV )
-	{
-		DEBUGOUT( "ALERT_OV: Over Voltage!\n" );
-		DEBUGOUT( "          Disables CHG_ON to 0\n" );
-	}
-	if( regValue & ALERT_SCD )
-	{
-		DEBUGOUT( "ALERT_SCD: Short Circuit Discharge!\n" );
-		DEBUGOUT( "           Disables DSG_ON to 0\n" );
-	}
-	if( regValue & ALERT_OCD )
-	{
-		DEBUGOUT( "ALERT_OCD: Over Current in Discharge!\n" );
-		DEBUGOUT( "           Disables DSG_ON to 0\n" );
+	    // These are bitwise comparisons, and there can be more than one alert cause, so this logic is reasonable.
+        if( regValue & ALERT_CC )
+        {
+            // Uhh, disable output of this for now.
+            DEBUGOUT( "ALERT_CC: Coulomb Counter!\n" );
+        }
+        if( regValue & DEVICE_XREADY )
+        {
+            DEBUGOUT( "DEVICE_XREADY: Internal Chip Fault!\n" );
+            DEBUGOUT( "               Disables CHG_ON and DSG_ON to 0!\n" );
+        }
+        if( regValue & OVRD_ALERT )
+        {
+            DEBUGOUT( "OVRD_ALERT: Pin is forced high externally while low!\n" );
+            DEBUGOUT( "            Disables CHG_ON and DSG_ON to 0!\n" );
+        }
+        if( regValue & ALERT_UV )
+        {
+            DEBUGOUT( "ALERT_UV: Under Voltage!\n" );
+            DEBUGOUT( "          Disables DSG_ON to 0\n" );
+        }
+        if( regValue & ALERT_OV )
+        {
+            DEBUGOUT( "ALERT_OV: Over Voltage!\n" );
+            DEBUGOUT( "          Disables CHG_ON to 0\n" );
+        }
+        if( regValue & ALERT_SCD )
+        {
+            DEBUGOUT( "ALERT_SCD: Short Circuit Discharge!\n" );
+            DEBUGOUT( "           Disables DSG_ON to 0\n" );
+        }
+        if( regValue & ALERT_OCD )
+        {
+            DEBUGOUT( "ALERT_OCD: Over Current in Discharge!\n" );
+            DEBUGOUT( "           Disables DSG_ON to 0\n" );
+        }
 	}
 
 
