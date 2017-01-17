@@ -46,6 +46,7 @@ struct comm_packet {
 
 struct comm_packet CommPacket;
 
+void logData();
 void sendToWebAppSDCard();
 void send_comm_packet_helper(char *method, char *val, int *position);
 

@@ -5,6 +5,7 @@
 #include "ranging.h"
 #include "temp_press.h"
 #include "kinematics.h"
+#include "photo_electric.h"
 
 void collectCalibrationData( I2C_ID_T id ){
 	XYZ initialAccel;
@@ -75,6 +76,15 @@ void collectData(){
 
 	}
 
+    if (PHOTO_ELECTRIC_ACTIVE){
+        /* Handle Photoelectric Strip Detected */
+        if(stripDetectedFlag) {
+            stripDetected();
+            DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
+
+        }
+    }
+
     if(MOTOR_BOARD_I2C_ACTIVE) {
     	int i;
     	for(i=0; i<NUM_MOTORS; i++) {
@@ -83,6 +93,30 @@ void collectData(){
     }
 
 	getPressureFlag = !getPressureFlag; // Toggling between pressure and temperature register loading.
+
+	// Currently disabled debug-out printing of data.
+#if 0
+    if (sensorData.dataPrintFlag == 2) { // Print every 2/1 = 2 seconds.
+        DEBUGOUT( "temperature1 = %f\n", sensorData.temp1 );
+        DEBUGOUT( "temperature2 = %f\n", sensorData.temp2 );
+        DEBUGOUT( "pressure1 = %f\n", sensorData.pressure1 );
+        DEBUGOUT( "pressure2 = %f\n", sensorData.pressure2 );
+        DEBUGOUT( "accelX = %f\t", sensorData.accelX );
+        DEBUGOUT( "accelY = %f\t", sensorData.accelY );
+        DEBUGOUT( "accelZ = %f\n", sensorData.accelZ );
+        DEBUGOUT( "velocityX = %f\t", sensorData.velocityX );
+        DEBUGOUT( "velocityY = %f\t", sensorData.velocityY );
+        DEBUGOUT( "velocityZ = %f\n", sensorData.velocityZ );
+        DEBUGOUT( "positionX = %f\t", sensorData.positionX );
+        DEBUGOUT( "positionY = %f\t", sensorData.positionY );
+        DEBUGOUT( "positionZ = %f\n", sensorData.positionZ );
+        DEBUGOUT( "Roll = %f\t", sensorData.roll );
+        DEBUGOUT( "Pitch = %f\t", sensorData.pitch );
+        DEBUGOUT( "Yaw = %f\n", sensorData.yaw );
+        DEBUGOUT( "\n" );
+        sensorData.dataPrintFlag = 0;
+    }
+#endif
 
 }
 
