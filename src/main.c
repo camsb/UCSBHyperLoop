@@ -40,9 +40,9 @@ int main(void)
     // Main control loop
     while( 1 ) {
         // 1. Gather data from sensors
-        // 2. Evaluate state machine transition conditions and transition if necessary
-        // 3. Perform actuation of systems as necessary
-        // 4. Log data to web app, SD card, etc.
+        // 2. Log data to web app, SD card, etc.
+        // 3. Evaluate state machine transition conditions and transition if necessary
+        // 4. Perform actuation of systems as necessary
 
         // ** GATHER DATA FROM SENSORS **
         if(collectDataFlag){
@@ -50,7 +50,7 @@ int main(void)
         }
 
         // ** DATA LOGGING **
-        if (ETHERNET_ACTIVE || SDCARD_ACTIVE){
+        if (COMMUNICATION_ACTIVE){
             logData(); // See communications.c
         }
 
