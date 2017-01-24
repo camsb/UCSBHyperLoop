@@ -40,6 +40,7 @@ HEMS* initialize_HEMS(uint8_t I2C_BUS, uint8_t I2C_DIP) {
 }
 
 void update_HEMS(HEMS* engine) {
+#if 0
 	if(engine->throttle_voltage > engine->target_throttle_voltage) {
 		engine->throttle_voltage -= 0.1;
 	}
@@ -53,7 +54,8 @@ void update_HEMS(HEMS* engine) {
 
 	//Set throttle;
 	DAC_write(engine->bus, engine->DAC_0_device_address, engine->throttle_voltage * 4095 / 5);
-
+#endif
+#if 1
   //Record Temperatures
   int temp_counter;
   for (temp_counter = 0; temp_counter < NUM_THERMISTORS; temp_counter++) {
@@ -97,6 +99,7 @@ void update_HEMS(HEMS* engine) {
   engine->rpm = (1 - TACHOMETER_AVG_WEIGHT) * current_rpm + TACHOMETER_AVG_WEIGHT * engine->rpm;
   engine->timestamp = current_time;
   engine->tachometer_counter = current_tachometer_counter;
+#endif	// 0
 }
 
 uint16_t ADC_read(uint8_t bus, uint8_t ADC_address, uint8_t ADC_channel) {

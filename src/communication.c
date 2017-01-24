@@ -2,6 +2,7 @@
 #include "ethernet.h"
 #include "sdcard.h"
 #include "sensor_data.h"
+#include "HEMS.h"
 
 void send_comm_packet_helper(char *method, char *val, int *position) {
 	if (val != 0) {
@@ -18,37 +19,7 @@ void send_comm_packet_helper(char *method, char *val, int *position) {
 
 void sendToWebAppSDCard(){
 
-	sendDataPacket();
-
-	/* Test data to send */
-//	sensorData.pressure1 = 2.0;
-//	sensorData.pressure2 = 3.0;
-//	sensorData.temp1 = 100.0;
-//	sensorData.temp2 = 120.0;
-//	sensorData.temp3 = 140.0;
-//	sensorData.temp4 = 160.0;
-//	sensorData.therm1 = 210.0;
-//	sensorData.therm2 = 220.0;
-//	sensorData.therm3 = 230.0;
-//	sensorData.therm4 = 240.0;
-//	sensorData.power = 20.0;
-//	/* Positional Data */
-//	sensorData.positionX = 5.0;
-//	sensorData.positionY = 6.0;
-//	sensorData.positionZ = 0.0;
-//	/* Velocity Data */
-//	sensorData.velocityX = 20.0;
-//	sensorData.velocityY = 4.0;
-//	sensorData.velocityZ = 0.0;
-//	/* Acceleration Data */
-//	sensorData.accelX = 10.0;
-//	sensorData.accelY = 0.0;
-//	sensorData.accelZ = 0.0;
-//	/* Attitudinal Data */
-//	sensorData.roll = 1.0;
-//	sensorData.pitch = 2.0;
-//	sensorData.yaw = 3.0;
-
+	sendPrototypePacket();
 	/* Atmospheric, Miscellaneous Data */
 //	sprintf(CommPacket.bm1, "%06.2f", sensorData.pressure1);
 //	sprintf(CommPacket.bm2, "%06.2f", sensorData.pressure2);

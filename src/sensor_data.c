@@ -6,6 +6,8 @@
 #include "temp_press.h"
 #include "kinematics.h"
 
+int y = 0;
+
 void collectCalibrationData( I2C_ID_T id ){
 	XYZ initialAccel;
 
@@ -83,6 +85,16 @@ void collectData(){
     }
 
 	getPressureFlag = !getPressureFlag; // Toggling between pressure and temperature register loading.
+
+	if(y%10 == 0) {
+		// Print sensor data at 1Hz.
+		int i;
+		for(i=0; i<NUM_MOTORS; i++) {
+			DEBUGOUT("Motor %d sensors: RPM=%d, CURRENT=%d, TEMP=%d,%d,%d,%d\n", i, motors[i]->rpm, motors[i]->amps, motors[i]->temperatures[0], motors[i]->temperatures[1],motors[i]->temperatures[2],motors[i]->temperatures[3]);
+		}
+		DEBUGOUT("\n");
+
+	}
 
 }
 

@@ -1,5 +1,6 @@
 #include "ethernet.h"
 #include "sensor_data.h"
+#include "HEMS.h"
 #include <string.h>
 #include "stdio.h"
 #include "timer.h"
@@ -396,6 +397,100 @@ void sendDataPacket() {
 
 	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 
+}
+
+void sendPrototypePacket(){
+	sendDataFlag = 0;
+
+	// Copy strings to Net_Tx_Data
+	int pos = 0;
+	memset(Net_Tx_Data, 0, 512); // Make sure this clears enough space
+
+	/* DAC Output */
+	sprintf(PrototypePacket.dac, "%06.2f", motors[0]->throttle_voltage);
+	/* Current Output */
+	sprintf(PrototypePacket.cu1, "%06.2f", (float)motors[0]->amps);
+	sprintf(PrototypePacket.cu2, "%06.2f", (float)motors[1]->amps);
+	sprintf(PrototypePacket.cu3, "%06.2f", (float)motors[2]->amps);
+	sprintf(PrototypePacket.cu4, "%06.2f", (float)motors[3]->amps);
+	/* Tachometer Output */
+	sprintf(PrototypePacket.ta1, "%06.2f", (float)motors[0]->rpm);
+	sprintf(PrototypePacket.ta2, "%06.2f", (float)motors[1]->rpm);
+	sprintf(PrototypePacket.ta3, "%06.2f", (float)motors[2]->rpm);
+	sprintf(PrototypePacket.ta4, "%06.2f", (float)motors[3]->rpm);
+	/* Temperature Output */
+	sprintf(PrototypePacket.m1tmp1, "%06.f", (float)motors[0]->temperatures[0]);
+	sprintf(PrototypePacket.m1tmp2, "%06.f", (float)motors[0]->temperatures[1]);
+	sprintf(PrototypePacket.m1tmp3, "%06.f", (float)motors[0]->temperatures[2]);
+	sprintf(PrototypePacket.m1tmp4, "%06.f", (float)motors[0]->temperatures[3]);
+//	sprintf(PrototypePacket.m1tmp5, "%06.f", (float)motors[0]->temperatures[4]);
+//	sprintf(PrototypePacket.m1tmp6, "%06.f", (float)motors[0]->temperatures[5]);
+//	sprintf(PrototypePacket.m1tmp7, "%06.f", (float)motors[0]->temperatures[6]);
+	sprintf(PrototypePacket.m2tmp1, "%06.f", (float)motors[1]->temperatures[0]);
+	sprintf(PrototypePacket.m2tmp2, "%06.f", (float)motors[1]->temperatures[1]);
+	sprintf(PrototypePacket.m2tmp3, "%06.f", (float)motors[1]->temperatures[2]);
+	sprintf(PrototypePacket.m2tmp4, "%06.f", (float)motors[1]->temperatures[3]);
+//	sprintf(PrototypePacket.m2tmp5, "%06.f", (float)motors[1]->temperatures[4]);
+//	sprintf(PrototypePacket.m2tmp6, "%06.f", (float)motors[1]->temperatures[5]);
+//	sprintf(PrototypePacket.m2tmp7, "%06.f", (float)motors[1]->temperatures[6]);
+	sprintf(PrototypePacket.m3tmp1, "%06.f", (float)motors[2]->temperatures[0]);
+	sprintf(PrototypePacket.m3tmp2, "%06.f", (float)motors[2]->temperatures[1]);
+	sprintf(PrototypePacket.m3tmp3, "%06.f", (float)motors[2]->temperatures[2]);
+	sprintf(PrototypePacket.m3tmp4, "%06.f", (float)motors[2]->temperatures[3]);
+//	sprintf(PrototypePacket.m3tmp5, "%06.f", (float)motors[2]->temperatures[4]);
+//	sprintf(PrototypePacket.m3tmp6, "%06.f", (float)motors[2]->temperatures[5]);
+//	sprintf(PrototypePacket.m3tmp7, "%06.f", (float)motors[2]->temperatures[6]);
+	sprintf(PrototypePacket.m4tmp1, "%06.f", (float)motors[3]->temperatures[0]);
+	sprintf(PrototypePacket.m4tmp2, "%06.f", (float)motors[3]->temperatures[1]);
+	sprintf(PrototypePacket.m4tmp3, "%06.f", (float)motors[3]->temperatures[2]);
+	sprintf(PrototypePacket.m4tmp4, "%06.f", (float)motors[3]->temperatures[3]);
+//	sprintf(PrototypePacket.m4tmp5, "%06.f", (float)motors[3]->temperatures[4]);
+//	sprintf(PrototypePacket.m4tmp6, "%06.f", (float)motors[3]->temperatures[5]);
+//	sprintf(PrototypePacket.m4tmp7, "%06.f", (float)motors[3]->temperatures[6]);
+
+	/* DAC Data */
+	send_data_packet_helper(DAC, PrototypePacket.dac, &pos);
+	/* Current Data */
+	send_data_packet_helper(CU1, PrototypePacket.cu1, &pos);
+	send_data_packet_helper(CU2, PrototypePacket.cu2, &pos);
+	send_data_packet_helper(CU3, PrototypePacket.cu3, &pos);
+	send_data_packet_helper(CU4, PrototypePacket.cu4, &pos);
+	/* Tachometer Data */
+	send_data_packet_helper(TA1, PrototypePacket.ta1, &pos);
+	send_data_packet_helper(TA2, PrototypePacket.ta2, &pos);
+	send_data_packet_helper(TA3, PrototypePacket.ta3, &pos);
+	send_data_packet_helper(TA4, PrototypePacket.ta4, &pos);
+	/* Temperature Data */
+	send_data_packet_helper(TM1, PrototypePacket.m1tmp1, &pos);
+	send_data_packet_helper(TM2, PrototypePacket.m1tmp2, &pos);
+	send_data_packet_helper(TM3, PrototypePacket.m1tmp3, &pos);
+	send_data_packet_helper(TM4, PrototypePacket.m1tmp4, &pos);
+	send_data_packet_helper(TM5, PrototypePacket.m1tmp5, &pos);
+	send_data_packet_helper(TM6, PrototypePacket.m1tmp6, &pos);
+	send_data_packet_helper(TM7, PrototypePacket.m1tmp7, &pos);
+	send_data_packet_helper(TM8, PrototypePacket.m2tmp1, &pos);
+	send_data_packet_helper(TM9, PrototypePacket.m2tmp2, &pos);
+	send_data_packet_helper(T10, PrototypePacket.m2tmp3, &pos);
+	send_data_packet_helper(T11, PrototypePacket.m2tmp4, &pos);
+	send_data_packet_helper(T12, PrototypePacket.m2tmp5, &pos);
+	send_data_packet_helper(T13, PrototypePacket.m2tmp6, &pos);
+	send_data_packet_helper(T14, PrototypePacket.m2tmp7, &pos);
+	send_data_packet_helper(T15, PrototypePacket.m3tmp1, &pos);
+	send_data_packet_helper(T16, PrototypePacket.m3tmp2, &pos);
+	send_data_packet_helper(T17, PrototypePacket.m3tmp3, &pos);
+	send_data_packet_helper(T18, PrototypePacket.m3tmp4, &pos);
+	send_data_packet_helper(T19, PrototypePacket.m3tmp5, &pos);
+	send_data_packet_helper(T20, PrototypePacket.m3tmp6, &pos);
+	send_data_packet_helper(T21, PrototypePacket.m3tmp7, &pos);
+	send_data_packet_helper(T22, PrototypePacket.m4tmp1, &pos);
+	send_data_packet_helper(T23, PrototypePacket.m4tmp2, &pos);
+	send_data_packet_helper(T24, PrototypePacket.m4tmp3, &pos);
+	send_data_packet_helper(T25, PrototypePacket.m4tmp4, &pos);
+	send_data_packet_helper(T26, PrototypePacket.m4tmp5, &pos);
+	send_data_packet_helper(T27, PrototypePacket.m4tmp6, &pos);
+	send_data_packet_helper(T28, PrototypePacket.m4tmp7, &pos);
+
+	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 }
 
 // Singular, will change to multiple, or do an interrupt or something
