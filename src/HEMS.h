@@ -15,6 +15,8 @@
 #endif //ARDUINO
 
 #ifdef LPC //LPC LIBRARIES BELOW
+#include "stdlib.h"
+
 #include "i2c.h"
 #include "timer.h"
 
@@ -33,7 +35,7 @@
 #define SAFE_TEMPERATURE 100      //[C]
 #define SAFE_CURRENT 60           //[A]
 
-#define NUM_THERMISTORS 7
+#define NUM_THERMISTORS 4
 #define REFERENCE_RESISTANCE 5100 //[ohms]
 #define THERMISTOR_BETA 3380
 #define THERMISTOR_OFFSET -2.126
@@ -42,7 +44,7 @@
 #define AMMETER_CONVERSION 0.1136	//[A/mV] 1/AMMETER_SENSITIVITY
 #define AMMETER_VCC 3.3           //Ammeter referenced to 3.3V; everything else runs off 5V
 
-#define TACHOMETER_TICKS 3.0
+#define TACHOMETER_TICKS 1.0	// Number of reflective strips on the motor.
 
 //ADC Channel Assignments
 #define COILS_FRONT 0

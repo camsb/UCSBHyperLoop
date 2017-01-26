@@ -74,6 +74,7 @@ int main(void)
         if(PROTOTYPE_TEST) {
     		uint8_t prototypeRunTempAlert = 0;
 
+#if 0
     		// Check if any temperature is over 80C.
     		int i, j;
     		for(i=0; i<NUM_MOTORS; i++) {
@@ -87,6 +88,7 @@ int main(void)
     			}
     			if(prototypeRunTempAlert == 1) break;
     		}
+#endif	// 0
 
     		// Check if prototype test is running AND temperature is below 80C.
         	if(prototypeRunTempAlert == 0 && prototypeRunFlag == 1) {
@@ -94,16 +96,37 @@ int main(void)
 
 				if(PROTOTYPE_PRERUN) {	// PRERUN
 					if (time_sec < prototypeRunStartTime + 10) {	// Spin up to tenth power.
-						motors[0]->target_throttle_voltage = 0.5;
-						motors[1]->target_throttle_voltage = 0.5;
-						motors[2]->target_throttle_voltage = 0.5;
-						motors[3]->target_throttle_voltage = 0.5;
+						motors[0]->target_throttle_voltage = 0.8;
+						motors[1]->target_throttle_voltage = 0;
+						motors[2]->target_throttle_voltage = 0;
+						motors[3]->target_throttle_voltage = 0;
 					}
-					else {	// Spin down
+					else if (time_sec < prototypeRunStartTime + 20) {	// Spin up to tenth power.
+						motors[0]->target_throttle_voltage = 0;
+						motors[1]->target_throttle_voltage = 0.8;
+						motors[2]->target_throttle_voltage = 0;
+						motors[3]->target_throttle_voltage = 0;
+					}
+					else if (time_sec < prototypeRunStartTime + 30) {	// Spin up to tenth power.
+						motors[0]->target_throttle_voltage = 0;
+						motors[1]->target_throttle_voltage = 0;
+						motors[2]->target_throttle_voltage = 0.8;
+						motors[3]->target_throttle_voltage = 0;
+					}
+					else if (time_sec < prototypeRunStartTime + 40) {	// Spin up to tenth power.
+						motors[0]->target_throttle_voltage = 0;
+						motors[1]->target_throttle_voltage = 0;
+						motors[2]->target_throttle_voltage = 0;
+						motors[3]->target_throttle_voltage = 0.8;
+					} else {	// Spin down.
 						motors[0]->target_throttle_voltage = 0;
 						motors[1]->target_throttle_voltage = 0;
 						motors[2]->target_throttle_voltage = 0;
 						motors[3]->target_throttle_voltage = 0;
+						motors[0]->throttle_voltage = 0;
+						motors[1]->throttle_voltage = 0;
+						motors[2]->throttle_voltage = 0;
+						motors[3]->throttle_voltage = 0;
 
 						prototypeRunFlag = 0;	// The prerun has ended.
 						DEBUGOUT("PRERUN HAS ENDED\n");
@@ -111,16 +134,26 @@ int main(void)
 				}
 				else {  // RUN
 					if (time_sec < prototypeRunStartTime + 60) {	// Spin up to half power.
-						motors[0]->target_throttle_voltage = 2.5;
-						motors[1]->target_throttle_voltage = 2.5;
-						motors[2]->target_throttle_voltage = 2.5;
-						motors[3]->target_throttle_voltage = 2.5;
-					}
-					else {	// Spin down.
+						motors[0]->target_throttle_voltage = 4;
+						motors[1]->target_throttle_voltage = 4;
+						motors[2]->target_throttle_voltage = 4;
+						motors[3]->target_throttle_voltage = 4;
+#if 1
+						motors[0]->throttle_voltage = 4;
+						motors[1]->throttle_voltage = 4;
+						motors[2]->throttle_voltage = 4;
+						motors[3]->throttle_voltage = 4;
+#endif	// 0
+
+					} else {	// Spin down.
 						motors[0]->target_throttle_voltage = 0;
 						motors[1]->target_throttle_voltage = 0;
 						motors[2]->target_throttle_voltage = 0;
 						motors[3]->target_throttle_voltage = 0;
+						motors[0]->throttle_voltage = 0;
+						motors[1]->throttle_voltage = 0;
+						motors[2]->throttle_voltage = 0;
+						motors[3]->throttle_voltage = 0;
 
 						prototypeRunFlag = 0;	// The run has ended.
 						DEBUGOUT("RUN HAS ENDED\n");
@@ -133,8 +166,13 @@ int main(void)
 				motors[1]->target_throttle_voltage = 0;
 				motors[2]->target_throttle_voltage = 0;
 				motors[3]->target_throttle_voltage = 0;
+				motors[0]->throttle_voltage = 0;
+				motors[1]->throttle_voltage = 0;
+				motors[2]->throttle_voltage = 0;
+				motors[3]->throttle_voltage = 0;
         	}
-        	DEBUGOUT("Throttle voltage: %0.2f\n", motors[0]->target_throttle_voltage);
+        	//DEBUGOUT("Target throttle voltages: FR%0.2f BR%0.2f FL%0.2f BL%0.2f\n", motors[0]->target_throttle_voltage, motors[1]->target_throttle_voltage, motors[2]->target_throttle_voltage, motors[3]->target_throttle_voltage);
+        	//DEBUGOUT("Throttle voltages: FR%0.2f BR%0.2f FL%0.2f BL%0.2f\n", motors[0]->throttle_voltage, motors[1]->throttle_voltage, motors[2]->throttle_voltage, motors[3]->throttle_voltage);
         }
 
     // End of main control loop

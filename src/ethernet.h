@@ -147,6 +147,45 @@
 
 #define SOCKET_ID 		0
 
+/* Prototype methods */
+#define DAC				"DAC"		// DAC
+#define TA1				"TA1"		// Motor 1 Tachometer
+#define TA2				"TA2"		// Motor 2 Tachometer
+#define TA3				"TA3"		// Motor 3 Tachometer
+#define TA4				"TA4"		// Motor 4 Tachometer
+#define CU1				"CU1"		// Motor 1 Current
+#define CU2				"CU2"		// Motor 2 Current
+#define CU3				"CU3"		// Motor 3 Current
+#define CU4				"CU4"		// Motor 4 Current
+#define TM1				"TM1"		// Motor 1 Temperature 1
+#define TM2				"TM2"		// Motor 1 Temperature 2
+#define TM3				"TM3"		// Motor 1 Temperature 3
+#define TM4				"TM4"		// Motor 1 Temperature 4
+#define TM5				"TM5"		// Motor 1 Temperature 5
+#define TM6				"TM6"		// Motor 1 Temperature 6
+#define TM7				"TM7"		// Motor 1 Temperature 7
+#define TM8				"TM8"		// Motor 2 Temperature 1
+#define TM9				"TM9"		// Motor 2 Temperature 2
+#define T10				"T10"		// Motor 2 Temperature 3
+#define T11				"T11"		// Motor 2 Temperature 4
+#define T12				"T12"		// Motor 2 Temperature 5
+#define T13				"T13"		// Motor 2 Temperature 6
+#define T14				"T14"		// Motor 2 Temperature 7
+#define T15				"T15"		// Motor 3 Temperature 1
+#define T16				"T16"		// Motor 3 Temperature 2
+#define T17				"T17"		// Motor 3 Temperature 3
+#define T18				"T18"		// Motor 3 Temperature 4
+#define T19				"T19"		// Motor 3 Temperature 5
+#define T20				"T20"		// Motor 3 Temperature 6
+#define T21				"T21"		// Motor 3 Temperature 7
+#define T22				"T22"		// Motor 4 Temperature 1
+#define T23				"T23"		// Motor 4 Temperature 2
+#define T24				"T24"		// Motor 4 Temperature 3
+#define T25				"T25"		// Motor 4 Temperature 4
+#define T26				"T26"		// Motor 4 Temperature 5
+#define T27				"T27"		// Motor 4 Temperature 6
+#define T28				"T28"		// Motor 4 Temperature 7
+
 struct data_packet {
 	// all pointers are ini
 	// pass in pointer to null terminated data string
@@ -184,7 +223,59 @@ struct data_packet {
 
 };
 
+
+struct prototype_packet {
+	// all pointers are ini
+	// pass in pointer to null terminated data string
+	// packet construction will be taken care of by function
+	// format with ###.## zero padded
+
+	/* DAC Data */
+	char dac[6];	// DAC
+	/* Current Data */
+	char cu1[6];	// Motor 1 Current
+	char cu2[6];	// Motor 2 Current
+	char cu3[6];	// Motor 3 Current
+	char cu4[6];	// Motor 4 Current
+	/* Tachometer Data*/
+	char ta1[6]; 	// Motor 1 Tachometer
+	char ta2[6]; 	// Motor 2 Tachometer
+	char ta3[6]; 	// Motor 3 Tachometer
+	char ta4[6]; 	// Motor 4 Tachometer
+	/* Temperature Data */
+	char m1tmp1[6]; // Motor 1 Temperature1
+	char m1tmp2[6]; // Motor 1 Temperature2
+	char m1tmp3[6]; // Motor 1 Temperature3
+	char m1tmp4[6]; // Motor 1 Temperature4
+	char m1tmp5[6]; // Motor 1 Temperature5
+	char m1tmp6[6]; // Motor 1 Temperature6
+	char m1tmp7[6]; // Motor 1 Temperature7
+	char m2tmp1[6]; // Motor 2 Temperature1
+	char m2tmp2[6]; // Motor 2 Temperature2
+	char m2tmp3[6]; // Motor 2 Temperature3
+	char m2tmp4[6]; // Motor 2 Temperature4
+	char m2tmp5[6]; // Motor 2 Temperature5
+	char m2tmp6[6]; // Motor 2 Temperature6
+	char m2tmp7[6]; // Motor 2 Temperature7
+	char m3tmp1[6]; // Motor 3 Temperature1
+	char m3tmp2[6]; // Motor 3 Temperature2
+	char m3tmp3[6]; // Motor 3 Temperature3
+	char m3tmp4[6]; // Motor 3 Temperature4
+	char m3tmp5[6]; // Motor 3 Temperature5
+	char m3tmp6[6]; // Motor 3 Temperature6
+	char m3tmp7[6]; // Motor 3 Temperature7
+	char m4tmp1[6]; // Motor 4 Temperature1
+	char m4tmp2[6]; // Motor 4 Temperature2
+	char m4tmp3[6]; // Motor 4 Temperature3
+	char m4tmp4[6]; // Motor 4 Temperature4
+	char m4tmp5[6]; // Motor 4 Temperature5
+	char m4tmp6[6]; // Motor 4 Temperature6
+	char m4tmp7[6]; // Motor 4 Temperature7
+
+};
+
 struct data_packet DataPacket;
+struct prototype_packet PrototypePacket;
 
 extern uint16_t gSn_RX_BASE[];
 extern uint16_t gSn_TX_BASE[];
@@ -212,6 +303,7 @@ void wizIntFunction();
 void rec_method(char *method, char *val, int *val_len);
 void send_method(char *method, char* val, int val_len);
 void sendDataPacket();
+void sendPrototypePacket();
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 void Wiz_Restart();
 void Wiz_Init();
