@@ -44,7 +44,7 @@ static QState Hyperloop_reverse(Hyperloop *me);
 static QState Hyperloop_engines_on(Hyperloop *me); 
 static QState Hyperloop_rev_engines(Hyperloop *me);
 static QState Hyperloop_power_down(Hyperloop *me);
-static QState Hyperloop_hovering(Hyperloop *me);
+//static QState Hyperloop_hovering(Hyperloop *me);
 static QState Hyperloop_hover(Hyperloop *me);
 static QState Hyperloop_braking(Hyperloop *me);             
 
@@ -110,7 +110,7 @@ QState Hyperloop_idle(Hyperloop *me) {
             return Q_TRAN(&Hyperloop_reverse);
         }
         case ENGAGE_ENGINES_SIG: {
-            return Q_TRAN(&Hyperloop_rev_engines);
+            return Q_TRAN(&Hyperloop_engines_on);
         }
     }
     return Q_SUPER(&Hyperloop_stationary);
@@ -174,7 +174,7 @@ QState Hyperloop_engines_on(Hyperloop *me) {
         }
         case Q_INIT_SIG: {
             BSP_display("engines_on-INIT;");
-            return Q_HANDLED();
+            return Q_TRAN(&Hyperloop_rev_engines);
         }
     }
     return Q_SUPER(&QHsm_top);
@@ -194,6 +194,10 @@ QState Hyperloop_rev_engines(Hyperloop *me) {
         }
         case Q_INIT_SIG: {
             BSP_display("rev_engines-INIT;");
+            return Q_HANDLED();
+        }
+        case ENGINES_REVED_SIG: {
+            BSP_display("Rev-sig!;");
             return Q_TRAN(&Hyperloop_hover);
         }
     }
@@ -218,6 +222,7 @@ QState Hyperloop_power_down(Hyperloop *me) {
     return Q_SUPER(&Hyperloop_engines_on);
 }
 /*..........................................................................*/
+/*
 QState Hyperloop_hovering(Hyperloop *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
@@ -231,11 +236,14 @@ QState Hyperloop_hovering(Hyperloop *me) {
         }
         case Q_INIT_SIG: {
             BSP_display("hovering-INIT;");
-            return Q_HANDLED();
+            return Q_TRAN(&Hyperloop_hover);
+
+            //return Q_HANDLED();
         }
     }
     return Q_SUPER(&Hyperloop_engines_on);
 }
+*/
 /*..........................................................................*/
 QState Hyperloop_hover(Hyperloop *me) {
     switch (Q_SIG(me)) {
@@ -259,7 +267,7 @@ QState Hyperloop_hover(Hyperloop *me) {
 	    return Q_TRAN(&Hyperloop_power_down);
         }
     }
-    return Q_SUPER(&Hyperloop_hovering);
+    return Q_SUPER(&Hyperloop_engines_on);
 }
 /*..........................................................................*/
 QState Hyperloop_braking(Hyperloop *me) {
@@ -282,6 +290,6 @@ QState Hyperloop_braking(Hyperloop *me) {
             return Q_TRAN(&Hyperloop_hover);
         }
     }
-    return Q_SUPER(&Hyperloop_hovering);
+    return Q_SUPER(&Hyperloop_hover);
 }
 /*..........................................................................*/

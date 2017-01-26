@@ -21,6 +21,8 @@
 #include "sensor_data.h"
 #include "communication.h"
 #include "gpio.h"
+#include "qpn_port.h"
+#include "hyperloop_sm.h"
 
 int main(void)
 {
@@ -33,16 +35,18 @@ int main(void)
 
     initializeSensorsAndControls();
     initializeCommunications();
+    Hyperloop_ctor();
 
     DEBUGOUT("UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
+
+    int dispatch = 0;
 
     // Main control loop
     while( 1 ) {
         // 1. Gather data from sensors
         // 2. Log data to web app, SD card, etc.
-        // 3. Evaluate state machine transition conditions and transition if necessary
-        // 4. Perform actuation of systems as necessary
+        // 3. Evaluate state machine transition conditions and transition if necessary. Also do actuations.
 
         // ** GATHER DATA FROM SENSORS **
         if(collectDataFlag){
@@ -57,8 +61,14 @@ int main(void)
         // ** STATE MACHINE TRANSITIONS**
         // Do some state machining here.
 
-        // ** DO ACTUATION OF SYSTEMS **
-        // These will be based on what the state machine is.
+        
+        if (dispatch){
+          // Dispatch the signal
+          QHsm_dispatch((QHsm *)&HSM_Hyperloop);
+          dispatch = 0;
+        }
+
+
 
         // Prototype test run control routine
         if(PROTOTYPE_TEST) {
