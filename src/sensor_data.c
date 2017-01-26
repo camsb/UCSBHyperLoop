@@ -118,6 +118,7 @@ void collectData(){
         DEBUGOUT( "\n" );
         sensorData.dataPrintFlag = 0;
     }
+#endif
 
 	if(y%10 == 0) {
 		// Print sensor data at 1Hz.

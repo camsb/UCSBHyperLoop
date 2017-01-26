@@ -22,7 +22,10 @@
 #include "communication.h"
 #include "gpio.h"
 #include "qpn_port.h"
-#include "hyperloop_sm.h"
+#include "state_machine.h"
+
+void BSP_display(char const *);
+void BSP_exit(void);
 
 int main(void)
 {
@@ -60,15 +63,15 @@ int main(void)
 
         // ** STATE MACHINE TRANSITIONS**
         // Do some state machining here.
-
+        // Look at sensor data to determine if a state machine transition signal should be sent.
+        // Set 'dispatch' to 1 if a signal was generated.
         
+        // If there is a state transition signal to dispatch, do so.
         if (dispatch){
           // Dispatch the signal
           QHsm_dispatch((QHsm *)&HSM_Hyperloop);
           dispatch = 0;
         }
-
-
 
         // Prototype test run control routine
         if(PROTOTYPE_TEST) {
@@ -179,4 +182,15 @@ int main(void)
     }
 
     return 0;
+}
+
+// Print a message from the state machine. TODO: Integrate into the normal printout mechanisms.
+void BSP_display(char const *msg) {
+    printf("%s", msg);
+}
+
+// The state machine has received an EXIT_SIG somehow. TODO: Add a guard to prevent this from happening, or remove the reference to it.
+void BSP_exit(void) {
+    printf("State machine has received an EXIT_SIG!");
+    //exit(0);
 }
