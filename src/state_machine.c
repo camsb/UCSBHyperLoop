@@ -7,6 +7,8 @@ typedef struct HyperloopTag {
     uint8_t engine_throttle[NUM_ENGINES];		 /* extended state variables... */
     uint8_t engine_flag = 0;
     uint8_t brake_flag = 0;
+    uint8_t service_flag = 0;
+    uint8_t direction = 0;
 } Hyperloop;
 
 void   Hyperloop_ctor(void);                             /* the ctor */
@@ -30,6 +32,8 @@ void Hyperloop_ctor(void) {
     QHsm_ctor(&HSM_Hyperloop.super, (QStateHandler)&Hyperloop_initial);
     HSM_Hyperloop.brake_flag = 0;              /* initialize extended state variable */
     HSM_Hyperloop.engine_flag = 0;
+    HSM_Hyperloop.service_flag = 0;
+    HSM_Hyperloop.direction = 0;
     for(int i = 0; i < NUM_ENGINES; i++)
 	    HSM_Hyperloop.engine_throttle[i] = 0;
 }
@@ -70,6 +74,7 @@ QState Hyperloop_idle(Hyperloop *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("idle-ENTRY;");
+    	    HSM_Hyperloop.service_flag = 0;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -102,11 +107,14 @@ QState Hyperloop_forward(Hyperloop *me) {
         case Q_ENTRY_SIG: {
             BSP_display("forward-ENTRY;");
             BSP_display("moving forward;");
+	    HSM_Hyperloop.service_flag = 1;
+    	    HSM_Hyperloop.direction = 0;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
             BSP_display("forward-EXIT;");
             BSP_display("stopping;");
+	    HSM_Hyperloop.service_flag = 0;
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
@@ -125,11 +133,14 @@ QState Hyperloop_reverse(Hyperloop *me) {
         case Q_ENTRY_SIG: {
             BSP_display("reverse-ENTRY;");
             BSP_display("moving in reverse;");
+	    HSM_Hyperloop.service_flag = 1;
+    	    HSM_Hyperloop.direction = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
             BSP_display("reverse-EXIT;");
             BSP_display("stopping;");
+	    HSM_Hyperloop.service_flag = 0;
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
