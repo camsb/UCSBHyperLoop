@@ -9,6 +9,7 @@ typedef struct HyperloopTag {
     uint8_t brake_flag = 0;
     uint8_t service_flag = 0;
     uint8_t direction = 0;
+    uint8_t update = 0;
 } Hyperloop;
 
 void   Hyperloop_ctor(void);                             /* the ctor */
@@ -34,6 +35,7 @@ void Hyperloop_ctor(void) {
     HSM_Hyperloop.engine_flag = 0;	// are engines on?
     HSM_Hyperloop.service_flag = 0;	// are service motors in use?
     HSM_Hyperloop.direction = 0;	// service motor direction, 0 for forward, 1 for reverse
+    HSM_Hyperloop.update = 1;		// has a transition occured?
     for(int i = 0; i < NUM_ENGINES; i++)
 	    HSM_Hyperloop.engine_throttle[i] = 0;
 }
@@ -75,6 +77,7 @@ QState Hyperloop_idle(Hyperloop *me) {
         case Q_ENTRY_SIG: {
             BSP_display("idle-ENTRY;");
     	    HSM_Hyperloop.service_flag = 0;
+    	    HSM_Hyperloop.update = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -109,6 +112,7 @@ QState Hyperloop_forward(Hyperloop *me) {
             BSP_display("moving forward;");
 	    HSM_Hyperloop.service_flag = 1;
     	    HSM_Hyperloop.direction = 0;
+	    HSM_Hyperloop.update = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -135,6 +139,7 @@ QState Hyperloop_reverse(Hyperloop *me) {
             BSP_display("moving in reverse;");
 	    HSM_Hyperloop.service_flag = 1;
     	    HSM_Hyperloop.direction = 1;
+	    HSM_Hyperloop.update = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -181,6 +186,7 @@ QState Hyperloop_rev_engines(Hyperloop *me) {
             BSP_display("revving engines;");
 	    for(int i = 0; i < NUM_ENGINES; i++)
 	    	HSM_Hyperloop.engine_throttle[i] = 0.8;		//rev up to a tenth of throttle
+	    HSM_Hyperloop.update = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -204,6 +210,9 @@ QState Hyperloop_power_down(Hyperloop *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("power_down-ENTRY;");
+	    for(int i = 0; i < NUM_ENGINES; i++)
+	    	HSM_Hyperloop.engine_throttle[i] = 0;	
+	    HSM_Hyperloop.update = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -246,6 +255,7 @@ QState Hyperloop_hover(Hyperloop *me) {
         case Q_ENTRY_SIG: {
 	    BSP_display("hover-ENTRY;");
             BSP_display("maintaining hovering conditions;");
+	    HSM_Hyperloop.update = 1;	
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -271,7 +281,8 @@ QState Hyperloop_braking(Hyperloop *me) {
         case Q_ENTRY_SIG: {
             BSP_display("braking-ENTRY;");
             BSP_display("engaging brakes;");
-	    HSM_Hyperloop.brake_flag = 1; 
+	    HSM_Hyperloop.brake_flag = 1;
+	    HSM_Hyperloop.update = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -288,6 +299,6 @@ QState Hyperloop_braking(Hyperloop *me) {
             return Q_TRAN(&Hyperloop_hover);
         }
     }
-    return Q_SUPER(&Hyperloop_hover);
+    return Q_SUPER(&Hyperloop_engines_on);
 }
 /*..........................................................................*/
