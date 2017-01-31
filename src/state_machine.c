@@ -180,7 +180,7 @@ QState Hyperloop_rev_engines(Hyperloop *me) {
             BSP_display("rev_engines-ENTRY;");
             BSP_display("revving engines;");
 	    for(int i = 0; i < NUM_ENGINES; i++)
-	    	HSM_Hyperloop.engine_throttle[i] = 10;
+	    	HSM_Hyperloop.engine_throttle[i] = 0.8;		//rev up to a tenth of throttle
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
