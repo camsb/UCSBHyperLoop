@@ -1,6 +1,9 @@
 #ifndef hyperloop_sm_h
 #define hyperloop_sm_h
 
+#ifndef NUM_ENGINES
+#define NUM_ENGINES 4
+
 enum Hyperloop_Signals {
     STOP_SIG = Q_USER_SIG,
     FORWARD_SIG,
