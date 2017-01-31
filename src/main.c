@@ -73,6 +73,41 @@ int main(void)
           dispatch = 0;
         }
 
+	// Statemachine test routine
+	if(STATEMACHINE_TEST) {
+		if(HSM_Hyperloop.update) { //did transition occur?
+			if(HSM_Hyperloop.service_flag) {
+				if(HSM_Hyperloop.direction) {
+					DEBUGOUT("Service motor engaged, reverse.");
+				}
+				else {
+					DEBUGOUT("Service motor engaged, forward.")
+				}
+			}
+			else {
+				DEBUGOUT("Service motor disengaged.");
+			}			
+			
+			if(HSM_Hyperloop.engines_flag) {
+				DEBUGOUT("Engines engaged.");
+			}
+			else {
+				DEBUGOUT("Engines disengaged.");
+			}
+			if(HSM_Hyperloop.brake_flag) {
+				DEBUGOUT("Brakes engaged");	
+			}
+			else {
+				DEBUGOUT("Brakes disengaged");
+			}
+			HSM_Hyperloop.update = 0;
+		}
+		
+		if(HSM_Hyperloop.engines_flag) {
+			DEBUGOUT("Maintaining engine throttle.");
+		}
+	}
+	   
         // Prototype test run control routine
         if(PROTOTYPE_TEST) {
     		uint8_t prototypeRunTempAlert = 0;
