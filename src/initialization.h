@@ -4,6 +4,7 @@
 // State machine variables
 #define PROTOTYPE_TEST			1
 #define PROTOTYPE_PRERUN		1
+#define STATEMACHINE_TEST   1
 
 // Sensors and system actuation toggles
 #define PWM_ACTIVE				0
