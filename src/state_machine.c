@@ -30,10 +30,10 @@ Hyperloop HSM_Hyperloop;              /* the sole instance of the QHsmTst HSM */
 /*..........................................................................*/
 void Hyperloop_ctor(void) {
     QHsm_ctor(&HSM_Hyperloop.super, (QStateHandler)&Hyperloop_initial);
-    HSM_Hyperloop.brake_flag = 0;              /* initialize extended state variable */
-    HSM_Hyperloop.engine_flag = 0;
-    HSM_Hyperloop.service_flag = 0;
-    HSM_Hyperloop.direction = 0;
+    HSM_Hyperloop.brake_flag = 0;       // are brakes engaged?
+    HSM_Hyperloop.engine_flag = 0;	// are engines on?
+    HSM_Hyperloop.service_flag = 0;	// are service motors in use?
+    HSM_Hyperloop.direction = 0;	// service motor direction, 0 for forward, 1 for reverse
     for(int i = 0; i < NUM_ENGINES; i++)
 	    HSM_Hyperloop.engine_throttle[i] = 0;
 }
@@ -271,11 +271,12 @@ QState Hyperloop_braking(Hyperloop *me) {
         case Q_ENTRY_SIG: {
             BSP_display("braking-ENTRY;");
             BSP_display("engaging brakes;");
-	    HSM_Hyperloop.brake_flag = 0; 
+	    HSM_Hyperloop.brake_flag = 1; 
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
             BSP_display("braking-EXIT;");
+	    HSM_Hyperloop.brake_flag = 0;
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
