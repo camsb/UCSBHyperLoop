@@ -81,23 +81,23 @@ int main(void)
 			// set service motor behavior
 			if(HSM_Hyperloop.service_flag) {
 				if(HSM_Hyperloop.direction) {
-					DEBUGOUT("Service motor engaged, reverse.");
+					DEBUGOUT("Service motor engaged, reverse.\n");
 				}
 				else {
-					DEBUGOUT("Service motor engaged, forward.")
+					DEBUGOUT("Service motor engaged, forward.\n")
 				}
 			}
 			else {
-				DEBUGOUT("Service motor disengaged.");
+				DEBUGOUT("Service motor disengaged.\n");
 			}			
 			
 			// set engine behavior
 			if(HSM_Hyperloop.engines_flag) {
-				DEBUGOUT("Engines engaged.");
+				DEBUGOUT("Engines engaged.\n");
 				//update and maintain engine throttle
 			}
 			else {
-				DEBUGOUT("Engines disengaged.");
+				DEBUGOUT("Engines disengaged\n.");
 				//set throttle to 0
 				for(int i = 0; i<NUM_ENGINES; i++) {
 					motors[i]->target_throttle_voltage = 0;
@@ -107,11 +107,11 @@ int main(void)
 				
 			// set brake behavior
 			if(HSM_Hyperloop.brake_flag) {
-				DEBUGOUT("Brakes engaged");
+				DEBUGOUT("Brakes engaged\n");
 				// engage brakes here
 			}
 			else {
-				DEBUGOUT("Brakes disengaged");
+				DEBUGOUT("Brakes disengaged\n");
 				// disengage brakes here
 			}
 			HSM_Hyperloop.update = 0;
