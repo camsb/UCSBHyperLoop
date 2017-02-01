@@ -2,9 +2,9 @@
 #define INITIALIZATION_H_
 
 // State machine variables
-#define PROTOTYPE_TEST			1
-#define PROTOTYPE_PRERUN		1
-#define STATEMACHINE_TEST   1
+#define PROTOTYPE_TEST			0
+#define PROTOTYPE_PRERUN		0
+#define STATEMACHINE_TEST       1
 
 // Sensors and system actuation toggles
 #define PWM_ACTIVE				0
@@ -13,7 +13,7 @@
 #define SMOOSHED_ONE_ACTIVE		0
 #define SMOOSHED_TWO_ACTIVE		0
 
-#define MOTOR_BOARD_I2C_ACTIVE	1
+#define MOTOR_BOARD_I2C_ACTIVE	0
 #define ETHERNET_ACTIVE         0
 #define SDCARD_ACTIVE           0
 

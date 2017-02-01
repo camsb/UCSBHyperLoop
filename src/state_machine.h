@@ -1,9 +1,8 @@
 #ifndef hyperloop_sm_h
 #define hyperloop_sm_h
+#include "HEMS.h"
 
-#ifndef NUM_ENGINES
-#define NUM_ENGINES 4
-
+// Signals that can be sent to the state machine
 enum Hyperloop_Signals {
     STOP_SIG = Q_USER_SIG,
     FORWARD_SIG,
@@ -19,12 +18,21 @@ enum Hyperloop_Signals {
     MAX_SIG
 };
 
-extern struct HyperloopTag HSM_Hyperloop;   /* sole instance of hsm_hyperloop */
+// Structure of data members to be passed between main and the state machine
+typedef struct HyperloopTag {
+    QHsm super;
+    uint8_t engine_throttle[NUM_MOTORS];
+    uint8_t engine_flag;
+    uint8_t brake_flag;
+    uint8_t service_flag;
+    uint8_t direction;
+    uint8_t update;
+} Hyperloop;
 
-void Hyperloop_ctor(void);              /* instantiate and initialize the HSM */
+// The global instance of the state machine object (with added data members defined above)
+extern struct HyperloopTag HSM_Hyperloop;
 
-/* Board Support Package */
-void BSP_display(char const *msg);
-void BSP_exit(void);
+// Initialize function
+void Hyperloop_ctor(void);
 
-#endif                                                      /* hyperloop_sm_h */
+#endif

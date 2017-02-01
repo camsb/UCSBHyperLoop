@@ -1,17 +1,11 @@
 #include "qpn_port.h"
 #include "state_machine.h"
+#include "HEMS.h"
+
+#define SM_DEBUG 0
+#define BSP_display(msg) if(SM_DEBUG){DEBUGOUT(msg);}
 
 /* Hyperloop class -----------------------------------------------------*/
-typedef struct HyperloopTag {
-    QHsm super;                                        	 /* extend class QHsm */                                         
-    uint8_t engine_throttle[NUM_ENGINES];		 /* extended state variables... */
-    uint8_t engine_flag = 0;
-    uint8_t brake_flag = 0;
-    uint8_t service_flag = 0;
-    uint8_t direction = 0;
-    uint8_t update = 0;
-} Hyperloop;
-
 void   Hyperloop_ctor(void);                             /* the ctor */
 static QState Hyperloop_initial(Hyperloop *me);          /* initial handler */
 static QState Hyperloop_stationary(Hyperloop *me);       /* state handler */
@@ -32,11 +26,12 @@ Hyperloop HSM_Hyperloop;              /* the sole instance of the QHsmTst HSM */
 void Hyperloop_ctor(void) {
     QHsm_ctor(&HSM_Hyperloop.super, (QStateHandler)&Hyperloop_initial);
     HSM_Hyperloop.brake_flag = 0;       // are brakes engaged?
-    HSM_Hyperloop.engine_flag = 0;	// are engines on?
-    HSM_Hyperloop.service_flag = 0;	// are service motors in use?
-    HSM_Hyperloop.direction = 0;	// service motor direction, 0 for forward, 1 for reverse
-    HSM_Hyperloop.update = 1;		// has a transition occured?
-    for(int i = 0; i < NUM_ENGINES; i++)
+    HSM_Hyperloop.engine_flag = 0;	    // are engines on?
+    HSM_Hyperloop.service_flag = 0;	    // are service motors in use?
+    HSM_Hyperloop.direction = 0;	    // service motor direction, 0 for forward, 1 for reverse
+    HSM_Hyperloop.update = 1;		    // has a transition occurred?
+    int i;
+    for(i = 0; i < NUM_MOTORS; i++)
 	    HSM_Hyperloop.engine_throttle[i] = 0;
 }
 
@@ -52,7 +47,8 @@ QState Hyperloop_stationary(Hyperloop *me) {
             BSP_display("stationary-ENTRY;");
 	    HSM_Hyperloop.brake_flag = 0;
     	    HSM_Hyperloop.engine_flag = 0;
-	    for(int i = 0; i < NUM_ENGINES; i++)
+    	int i;
+	    for(i = 0; i < NUM_MOTORS; i++)
 	    	HSM_Hyperloop.engine_throttle[i] = 0;
             return Q_HANDLED();
         }
@@ -65,7 +61,8 @@ QState Hyperloop_stationary(Hyperloop *me) {
             return Q_HANDLED();
         }
         case TERMINATE_SIG: {
-            BSP_exit();
+            //BSP_exit();
+            // TODO: Handle this.
             return Q_HANDLED();
         }
     }
@@ -89,7 +86,8 @@ QState Hyperloop_idle(Hyperloop *me) {
             return Q_HANDLED();
         }
         case TERMINATE_SIG: {
-            BSP_exit();
+            //BSP_exit();
+            // TODO: Handle this.
             return Q_HANDLED();
         }
         case FORWARD_SIG: {
@@ -184,7 +182,8 @@ QState Hyperloop_rev_engines(Hyperloop *me) {
         case Q_ENTRY_SIG: {
             BSP_display("rev_engines-ENTRY;");
             BSP_display("revving engines;");
-	    for(int i = 0; i < NUM_ENGINES; i++)
+        int i;
+	    for(i = 0; i < NUM_MOTORS; i++)
 	    	HSM_Hyperloop.engine_throttle[i] = 0.8;		//rev up to a tenth of throttle
 	    HSM_Hyperloop.update = 1;
             return Q_HANDLED();
@@ -210,10 +209,14 @@ QState Hyperloop_power_down(Hyperloop *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("power_down-ENTRY;");
-	    for(int i = 0; i < NUM_ENGINES; i++)
+        int i;
+	    for(i = 0; i < NUM_MOTORS; i++)
 	    	HSM_Hyperloop.engine_throttle[i] = 0;	
 	    HSM_Hyperloop.update = 1;
-            return Q_HANDLED();
+
+	        // TODO: Maybe add a signal here for "engines de-reved"? Otherwise it never exits engines_on and sets engine_flag to 0...
+            //return Q_HANDLED();
+	        return Q_TRAN(&Hyperloop_idle);
         }
         case Q_EXIT_SIG: {
             BSP_display("power_down-EXIT;");

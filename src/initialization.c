@@ -46,10 +46,10 @@ void initializeSensorsAndControls(){
     	//i2cInit(I2C0, SPEED_100KHZ);
     	i2cInit(I2C1, SPEED_100KHZ);
     	i2cInit(I2C2, SPEED_100KHZ);
-    	motors[0] = initialize_HEMS(I2C1,0b01001001);	// Front Right
-    	motors[1] = initialize_HEMS(I2C1,0);			// Back Right
-    	motors[2] = initialize_HEMS(I2C2,0b01001001);	// Front Left
-    	motors[3] = initialize_HEMS(I2C2,0);			// Back Left
+        motors[0] = initialize_HEMS(I2C1,0b01001001);   // Front Right
+        motors[1] = initialize_HEMS(I2C1,0);            // Back Right
+        motors[2] = initialize_HEMS(I2C2,0b01001001);   // Front Left
+        motors[3] = initialize_HEMS(I2C2,0);            // Back Left
 
     	// Enable GPIO interrupt.
     	Chip_GPIOINT_SetIntRising(LPC_GPIOINT, 2, 1 << 11);
@@ -57,6 +57,13 @@ void initializeSensorsAndControls(){
     	NVIC_EnableIRQ(GPIO_IRQn);
 
     	prototypeRunFlag = 0;
+    }
+    else{
+        // These structs are needed to be initialized for state machine testing.
+        motors[0] = malloc(sizeof(HEMS));
+        motors[1] = malloc(sizeof(HEMS));
+        motors[2] = malloc(sizeof(HEMS));
+        motors[3] = malloc(sizeof(HEMS));
     }
 }
 

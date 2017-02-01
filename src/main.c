@@ -23,6 +23,7 @@
 #include "gpio.h"
 #include "qpn_port.h"
 #include "state_machine.h"
+#include "HEMS.h"
 
 void BSP_display(char const *);
 void BSP_exit(void);
@@ -39,18 +40,24 @@ int main(void)
     initializeSensorsAndControls();
     initializeCommunications();
     Hyperloop_ctor();
+    QHsm_init((QHsm *)&HSM_Hyperloop);
 
     DEBUGOUT("UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n\n");
 
     int dispatch = 0;
     int i = 0;
+    int oldRuntime = 0;
+    int step = 0;
+    enum Hyperloop_Signals profile[9] = {FORWARD_SIG, STOP_SIG, REVERSE_SIG, STOP_SIG, ENGAGE_ENGINES_SIG, ENGINES_REVED_SIG, ENGAGE_BRAKES_SIG, DISENGAGE_BRAKES_SIG, DISENGAGE_ENGINES_SIG};
+    int done = 0;
 
     // Main control loop
     while( 1 ) {
         // 1. Gather data from sensors
         // 2. Log data to web app, SD card, etc.
-        // 3. Evaluate state machine transition conditions and transition if necessary. Also do actuations.
+        // 3. Send signals to state machine to induce transitions as necessary
+        // 4. Based on flags from state machine, do actuation of subsystems
 	
         // ** GATHER DATA FROM SENSORS **
         if(collectDataFlag){
@@ -67,6 +74,21 @@ int main(void)
         // Look at sensor data to determine if a state machine transition signal should be sent.
         // Set 'dispatch' to 1 if a signal was generated.
         
+        int newRuntime = getRuntime();
+        if (newRuntime > 1000 + oldRuntime){
+            oldRuntime = newRuntime;
+            if (step < 9){ // Don't go past the end of the array
+                Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[step]);
+                step++;
+                dispatch = 1;
+            }
+            else if (!done){
+                DEBUGOUT("test profile finished.\n");
+                done = 1;
+            }
+
+        }
+
         // If there is a state transition signal to dispatch, do so.
         if (dispatch){
           // Dispatch the signal
@@ -74,66 +96,70 @@ int main(void)
           dispatch = 0;
         }
 	
-	// Statemachine test routine
+	// State machine test routine
 	if(STATEMACHINE_TEST) {
-		if(HSM_Hyperloop.update) { //did transition occur?
-			
-			// set service motor behavior
+	    // Apply changes if a transition occurred
+		if(HSM_Hyperloop.update) {
+
+			// Set service motor behavior
 			if(HSM_Hyperloop.service_flag) {
 				if(HSM_Hyperloop.direction) {
 					DEBUGOUT("Service motor engaged, reverse.\n");
 				}
 				else {
-					DEBUGOUT("Service motor engaged, forward.\n")
+					DEBUGOUT("Service motor engaged, forward.\n");
 				}
 			}
 			else {
 				DEBUGOUT("Service motor disengaged.\n");
 			}			
 			
-			// set engine behavior
-			if(HSM_Hyperloop.engines_flag) {
+			// Set engine behavior
+			if(HSM_Hyperloop.engine_flag) {
 				DEBUGOUT("Engines engaged.\n");
 				//update and maintain engine throttle
 			}
 			else {
 				DEBUGOUT("Engines disengaged\n.");
-				//set throttle to 0
-				for(int i = 0; i<NUM_ENGINES; i++) {
+				// Set throttle to 0
+				int i = 0;
+				for(i = 0; i < NUM_MOTORS; i++) {
 					motors[i]->target_throttle_voltage = 0;
 					motors[i]->throttle_voltage = 0;
 				}
 			}
 				
-			// set brake behavior
+			// Set brake behavior
 			if(HSM_Hyperloop.brake_flag) {
 				DEBUGOUT("Brakes engaged\n");
-				// engage brakes here
+				// TODO: Engage brakes here
 			}
 			else {
 				DEBUGOUT("Brakes disengaged\n");
-				// disengage brakes here
+				// TODO: Disengage brakes here
 			}
 			HSM_Hyperloop.update = 0;
+			DEBUGOUT("\n\n");
 		}
 		
-		// update engines, even if a transition did not occur
-		if(HSM_Hyperloop.engines_flag) {
-			//update and maintain engine throttle
-			for(i = 0; i<NUM_ENGINES; i++) {
+		// Update engines, even if a transition did not occur
+		if(HSM_Hyperloop.engine_flag) {
+			// Update and maintain engine throttle
+			for(i = 0; i < NUM_MOTORS; i++) {
 				motors[i]->target_throttle_voltage = 0.8;
 			}
 		}
 		else {
-			//set throttle to 0
-			for(i = 0; i<NUM_ENGINES; i++) {
+			// Set throttle to 0
+			for(i = 0; i<NUM_MOTORS; i++) {
 				motors[i]->target_throttle_voltage = 0;
 				motors[i]->throttle_voltage = 0;
 			}
 		}
-		// update HEMS
+		// TODO: Update HEMS here.
 	}
-	   
+
+#if 0
         // Prototype test run control routine
         if(PROTOTYPE_TEST) {
     		uint8_t prototypeRunTempAlert = 0;
@@ -238,6 +264,8 @@ int main(void)
         	//DEBUGOUT("Target throttle voltages: FR%0.2f BR%0.2f FL%0.2f BL%0.2f\n", motors[0]->target_throttle_voltage, motors[1]->target_throttle_voltage, motors[2]->target_throttle_voltage, motors[3]->target_throttle_voltage);
         	//DEBUGOUT("Throttle voltages: FR%0.2f BR%0.2f FL%0.2f BL%0.2f\n", motors[0]->throttle_voltage, motors[1]->throttle_voltage, motors[2]->throttle_voltage, motors[3]->throttle_voltage);
         }
+#endif
+
 
     // End of main control loop
     }
@@ -245,13 +273,7 @@ int main(void)
     return 0;
 }
 
-// Print a message from the state machine. TODO: Integrate into the normal printout mechanisms.
-void BSP_display(char const *msg) {
-    printf("%s", msg);
-}
-
-// The state machine has received an EXIT_SIG somehow. TODO: Add a guard to prevent this from happening, or remove the reference to it.
-void BSP_exit(void) {
-    printf("State machine has received an EXIT_SIG!");
-    //exit(0);
+void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
+    DEBUGOUT(stderr, "Assertion failed in %s, line %d", file, line);
+    //exit(-1);
 }
