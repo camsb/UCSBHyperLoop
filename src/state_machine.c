@@ -223,6 +223,10 @@ QState Hyperloop_power_down(Hyperloop *me) {
             BSP_display("power_down-INIT;");
             return Q_HANDLED();
         }
+	case ENGINES_STOPPED_SIG: {
+            BSP_display("stopped-sig!;");
+            return Q_TRAN(&Hyperloop_idle);
+        }
     }
     return Q_SUPER(&Hyperloop_engines_on);
 }
