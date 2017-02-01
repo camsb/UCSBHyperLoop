@@ -44,23 +44,24 @@ int main(void)
     DEBUGOUT("_______________________________________\n\n");
 
     int dispatch = 0;
+    int i = 0;
 
     // Main control loop
     while( 1 ) {
         // 1. Gather data from sensors
         // 2. Log data to web app, SD card, etc.
         // 3. Evaluate state machine transition conditions and transition if necessary. Also do actuations.
-
+	
         // ** GATHER DATA FROM SENSORS **
         if(collectDataFlag){
             collectData(); // See sensor_data.c
         }
-
+	
         // ** DATA LOGGING **
         if (COMMUNICATION_ACTIVE){
             logData(); // See communications.c
         }
-
+	
         // ** STATE MACHINE TRANSITIONS**
         // Do some state machining here.
         // Look at sensor data to determine if a state machine transition signal should be sent.
@@ -72,10 +73,12 @@ int main(void)
           QHsm_dispatch((QHsm *)&HSM_Hyperloop);
           dispatch = 0;
         }
-
+	
 	// Statemachine test routine
 	if(STATEMACHINE_TEST) {
 		if(HSM_Hyperloop.update) { //did transition occur?
+			
+			// set service motor behavior
 			if(HSM_Hyperloop.service_flag) {
 				if(HSM_Hyperloop.direction) {
 					DEBUGOUT("Service motor engaged, reverse.");
@@ -88,24 +91,47 @@ int main(void)
 				DEBUGOUT("Service motor disengaged.");
 			}			
 			
+			// set engine behavior
 			if(HSM_Hyperloop.engines_flag) {
 				DEBUGOUT("Engines engaged.");
+				//update and maintain engine throttle
 			}
 			else {
 				DEBUGOUT("Engines disengaged.");
+				//set throttle to 0
+				for(int i = 0; i<NUM_ENGINES; i++) {
+					motors[i]->target_throttle_voltage = 0;
+					motors[i]->throttle_voltage = 0;
+				}
 			}
+				
+			// set brake behavior
 			if(HSM_Hyperloop.brake_flag) {
-				DEBUGOUT("Brakes engaged");	
+				DEBUGOUT("Brakes engaged");
+				// engage brakes here
 			}
 			else {
 				DEBUGOUT("Brakes disengaged");
+				// disengage brakes here
 			}
 			HSM_Hyperloop.update = 0;
 		}
 		
+		// update engines, even if a transition did not occur
 		if(HSM_Hyperloop.engines_flag) {
-			DEBUGOUT("Maintaining engine throttle.");
+			//update and maintain engine throttle
+			for(i = 0; i<NUM_ENGINES; i++) {
+				motors[i]->target_throttle_voltage = 0.8;
+			}
 		}
+		else {
+			//set throttle to 0
+			for(i = 0; i<NUM_ENGINES; i++) {
+				motors[i]->target_throttle_voltage = 0;
+				motors[i]->throttle_voltage = 0;
+			}
+		}
+		// update HEMS
 	}
 	   
         // Prototype test run control routine
