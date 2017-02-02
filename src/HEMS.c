@@ -29,6 +29,7 @@ HEMS* initialize_HEMS(uint8_t I2C_BUS, uint8_t I2C_DIP) {
   engine->DAC_0_device_address = DAC_Address_Select[(I2C_DIP >> 3) & 0b1];
   engine->IOX_0_device_address = IOX_Address_Select[(I2C_DIP >> 0) & 0b111];
 
+
   IOX_setup(engine->bus, engine->IOX_0_device_address);
   engine->tachometer_counter = IOX_read(engine->bus, engine->IOX_0_device_address);
   engine->throttle_voltage = 0;
@@ -37,6 +38,40 @@ HEMS* initialize_HEMS(uint8_t I2C_BUS, uint8_t I2C_DIP) {
   engine->alarm = 0;
 
   return engine;
+}
+
+void set_motor_target_throttle(uint8_t motor_num, float voltage){
+  // Set the motor's target throttle, but only if HEMS is enabled
+  #if MOTOR_BOARD_I2C_ACTIVE
+  if (motor_num < NUM_MOTORS){
+      if (voltage <= MAX_THROTTLE_VOLTAGE && voltage >= 0){
+          motors[motor_num]->target_throttle_voltage = voltage;
+      }
+      else{
+          DEBUGOUT("Invald voltage specified in set_motor_target_throttle");
+      }
+  }
+  else{
+      DEBUGOUT("Invalid motor number in set_motor_target_throttle!\n");
+  }
+  #endif
+}
+
+void set_motor_throttle(uint8_t motor_num, float voltage){
+  // Set the motor's throttle directly, but only if HEMS is enabled
+  #if MOTOR_BOARD_I2C_ACTIVE
+    if (motor_num < NUM_MOTORS){
+        if (voltage <= MAX_THROTTLE_VOLTAGE && voltage >= 0){
+            motors[motor_num]->throttle_voltage = voltage;
+        }
+        else{
+            DEBUGOUT("Invald voltage specified in set_motor_target_throttle");
+        }
+    }
+    else{
+        DEBUGOUT("Invalid motor number in set_motor_target_throttle!\n");
+    }
+  #endif
 }
 
 void update_HEMS(HEMS* engine) {

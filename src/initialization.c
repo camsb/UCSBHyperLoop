@@ -9,6 +9,7 @@
 #include "sdcard.h"
 #include "gpio.h"
 
+// Initialize all sensor and control systems that are enabled via #-defines in initialization.h!
 void initializeSensorsAndControls(){
 
     if(PWM_ACTIVE){
@@ -43,9 +44,12 @@ void initializeSensorsAndControls(){
     }
 
     if(MOTOR_BOARD_I2C_ACTIVE) {
+        // Initialize the I^2C buses for communication with the HEMS boards
     	//i2cInit(I2C0, SPEED_100KHZ);
     	i2cInit(I2C1, SPEED_100KHZ);
     	i2cInit(I2C2, SPEED_100KHZ);
+
+    	// Create objects to hold parameters of the HEMS boards
         motors[0] = initialize_HEMS(I2C1,0b01001001);   // Front Right
         motors[1] = initialize_HEMS(I2C1,0);            // Back Right
         motors[2] = initialize_HEMS(I2C2,0b01001001);   // Front Left
@@ -57,13 +61,6 @@ void initializeSensorsAndControls(){
     	NVIC_EnableIRQ(GPIO_IRQn);
 
     	prototypeRunFlag = 0;
-    }
-    else{
-        // These structs are needed to be initialized for state machine testing.
-        motors[0] = malloc(sizeof(HEMS));
-        motors[1] = malloc(sizeof(HEMS));
-        motors[2] = malloc(sizeof(HEMS));
-        motors[3] = malloc(sizeof(HEMS));
     }
 }
 

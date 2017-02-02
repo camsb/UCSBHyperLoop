@@ -74,6 +74,9 @@ int main(void)
         // Look at sensor data to determine if a state machine transition signal should be sent.
         // Set 'dispatch' to 1 if a signal was generated.
         
+
+        // Simulate transitions to the state machine from "test profiles"
+        // This section will probably get replaced with
         int newRuntime = getRuntime();
         if (newRuntime > 1000 + oldRuntime){
             oldRuntime = newRuntime;
@@ -83,10 +86,9 @@ int main(void)
                 dispatch = 1;
             }
             else if (!done){
-                DEBUGOUT("test profile finished.\n");
+                DEBUGOUT("Test profile finished.\n");
                 done = 1;
             }
-
         }
 
         // If there is a state transition signal to dispatch, do so.
@@ -124,8 +126,8 @@ int main(void)
 				// Set throttle to 0
 				int i = 0;
 				for(i = 0; i < NUM_MOTORS; i++) {
-					motors[i]->target_throttle_voltage = 0;
-					motors[i]->throttle_voltage = 0;
+				    set_motor_target_throttle(i, 0);
+				    set_motor_throttle(i, 0);
 				}
 			}
 				
@@ -146,14 +148,14 @@ int main(void)
 		if(HSM_Hyperloop.engine_flag) {
 			// Update and maintain engine throttle
 			for(i = 0; i < NUM_MOTORS; i++) {
-				motors[i]->target_throttle_voltage = 0.8;
+			    set_motor_target_throttle(i, 0);
 			}
 		}
 		else {
 			// Set throttle to 0
 			for(i = 0; i<NUM_MOTORS; i++) {
-				motors[i]->target_throttle_voltage = 0;
-				motors[i]->throttle_voltage = 0;
+			    set_motor_target_throttle(i, 0);
+			    set_motor_throttle(i, 0);
 			}
 		}
 		// TODO: Update HEMS here.
@@ -273,6 +275,7 @@ int main(void)
     return 0;
 }
 
+// This assertion function is required for the state machine. It's called if things go haywire.
 void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
     DEBUGOUT(stderr, "Assertion failed in %s, line %d", file, line);
     //exit(-1);

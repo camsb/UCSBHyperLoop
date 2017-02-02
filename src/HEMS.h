@@ -34,6 +34,7 @@
 
 #define SAFE_TEMPERATURE 100      //[C]
 #define SAFE_CURRENT 60           //[A]
+#define MAX_THROTTLE_VOLTAGE 8    //[V]
 
 #define NUM_THERMISTORS 4
 #define REFERENCE_RESISTANCE 5100 //[ohms]
@@ -83,6 +84,8 @@ typedef struct {
 HEMS *motors[NUM_MOTORS];
 
 HEMS* initialize_HEMS(uint8_t I2C_BUS, uint8_t I2C_DIP);  //See below for I2C DIP addressing
+void set_motor_target_throttle(uint8_t motor_num, float voltage);
+void set_motor_throttle(uint8_t motor_num, float voltage);
 void update_HEMS(HEMS* engine);
 float runtime();
 
