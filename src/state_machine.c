@@ -2,28 +2,27 @@
 #include "state_machine.h"
 #include "HEMS.h"
 
+// Macro to re-direct the state machine debug test to DEBUGOUT only if SM_DEBUG is 1
 #define SM_DEBUG 0
 #define BSP_display(msg) if(SM_DEBUG){DEBUGOUT(msg);}
 
-/* Hyperloop class -----------------------------------------------------*/
-void   Hyperloop_ctor(void);                             /* the ctor */
-static QState Hyperloop_initial(Hyperloop *me);          /* initial handler */
-static QState Hyperloop_stationary(Hyperloop *me);       /* state handler */
-static QState Hyperloop_idle(Hyperloop *me);            
+/* The global instance of the state machine object -------------------------*/
+Hyperloop HSM_Hyperloop;
+
+// Forward declaration of all the possible states
+static QState Hyperloop_initial(Hyperloop *me);
+static QState Hyperloop_stationary(Hyperloop *me);
+static QState Hyperloop_idle(Hyperloop *me);
 static QState Hyperloop_forward(Hyperloop *me);
 static QState Hyperloop_reverse(Hyperloop *me);
-static QState Hyperloop_engines_on(Hyperloop *me); 
+static QState Hyperloop_engines_on(Hyperloop *me);
 static QState Hyperloop_rev_engines(Hyperloop *me);
 static QState Hyperloop_power_down(Hyperloop *me);
-//static QState Hyperloop_hovering(Hyperloop *me);
 static QState Hyperloop_hover(Hyperloop *me);
 static QState Hyperloop_braking(Hyperloop *me);
 
-/* global objects ----------------------------------------------------------*/
-Hyperloop HSM_Hyperloop;              /* the sole instance of the QHsmTst HSM */
-
 /*..........................................................................*/
-void Hyperloop_ctor(void) {
+void initializeStateMachine(void) {
     QHsm_ctor(&HSM_Hyperloop.super, (QStateHandler)&Hyperloop_initial);
     HSM_Hyperloop.brake_flag = 0;       // are brakes engaged?
     HSM_Hyperloop.engine_flag = 0;	    // are engines on?
@@ -33,10 +32,11 @@ void Hyperloop_ctor(void) {
     int i;
     for(i = 0; i < NUM_MOTORS; i++)
 	    HSM_Hyperloop.engine_throttle[i] = 0;
+    QHsm_init((QHsm *)&HSM_Hyperloop);
 }
 
 /*..........................................................................*/
-QState Hyperloop_initial(Hyperloop *me) {
+static QState Hyperloop_initial(Hyperloop *me) {
     BSP_display("top-INIT;");
     return Q_TRAN(&Hyperloop_idle);
 }
@@ -232,29 +232,6 @@ QState Hyperloop_power_down(Hyperloop *me) {
     return Q_SUPER(&Hyperloop_engines_on);
 }
 /*..........................................................................*/
-/*
-QState Hyperloop_hovering(Hyperloop *me) {
-    switch (Q_SIG(me)) {
-        case Q_ENTRY_SIG: {
-            BSP_display("hovering-ENTRY;");
-            BSP_display("hovering at constant engine rpm;");
-            return Q_HANDLED();
-        }
-        case Q_EXIT_SIG: {
-            BSP_display("hovering-EXIT;");
-            return Q_HANDLED();
-        }
-        case Q_INIT_SIG: {
-            BSP_display("hovering-INIT;");
-            return Q_TRAN(&Hyperloop_hover);
-
-            //return Q_HANDLED();
-        }
-    }
-    return Q_SUPER(&Hyperloop_engines_on);
-}
-*/
-/*..........................................................................*/
 QState Hyperloop_hover(Hyperloop *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
@@ -307,3 +284,9 @@ QState Hyperloop_braking(Hyperloop *me) {
     return Q_SUPER(&Hyperloop_engines_on);
 }
 /*..........................................................................*/
+
+// This assertion function is required for the state machine. It's called if things go haywire.
+void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
+    DEBUGOUT("Assertion failed in %s, line %d", file, line);
+    //exit(-1);
+}

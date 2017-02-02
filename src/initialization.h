@@ -2,6 +2,7 @@
 #define INITIALIZATION_H_
 
 // State machine variables
+#define NO_OLD_PROTOTYPE_RUN    1
 #define PROTOTYPE_TEST			0
 #define PROTOTYPE_PRERUN		0
 #define STATEMACHINE_TEST       1
