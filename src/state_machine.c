@@ -214,9 +214,7 @@ QState Hyperloop_power_down(Hyperloop *me) {
 	    	HSM_Hyperloop.engine_throttle[i] = 0;	
 	    HSM_Hyperloop.update = 1;
 
-	        // TODO: Maybe add a signal here for "engines de-reved"? Otherwise it never exits engines_on and sets engine_flag to 0...
-            //return Q_HANDLED();
-	        return Q_TRAN(&Hyperloop_idle);
+	        return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
             BSP_display("power_down-EXIT;");
