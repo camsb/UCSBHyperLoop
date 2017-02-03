@@ -5,10 +5,11 @@
 
 void GPIO_IRQHandler(void)
 {
-	uint32_t interrupt_bits_port0 = Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 0);
+//	uint32_t interrupt_bits_port0 = Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 0);
+	uint32_t interrupt_bits_port0 = Chip_GPIOINT_GetStatusFalling(LPC_GPIOINT, 0);
 	uint32_t interrupt_bits_port2 = Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 2);
-	DEBUGOUT("interrupt_bits_port0: %d\n", interrupt_bits_port0);
-	DEBUGOUT("interrupt_bits_port2: %d\n", interrupt_bits_port2);
+//	DEBUGOUT("interrupt_bits_port0: %d\n", interrupt_bits_port0);
+//	DEBUGOUT("interrupt_bits_port2: %d\n", interrupt_bits_port2);
 
 	/* Photoelectric Interrupt Pin */
 	if(interrupt_bits_port2 & (1 << PHOTOELECTRIC_INT_PIN)){
@@ -51,16 +52,23 @@ void GPIO_IRQHandler(void)
 
 	/* Wiznet Interrupt Pin */
 	if(interrupt_bits_port0 & (1 << WIZNET_INT_PIN)){
-		Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, WIZNET_INT_PORT, 1 << WIZNET_INT_PIN);
-		wizIntFlag = 1;
 
+		Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, WIZNET_INT_PORT, 1 << WIZNET_INT_PIN);
+//		if(Chip_GPIOINT_IsIntPending(LPC_GPIOINT, WIZNET_INT_PORT)){
+//			printf("returns true\n");
+//		}
+
+		wizIntFlag = 1;
+		DEBUGOUT("Wiznet Interrupt Flag\n");
 		return;
 	}
 
-	/* Wiznet Initial Interrupt Pin */
-	DEBUGOUT("WIZNET INITIAL INTERRUPT PIN");
-	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, WIZNET_INT_PORT, 1 << WIZNET_INT_PIN);
-	wizIntFlag = 1;
+	DEBUGOUT("Other interrupt\n");
+
+//	/* Wiznet Initial Interrupt Pin */
+//	DEBUGOUT("WIZNET INITIAL INTERRUPT PIN");
+//	Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, WIZNET_INT_PORT, 1 << WIZNET_INT_PIN);
+//	wizIntFlag = 1;
 
 }
 

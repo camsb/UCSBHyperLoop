@@ -63,7 +63,7 @@ int main(void)
     }
     if(ETHERNET_ACTIVE){
     	ethernetInit(PROTO_TCP, 0);
-        sendSensorDataTimerInit(LPC_TIMER2, TIMER2_IRQn, 4);
+//        sendSensorDataTimerInit(LPC_TIMER2, TIMER2_IRQn, 4);
     }
     if(RANGING_SENSORS_ACTIVE){
     	rangingSensorsInit();
@@ -100,7 +100,9 @@ int main(void)
     }
 
     DEBUGOUT("UCSB Hyperloop Controller Initialized\n");
-    DEBUGOUT("_______________________________________\n\n");
+    DEBUGOUT("_______________________________________\n");
+
+//    int printCounter = 0;
 
     while( 1 )
     {
@@ -113,14 +115,23 @@ int main(void)
 
         /* Handle all Wiznet Interrupts, including RECV */
         if(wizIntFlag) {
-        	DEBUGOUT("here\n");
     		wizIntFunction();
     	}
+
+//        if(printCounter % 50 == 0){
+//        	uint32_t interrupt_bits_port0_R = Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 0);
+//			uint32_t interrupt_bits_port0_F = Chip_GPIOINT_GetStatusFalling(LPC_GPIOINT, 0);
+//			uint32_t interrupt_bits_port2 = Chip_GPIOINT_GetStatusRising(LPC_GPIOINT, 2);
+//			DEBUGOUT("Rising interrupt_bits_port0: %d\n", interrupt_bits_port0_R);
+//			DEBUGOUT("Falling interrupt_bits_port0: %d\n", interrupt_bits_port0_F);
+//			DEBUGOUT("interrupt_bits_port2: %d\n", interrupt_bits_port2);
+//        }
+//        printCounter++;
 
         /* If Data Send Requested, Send Data */
         /* Function to write to SD card and Web App will be here*/
     	if((sendDataFlag && connectionOpen)) {
-    		sendToWebAppSDCard();
+//    		sendToWebAppSDCard();
     	}
 
     	/* Handle Photoelectric Strip Detected */
