@@ -14,7 +14,6 @@ void logData(){
 
         /* Handle all Wiznet Interrupts, including RECV */
         if(wizIntFlag) {
-            DEBUGOUT("here\n");
             wizIntFunction();
         }
 

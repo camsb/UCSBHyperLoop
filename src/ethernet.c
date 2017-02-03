@@ -5,6 +5,7 @@
 #include "stdio.h"
 #include "timer.h"
 #include "rtc.h"
+#include "gpio.h"
 
 /* Rx Buffer Addresses */
 uint16_t gSn_RX_BASE[] = {
@@ -138,12 +139,15 @@ void Wiz_Int_Init(uint8_t n) {
 
 	/* Datasheet and addresses are backwards for
 	 * Socket Interrupt Mask and General Interrupt Mask. */
+	/* IMR-0x0016 is supposed to have one of 7 bits set for the corresponding bit in IR2 to be set, if it is 0 then interrupts will not go through*/
+	/* IMR2-0x0032, each interrupt bit mask corresponds to a bit in the IR, if set then interrupt will happen when corresponding bit in the IR is set*/
 	/* Socket Interrupt Mask */
 	Tx_Buf[4] = 0x01 << n;
 	spi_Send_Blocking(IMR, 0x0001);
 
 	/* General Interrupt Mask */
 	Tx_Buf[4] = 0x00;
+//	Tx_Buf[4] = 0x01 << n;
 	spi_Send_Blocking(IMR2, 0x0001);
 
 	/* Socket n Interrupt Mask Register */
@@ -187,7 +191,7 @@ void send_data_packet_helper(char *method, char *val, int *position) {
 void send_data_ack_helper(char *method, int *position) {
 	memcpy(Net_Tx_Data + *position, method, 3);
 	*position += 3;
-	memcpy(Net_Tx_Data + *position, "\n", 1);
+	memcpy(Net_Tx_Data + *position, "\n\n", 1);
 	*position += 1;
 }
 
@@ -201,7 +205,7 @@ void recvDataPacket() {
 //	for (i = 0; i < DATA_BUF_SIZE; i++) {
 //		printf("%i:%c\n", i, Net_Rx_Data[i]);
 //	}
-	printf("Receiving Data Packet!\n");
+//	printf("Receiving Data Packet!\n");
 
 	if(strstr((char *)Net_Rx_Data, EBRAKE) != NULL) {	// Emergency Brake
 		eBrakeFlag = 1;
@@ -423,30 +427,18 @@ void sendPrototypePacket(){
 	sprintf(PrototypePacket.m1tmp2, "%06.f", (float)motors[0]->temperatures[1]);
 	sprintf(PrototypePacket.m1tmp3, "%06.f", (float)motors[0]->temperatures[2]);
 	sprintf(PrototypePacket.m1tmp4, "%06.f", (float)motors[0]->temperatures[3]);
-//	sprintf(PrototypePacket.m1tmp5, "%06.f", (float)motors[0]->temperatures[4]);
-//	sprintf(PrototypePacket.m1tmp6, "%06.f", (float)motors[0]->temperatures[5]);
-//	sprintf(PrototypePacket.m1tmp7, "%06.f", (float)motors[0]->temperatures[6]);
 	sprintf(PrototypePacket.m2tmp1, "%06.f", (float)motors[1]->temperatures[0]);
 	sprintf(PrototypePacket.m2tmp2, "%06.f", (float)motors[1]->temperatures[1]);
 	sprintf(PrototypePacket.m2tmp3, "%06.f", (float)motors[1]->temperatures[2]);
 	sprintf(PrototypePacket.m2tmp4, "%06.f", (float)motors[1]->temperatures[3]);
-//	sprintf(PrototypePacket.m2tmp5, "%06.f", (float)motors[1]->temperatures[4]);
-//	sprintf(PrototypePacket.m2tmp6, "%06.f", (float)motors[1]->temperatures[5]);
-//	sprintf(PrototypePacket.m2tmp7, "%06.f", (float)motors[1]->temperatures[6]);
 	sprintf(PrototypePacket.m3tmp1, "%06.f", (float)motors[2]->temperatures[0]);
 	sprintf(PrototypePacket.m3tmp2, "%06.f", (float)motors[2]->temperatures[1]);
 	sprintf(PrototypePacket.m3tmp3, "%06.f", (float)motors[2]->temperatures[2]);
 	sprintf(PrototypePacket.m3tmp4, "%06.f", (float)motors[2]->temperatures[3]);
-//	sprintf(PrototypePacket.m3tmp5, "%06.f", (float)motors[2]->temperatures[4]);
-//	sprintf(PrototypePacket.m3tmp6, "%06.f", (float)motors[2]->temperatures[5]);
-//	sprintf(PrototypePacket.m3tmp7, "%06.f", (float)motors[2]->temperatures[6]);
 	sprintf(PrototypePacket.m4tmp1, "%06.f", (float)motors[3]->temperatures[0]);
 	sprintf(PrototypePacket.m4tmp2, "%06.f", (float)motors[3]->temperatures[1]);
 	sprintf(PrototypePacket.m4tmp3, "%06.f", (float)motors[3]->temperatures[2]);
 	sprintf(PrototypePacket.m4tmp4, "%06.f", (float)motors[3]->temperatures[3]);
-//	sprintf(PrototypePacket.m4tmp5, "%06.f", (float)motors[3]->temperatures[4]);
-//	sprintf(PrototypePacket.m4tmp6, "%06.f", (float)motors[3]->temperatures[5]);
-//	sprintf(PrototypePacket.m4tmp7, "%06.f", (float)motors[3]->temperatures[6]);
 
 	/* DAC Data */
 	send_data_packet_helper(DAC, PrototypePacket.dac, &pos);
@@ -465,30 +457,18 @@ void sendPrototypePacket(){
 	send_data_packet_helper(TM2, PrototypePacket.m1tmp2, &pos);
 	send_data_packet_helper(TM3, PrototypePacket.m1tmp3, &pos);
 	send_data_packet_helper(TM4, PrototypePacket.m1tmp4, &pos);
-	send_data_packet_helper(TM5, PrototypePacket.m1tmp5, &pos);
-	send_data_packet_helper(TM6, PrototypePacket.m1tmp6, &pos);
-	send_data_packet_helper(TM7, PrototypePacket.m1tmp7, &pos);
-	send_data_packet_helper(TM8, PrototypePacket.m2tmp1, &pos);
-	send_data_packet_helper(TM9, PrototypePacket.m2tmp2, &pos);
-	send_data_packet_helper(T10, PrototypePacket.m2tmp3, &pos);
-	send_data_packet_helper(T11, PrototypePacket.m2tmp4, &pos);
-	send_data_packet_helper(T12, PrototypePacket.m2tmp5, &pos);
-	send_data_packet_helper(T13, PrototypePacket.m2tmp6, &pos);
-	send_data_packet_helper(T14, PrototypePacket.m2tmp7, &pos);
-	send_data_packet_helper(T15, PrototypePacket.m3tmp1, &pos);
-	send_data_packet_helper(T16, PrototypePacket.m3tmp2, &pos);
-	send_data_packet_helper(T17, PrototypePacket.m3tmp3, &pos);
-	send_data_packet_helper(T18, PrototypePacket.m3tmp4, &pos);
-	send_data_packet_helper(T19, PrototypePacket.m3tmp5, &pos);
-	send_data_packet_helper(T20, PrototypePacket.m3tmp6, &pos);
-	send_data_packet_helper(T21, PrototypePacket.m3tmp7, &pos);
-	send_data_packet_helper(T22, PrototypePacket.m4tmp1, &pos);
-	send_data_packet_helper(T23, PrototypePacket.m4tmp2, &pos);
-	send_data_packet_helper(T24, PrototypePacket.m4tmp3, &pos);
-	send_data_packet_helper(T25, PrototypePacket.m4tmp4, &pos);
-	send_data_packet_helper(T26, PrototypePacket.m4tmp5, &pos);
-	send_data_packet_helper(T27, PrototypePacket.m4tmp6, &pos);
-	send_data_packet_helper(T28, PrototypePacket.m4tmp7, &pos);
+	send_data_packet_helper(TM5, PrototypePacket.m2tmp1, &pos);
+	send_data_packet_helper(TM6, PrototypePacket.m2tmp2, &pos);
+	send_data_packet_helper(TM7, PrototypePacket.m2tmp3, &pos);
+	send_data_packet_helper(TM8, PrototypePacket.m2tmp4, &pos);
+	send_data_packet_helper(TM9, PrototypePacket.m3tmp1, &pos);
+	send_data_packet_helper(T10, PrototypePacket.m3tmp2, &pos);
+	send_data_packet_helper(T11, PrototypePacket.m3tmp3, &pos);
+	send_data_packet_helper(T12, PrototypePacket.m3tmp4, &pos);
+	send_data_packet_helper(T13, PrototypePacket.m4tmp1, &pos);
+	send_data_packet_helper(T14, PrototypePacket.m4tmp2, &pos);
+	send_data_packet_helper(T15, PrototypePacket.m4tmp3, &pos);
+	send_data_packet_helper(T16, PrototypePacket.m4tmp4, &pos);
 
 	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 }
@@ -516,13 +496,13 @@ void wizIntFunction() {
 	/* Read Socket Interrupts */
 	for(n = 0; n < 8; n++) {
 		if(activeSockets >> n & 0x01) {
-			offset = 0x0010 * n;
+//			offset = 0x0010 * n;
+			offset = 0x0100 * n;
 
 			/* Read Socket n Interrupt Register */
 			Tx_Buf[4] = 0xFF;
 			spi_Recv_Blocking(Sn_IR_BASE + offset, 0x0001);
 			socket_int = Rx_Buf[4];
-
 			/* Handle Interrupt Request */
 			if( socket_int & SEND_OK ) {	 // Send Completed
 				printf("send ok interrupt\n");
@@ -543,11 +523,38 @@ void wizIntFunction() {
 			if( socket_int & Sn_CON ) {	 // Socket Connection Completed
 				printf("socket connection completed interrupt\n");
 				connectionOpen = 1;
+//				Tx_Buf[4] = 0x01 | Tx_Buf[4];
 			}
-
+//			Tx_Buf[4] = 0xFF;
+//			spi_Recv_Blocking(IR2 + 0x0100*n, 0x0001);
+//			if((Rx_Buf[4] & 0x01) == 0x01) // Bit 1 is connected interrupt
+//				printf("IR2 S0 int\n");
 			/* Clear Socket n Interrupt Register */
-			Tx_Buf[4] = socket_int;
+			Tx_Buf[4] = 0xFF;
 			spi_Send_Blocking(Sn_IR_BASE + offset, 0x0001);
+//			if(Wiz_Check_Socket(0)){
+//				printf("Interrupt not cleared\n");
+//			}
+//			Tx_Buf[4] = 0xFF;
+//			spi_Recv_Blocking(Sn_IMR_BASE + 0x0100*n, 0x0001);
+//			if((Rx_Buf[4] & 0x01) == 0x01) // Bit 1 is connected interrupt
+//				printf("Sn_IMR connect\n");
+//			if((Rx_Buf[4] & 0x08) == 0x08) // Bit 4 is timeout
+//				printf("Sn_IMR timeout\n");
+//			if((Rx_Buf[4] & 0x04) == 0x04) // Bit 3 is data received interrupt
+//				printf("Sn_IMR recv\n");
+//			Tx_Buf[4] = 0xFF;
+//			spi_Recv_Blocking(IR2 + 0x0100*n, 0x0001);
+//			if((Rx_Buf[4] & 0x01) == 0x01) // Bit 1 is connected interrupt
+//				printf("IR2 S0 int\n");
+//			Tx_Buf[4] = 0xFF;
+//			spi_Recv_Blocking(IMR + 0x0100*n, 0x0001);
+//			if((Rx_Buf[4] & 0x01) == 0x01) // Bit 1 is connected interrupt
+//				printf("IMR S0 int for IR2\n");
+//			Tx_Buf[4] = 0xFF;
+//			spi_Recv_Blocking(Sn_SR_BASE + 0x0100*n, 0x0001);
+//			if((Rx_Buf[4] & 0x17) == 0x17) // Bit 1 is connected interrupt
+//				printf("Socket still established\n");
 		}
 	}
 
@@ -881,8 +888,14 @@ uint8_t Wiz_Check_Socket(uint8_t n) {
 	/* Read Socket n Interrupt Register */
 	Tx_Buf[4] = 0xFF;
 	spi_Recv_Blocking(Sn_IR_BASE + 0x0100*n, 0x0001);
-	if((Rx_Buf[4] & 0x04) == 0x04) // Bit 3 is data received interrupt
+	if((Rx_Buf[4] & 0x01) == 0x01) // Bit 1 is connected interrupt
+		printf("Sn_IR connect\n");
+	if((Rx_Buf[4] & 0x08) == 0x08) // Bit 4 is timeout
+		printf("Sn_IR timeout\n");
+	if((Rx_Buf[4] & 0x04) == 0x04){ // Bit 3 is data received interrupt
+		printf("Sn_IR recv\n");
 		return 1;
+	}
 	return 0;
 }
 

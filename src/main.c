@@ -38,9 +38,8 @@ int main(void)
     initializeCommunications();
     initializeStateMachine();
 
-
     DEBUGOUT("UCSB Hyperloop Controller Initialized\n");
-    DEBUGOUT("_______________________________________\n\n");
+    DEBUGOUT("_______________________________________\n");
 
     int dispatch = 0;
 

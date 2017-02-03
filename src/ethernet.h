@@ -161,30 +161,18 @@
 #define TM2				"TM2"		// Motor 1 Temperature 2
 #define TM3				"TM3"		// Motor 1 Temperature 3
 #define TM4				"TM4"		// Motor 1 Temperature 4
-#define TM5				"TM5"		// Motor 1 Temperature 5
-#define TM6				"TM6"		// Motor 1 Temperature 6
-#define TM7				"TM7"		// Motor 1 Temperature 7
-#define TM8				"TM8"		// Motor 2 Temperature 1
-#define TM9				"TM9"		// Motor 2 Temperature 2
-#define T10				"T10"		// Motor 2 Temperature 3
-#define T11				"T11"		// Motor 2 Temperature 4
-#define T12				"T12"		// Motor 2 Temperature 5
-#define T13				"T13"		// Motor 2 Temperature 6
-#define T14				"T14"		// Motor 2 Temperature 7
-#define T15				"T15"		// Motor 3 Temperature 1
-#define T16				"T16"		// Motor 3 Temperature 2
-#define T17				"T17"		// Motor 3 Temperature 3
-#define T18				"T18"		// Motor 3 Temperature 4
-#define T19				"T19"		// Motor 3 Temperature 5
-#define T20				"T20"		// Motor 3 Temperature 6
-#define T21				"T21"		// Motor 3 Temperature 7
-#define T22				"T22"		// Motor 4 Temperature 1
-#define T23				"T23"		// Motor 4 Temperature 2
-#define T24				"T24"		// Motor 4 Temperature 3
-#define T25				"T25"		// Motor 4 Temperature 4
-#define T26				"T26"		// Motor 4 Temperature 5
-#define T27				"T27"		// Motor 4 Temperature 6
-#define T28				"T28"		// Motor 4 Temperature 7
+#define TM5				"TM5"		// Motor 2 Temperature 1
+#define TM6				"TM6"		// Motor 2 Temperature 2
+#define TM7				"TM7"		// Motor 2 Temperature 3
+#define TM8				"TM8"		// Motor 2 Temperature 4
+#define TM9				"TM9"		// Motor 3 Temperature 1
+#define T10				"T10"		// Motor 3 Temperature 2
+#define T11				"T11"		// Motor 3 Temperature 3
+#define T12				"T12"		// Motor 3 Temperature 4
+#define T13				"T13"		// Motor 4 Temperature 1
+#define T14				"T14"		// Motor 4 Temperature 2
+#define T15				"T15"		// Motor 4 Temperature 3
+#define T16				"T16"		// Motor 4 Temperature 4
 
 struct data_packet {
 	// all pointers are ini
@@ -247,30 +235,18 @@ struct prototype_packet {
 	char m1tmp2[6]; // Motor 1 Temperature2
 	char m1tmp3[6]; // Motor 1 Temperature3
 	char m1tmp4[6]; // Motor 1 Temperature4
-	char m1tmp5[6]; // Motor 1 Temperature5
-	char m1tmp6[6]; // Motor 1 Temperature6
-	char m1tmp7[6]; // Motor 1 Temperature7
 	char m2tmp1[6]; // Motor 2 Temperature1
 	char m2tmp2[6]; // Motor 2 Temperature2
 	char m2tmp3[6]; // Motor 2 Temperature3
 	char m2tmp4[6]; // Motor 2 Temperature4
-	char m2tmp5[6]; // Motor 2 Temperature5
-	char m2tmp6[6]; // Motor 2 Temperature6
-	char m2tmp7[6]; // Motor 2 Temperature7
 	char m3tmp1[6]; // Motor 3 Temperature1
 	char m3tmp2[6]; // Motor 3 Temperature2
 	char m3tmp3[6]; // Motor 3 Temperature3
 	char m3tmp4[6]; // Motor 3 Temperature4
-	char m3tmp5[6]; // Motor 3 Temperature5
-	char m3tmp6[6]; // Motor 3 Temperature6
-	char m3tmp7[6]; // Motor 3 Temperature7
 	char m4tmp1[6]; // Motor 4 Temperature1
 	char m4tmp2[6]; // Motor 4 Temperature2
 	char m4tmp3[6]; // Motor 4 Temperature3
 	char m4tmp4[6]; // Motor 4 Temperature4
-	char m4tmp5[6]; // Motor 4 Temperature5
-	char m4tmp6[6]; // Motor 4 Temperature6
-	char m4tmp7[6]; // Motor 4 Temperature7
 
 };
 
