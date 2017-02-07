@@ -173,6 +173,9 @@ QState Hyperloop_engines_on(Hyperloop *me) {
             BSP_display("engines_on-INIT;");
             return Q_TRAN(&Hyperloop_rev_engines);
         }
+        case DISENGAGE_ENGINES_SIG: {
+	    return Q_TRAN(&Hyperloop_power_down);
+        }
     }
     return Q_SUPER(&QHsm_top);
 }
@@ -250,9 +253,6 @@ QState Hyperloop_hover(Hyperloop *me) {
         }
         case ENGAGE_BRAKES_SIG: {
             return Q_TRAN(&Hyperloop_braking);
-        }
-        case DISENGAGE_ENGINES_SIG: {
-	    return Q_TRAN(&Hyperloop_power_down);
         }
     }
     return Q_SUPER(&Hyperloop_engines_on);
