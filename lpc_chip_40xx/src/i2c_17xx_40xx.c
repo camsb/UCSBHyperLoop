@@ -373,7 +373,7 @@ void Chip_I2C_EventHandlerPolling(I2C_ID_T id, I2C_EVENT_T event)
 /* UCSB Hyperloop - Chip polling event handler w/ limited retries */
 void Chip_I2C_EventHandlerPollingRetry(I2C_ID_T id, I2C_EVENT_T event)
 {
-	int retry = 500;
+	int retry = 1000;
 	struct i2c_interface *iic = &i2c[id];
 	volatile I2C_STATUS_T *stat;
 
@@ -388,9 +388,11 @@ void Chip_I2C_EventHandlerPollingRetry(I2C_ID_T id, I2C_EVENT_T event)
 		if (Chip_I2C_IsStateChanged(id)) {
 			Chip_I2C_MasterStateHandler(id);
 		}
-		if(--retry <= 0)	{
-			LPC_I2Cx(id)->CONSET = I2C_CON_STO;
+		if(retry <= 0)	{
+			LPC_I2Cx(id)->CONSET &= I2C_CON_STO;
+			break;
 		}
+		retry--;
 	}
 }
 
@@ -461,7 +463,11 @@ int Chip_I2C_MasterTransfer(I2C_ID_T id, I2C_XFER_T *xfer)
 	iic->mXfer = 0;
 
 	/* Wait for stop condition to appear on bus */
-	while (!isI2CBusFree(iic->ip)) {}
+	int busFree;
+	do {
+		busFree = isI2CBusFree(iic->ip);
+	}
+	while (!busFree);
 
 	/* Start slave if one is active */
 	if (SLAVE_ACTIVE(iic)) {
