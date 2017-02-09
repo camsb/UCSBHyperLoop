@@ -24,6 +24,7 @@
 #include "qpn_port.h"
 #include "state_machine.h"
 #include "actuation.h"
+#include "ethernet.h"
 
 int main(void)
 {
@@ -34,8 +35,8 @@ int main(void)
     // Initialize LPC_TIMER0 as a runtime timer.
     runtimeTimerInit();
 
-    initializeSensorsAndControls();
     initializeCommunications();
+    initializeSensorsAndControls();
     initializeStateMachine();
 
     DEBUGOUT("UCSB Hyperloop Controller Initialized\n");
@@ -50,11 +51,17 @@ int main(void)
 
     // Main control loop
     while( 1 ) {
-        // 1. Gather data from sensors
-        // 2. Log data to web app, SD card, etc.
-        // 3. Send signals to state machine to induce transitions as necessary
-        // 4. Based on flags from state machine, do actuation of subsystems
+    	// 1. Handle Web App interrupts
+        // 2. Gather data from sensors
+        // 3. Log data to web app, SD card, etc.
+        // 4. Send signals to state machine to induce transitions as necessary
+        // 5. Based on flags from state machine, do actuation of subsystems
 	
+    	/* Handle all Wiznet Interrupts, including RECV */
+		if(wizIntFlag) {
+			wizIntFunction();
+		}
+
         // ** GATHER DATA FROM SENSORS **
         if(collectDataFlag){
             collectData(); // See sensor_data.c
@@ -71,19 +78,19 @@ int main(void)
 
         // Simulate transitions to the state machine from "test profiles"
         // This section will probably get replaced with signal thresholds from actual sensors soon.
-        int newRuntime = getRuntime();
-        if (newRuntime > 1000 + oldRuntime){
-            oldRuntime = newRuntime;
-            if (step < 10){ // Don't go past the end of the array
-                Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[step]);
-                step++;
-                dispatch = 1;
-            }
-            else if (!done){
-                DEBUGOUT("Test profile finished.\n");
-                done = 1;
-            }
-        }
+//        int newRuntime = getRuntime();
+//        if (newRuntime > 1000 + oldRuntime){
+//            oldRuntime = newRuntime;
+//            if (step < 10){ // Don't go past the end of the array
+//                Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[step]);
+//                step++;
+//                dispatch = 1;
+//            }
+//            else if (!done){
+//                DEBUGOUT("Test profile finished.\n");
+//                done = 1;
+//            }
+//        }
 
         // If there is a state transition signal to dispatch, do so.
         if (dispatch){

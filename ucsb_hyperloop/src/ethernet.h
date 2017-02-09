@@ -149,6 +149,10 @@
 
 /* Prototype methods */
 #define DAC				"DAC"		// DAC
+#define SR1				"SR1"		// Short Ranging 1
+#define SR2				"SR2"		// Short Ranging 2
+#define SR3				"SR3"		// Short Ranging 3
+#define SR4				"SR4"		// Short Ranging 4
 #define TA1				"TA1"		// Motor 1 Tachometer
 #define TA2				"TA2"		// Motor 2 Tachometer
 #define TA3				"TA3"		// Motor 3 Tachometer
@@ -173,6 +177,20 @@
 #define T14				"T14"		// Motor 4 Temperature 2
 #define T15				"T15"		// Motor 4 Temperature 3
 #define T16				"T16"		// Motor 4 Temperature 4
+
+/* Web App control signals for state machine */
+#define STOP				"STOP_SIG\0"
+#define ENGAGE_ENGINES		"ENGAGE_ENGINES_SIG\0"
+#define DISENGAGE_ENGINES	"DISENGAGE_ENGINES_SIG\0"
+#define ENGAGE_BRAKES		"ENGAGE_BRAKES_SIG\0"
+#define DISENGAGE_BRAKES	"DISENGAGE_BRAKES_SIG\0"
+#define ENGINES_REVED		"ENGINES_REVED_SIG\0"
+#define ENGINES_STOPPED		"ENGINES_STOPPED_SIG\0"
+#define FORWARD				"FORWARD_SIG\0"
+#define REVERSE				"REVERSE_SIG\0"
+#define TERMINATE			"TERMINATE_SIG\0"
+#define IGNORE				"IGNORE_SIG\0"
+#define MAXSIG				"MAX_SIG\0"
 
 struct data_packet {
 	// all pointers are ini
@@ -225,6 +243,11 @@ struct prototype_packet {
 	char cu2[6];	// Motor 2 Current
 	char cu3[6];	// Motor 3 Current
 	char cu4[6];	// Motor 4 Current
+	/* Short Ranging Data */
+	char sr1[6];	// Short Ranging 1
+	char sr2[6];	// Short Ranging 2
+	char sr3[6];	// Short Ranging 3
+	char sr4[6];	// Short Ranging 4
 	/* Tachometer Data*/
 	char ta1[6]; 	// Motor 1 Tachometer
 	char ta2[6]; 	// Motor 2 Tachometer

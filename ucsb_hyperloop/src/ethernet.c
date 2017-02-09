@@ -6,6 +6,8 @@
 #include "timer.h"
 #include "rtc.h"
 #include "gpio.h"
+#include "qpn_port.h"
+#include "state_machine.h"
 
 /* Rx Buffer Addresses */
 uint16_t gSn_RX_BASE[] = {
@@ -197,6 +199,7 @@ void send_data_ack_helper(char *method, int *position) {
 
 
 void recvDataPacket() {
+	enum Hyperloop_Signals profile[4] = { ENGAGE_ENGINES_SIG, ENGINES_REVED_SIG, DISENGAGE_ENGINES_SIG, ENGINES_STOPPED_SIG};
 	int pos = 0;
 	memset(Net_Tx_Data, 0, 64);
 
@@ -207,11 +210,55 @@ void recvDataPacket() {
 //	}
 //	printf("Receiving Data Packet!\n");
 
-	if(strstr((char *)Net_Rx_Data, EBRAKE) != NULL) {	// Emergency Brake
-		eBrakeFlag = 1;
-		printf("Emergency Brake!\n");
-		send_data_ack_helper(BAK, &pos);
+	if(strcmp((char *)Net_Rx_Data, ENGAGE_ENGINES) == 0){
+		printf("ENGAGE ENGINES SIG RECEIVED\n");
+		Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[0]);
+		QHsm_dispatch((QHsm *)&HSM_Hyperloop);
 	}
+	if(strcmp((char *)Net_Rx_Data, DISENGAGE_ENGINES) == 0){
+		printf("DISENGAGE ENGINES SIG RECEIVED\n");
+		Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[2]);
+		QHsm_dispatch((QHsm *)&HSM_Hyperloop);
+	}
+	if(strcmp((char *)Net_Rx_Data, ENGINES_REVED) == 0){
+		printf("ENGINES REVED SIG RECEIVED\n");
+		Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[1]);
+		QHsm_dispatch((QHsm *)&HSM_Hyperloop);
+	}
+	if(strcmp((char *)Net_Rx_Data, ENGINES_STOPPED) == 0){
+		printf("ENGINES STOPPED SIG RECEIVED\n");
+		Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[3]);
+		QHsm_dispatch((QHsm *)&HSM_Hyperloop);
+	}
+	if(strcmp((char *)Net_Rx_Data, STOP) == 0){
+		printf("STOP SIG RECEIVED\n");
+	}
+	if(strcmp((char *)Net_Rx_Data, ENGAGE_BRAKES) == 0){
+		printf("ENGAGE BRAKES SIG RECEIVED\n");
+	}
+	if(strcmp((char *)Net_Rx_Data, DISENGAGE_BRAKES) == 0){
+		printf("DISENGAGE BRAKES SIG RECEIVED\n");
+	}
+	if(strcmp((char *)Net_Rx_Data, FORWARD) == 0){
+		printf("FORWARD SIG RECEIVED\n");
+	}
+	if(strcmp((char *)Net_Rx_Data, REVERSE) == 0){
+		printf("REVERSE SIG RECEIVED\n");
+	}
+	if(strcmp((char *)Net_Rx_Data, TERMINATE) == 0){
+		printf("TERMINATE SIG RECEIVED\n");
+	}
+	if(strcmp((char *)Net_Rx_Data, IGNORE) == 0){
+		printf("IGNORE SIG RECEIVED\n");
+	}
+	if(strcmp((char *)Net_Rx_Data, MAXSIG) == 0){
+		printf("MAX SIG RECEIVED\n");
+	}
+//	if(strstr((char *)Net_Rx_Data, EBRAKE) != NULL) {	// Emergency Brake
+//		eBrakeFlag = 1;
+//		printf("Emergency Brake!\n");
+//		send_data_ack_helper(BAK, &pos);
+//	}
 	if(strstr((char *)Net_Rx_Data, INITTIME) != NULL) {	// Initialize Time
 		printf("Initialize Time!\n");
 		printf("Time recieved: %s\n", Net_Rx_Data);
@@ -296,7 +343,7 @@ void recvDataPacket() {
 				timeIterator++;
 			}
 		}
-		rtc_initialize();
+//		rtc_initialize();
 		RTC theTime;
 		theTime.year = (WORD)yearVal;
 		theTime.month = (BYTE)monthVal;
@@ -305,28 +352,28 @@ void recvDataPacket() {
 		theTime.hour = (BYTE)hourVal;
 		theTime.min = (BYTE)minVal;
 		theTime.sec = (BYTE)secVal;
-		rtc_settime(&theTime);
+//		rtc_settime(&theTime);
 		send_data_ack_helper(TAK, &pos);
 	}
-	if(strstr((char *)Net_Rx_Data, POWRUP) != NULL) {	// Pod Start Flag
-		powerUpFlag = 1;
-		send_data_ack_helper(PAK, &pos);
-		printf("Power Up!\n");
-	}
-	if(strstr((char *)Net_Rx_Data, PWRDWN) != NULL) {	// Pod Stop Flag
-		powerDownFlag = 1;
-		powerUpFlag = 0;
-		printf("Power Down!\n");
-	}
-	if(strstr((char *)Net_Rx_Data, SERPRO) != NULL) {	// Service Propulsion Start
-		serPropulsionWheels = 1;
-		send_data_ack_helper(WAK, &pos);
-		printf("Service Propulsion Activated!\n");
-	}
-	if(strstr((char *)Net_Rx_Data, SERSTP) != NULL) {	// Service Propulsion Stop
-		serPropulsionWheels = 0;
-		printf("Service Propulsion Disactivated!\n");
-	}
+//	if(strstr((char *)Net_Rx_Data, POWRUP) != NULL) {	// Pod Start Flag
+//		powerUpFlag = 1;
+//		send_data_ack_helper(PAK, &pos);
+//		printf("Power Up!\n");
+//	}
+//	if(strstr((char *)Net_Rx_Data, PWRDWN) != NULL) {	// Pod Stop Flag
+//		powerDownFlag = 1;
+//		powerUpFlag = 0;
+//		printf("Power Down!\n");
+//	}
+//	if(strstr((char *)Net_Rx_Data, SERPRO) != NULL) {	// Service Propulsion Start
+//		serPropulsionWheels = 1;
+//		send_data_ack_helper(WAK, &pos);
+//		printf("Service Propulsion Activated!\n");
+//	}
+//	if(strstr((char *)Net_Rx_Data, SERSTP) != NULL) {	// Service Propulsion Stop
+//		serPropulsionWheels = 0;
+//		printf("Service Propulsion Disactivated!\n");
+//	}
 
 	if(pos != 0) {
 		Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
@@ -412,6 +459,11 @@ void sendPrototypePacket(){
 
 	/* DAC Output */
 	sprintf(PrototypePacket.dac, "%06.2f", motors[0]->throttle_voltage);
+	/* Short Ranging */
+	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.frontLeft);
+	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.frontRight);
+	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.backLeft);
+	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.backRight);
 	/* Current Output */
 	sprintf(PrototypePacket.cu1, "%06.2f", (float)motors[0]->amps);
 	sprintf(PrototypePacket.cu2, "%06.2f", (float)motors[1]->amps);
@@ -442,6 +494,11 @@ void sendPrototypePacket(){
 
 	/* DAC Data */
 	send_data_packet_helper(DAC, PrototypePacket.dac, &pos);
+	/* Current Data */
+	send_data_packet_helper(SR1, PrototypePacket.sr1, &pos);
+	send_data_packet_helper(SR2, PrototypePacket.sr2, &pos);
+	send_data_packet_helper(SR3, PrototypePacket.sr3, &pos);
+	send_data_packet_helper(SR4, PrototypePacket.sr4, &pos);
 	/* Current Data */
 	send_data_packet_helper(CU1, PrototypePacket.cu1, &pos);
 	send_data_packet_helper(CU2, PrototypePacket.cu2, &pos);
