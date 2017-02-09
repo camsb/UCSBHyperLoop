@@ -45,7 +45,9 @@ int main(void)
 
     int oldRuntime = 0;
     int step = 0;
-    enum Hyperloop_Signals profile[10] = {FORWARD_SIG, STOP_SIG, REVERSE_SIG, STOP_SIG, ENGAGE_ENGINES_SIG, ENGINES_REVED_SIG, ENGAGE_BRAKES_SIG, DISENGAGE_BRAKES_SIG, DISENGAGE_ENGINES_SIG, ENGINES_STOPPED_SIG};
+    //enum Hyperloop_Signals profile[10] = {FORWARD_SIG, STOP_SIG, REVERSE_SIG, STOP_SIG, ENGAGE_ENGINES_SIG, ENGINES_REVED_SIG, ENGAGE_BRAKES_SIG, DISENGAGE_BRAKES_SIG, DISENGAGE_ENGINES_SIG, ENGINES_STOPPED_SIG};
+    enum Hyperloop_Signals profile[2] = {ENGAGE_ENGINES_SIG, ENGINES_REVED_SIG};
+
     int done = 0;
 
     // Main control loop
@@ -72,9 +74,9 @@ int main(void)
         // Simulate transitions to the state machine from "test profiles"
         // This section will probably get replaced with signal thresholds from actual sensors soon.
         int newRuntime = getRuntime();
-        if (newRuntime > 1000 + oldRuntime){
+        if (newRuntime > 3000 + oldRuntime){
             oldRuntime = newRuntime;
-            if (step < 10){ // Don't go past the end of the array
+            if (step < 2){ // Don't go past the end of the array
                 Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[step]);
                 step++;
                 dispatch = 1;
