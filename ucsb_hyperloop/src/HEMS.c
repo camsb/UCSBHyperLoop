@@ -3,6 +3,7 @@
 //If using on the Arduino, this should be saved as a .cpp file. Otherwise it should be saved as a .c
 
 #include "HEMS.h"
+#include "initialization.h"
 
 // Global variables.
 const uint8_t ADC_Address_Select[4] = {0x8, 0xA, 0x1A, 0x14};
@@ -86,10 +87,10 @@ void update_HEMS(HEMS* engine) {
 	if(engine->throttle_voltage > 5) {
 		engine->throttle_voltage = 5;
 	}
-
+#endif
 	//Set throttle;
 	DAC_write(engine->bus, engine->DAC_0_device_address, engine->throttle_voltage * 4095 / 5);
-#endif
+
 #if 1
   //Record Temperatures
   int temp_counter;

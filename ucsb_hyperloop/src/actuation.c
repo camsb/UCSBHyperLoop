@@ -56,7 +56,8 @@ void performActuation(){
             // Update and maintain engine throttle
             int i;
             for(i = 0; i < NUM_MOTORS; i++) {
-                set_motor_target_throttle(i, 0);
+                set_motor_target_throttle(i, 4);
+                set_motor_throttle(i, 4);
             }
         }
         else {

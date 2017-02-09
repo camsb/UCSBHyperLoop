@@ -412,6 +412,15 @@ int Chip_I2C_MasterRead(I2C_ID_T id, uint8_t slaveAddr, uint8_t *buff, int len);
 void Chip_I2C_EventHandlerPolling(I2C_ID_T id, I2C_EVENT_T event);
 
 /**
+ * UCSB Hyperloop
+ * @brief	Modified event handler for polling operation limiting number of retries.
+ * @param	id		: I2C peripheral ID (I2C0, I2C1 ... etc)
+ * @param	event	: Event ID of the event that called the function
+ * @return	Nothing
+ */
+void Chip_I2C_EventHandlerPollingTimeout(I2C_ID_T id, I2C_EVENT_T event);
+
+/**
  * @brief	Default event handler for interrupt base operation
  * @param	id		: I2C peripheral ID (I2C0, I2C1 ... etc)
  * @param	event	: Event ID of the event that called the function
