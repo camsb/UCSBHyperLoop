@@ -46,7 +46,8 @@ void i2c_set_mode(I2C_ID_T id, int polling) {
   } else {
     mode_poll |= 1 << id;
     NVIC_DisableIRQ(id == I2C0 ? I2C0_IRQn : I2C1_IRQn);
-    Chip_I2C_SetMasterEventHandler(id, Chip_I2C_EventHandlerPolling);
+    // Chip_I2C_SetMasterEventHandler(id, Chip_I2C_EventHandlerPolling);
+    Chip_I2C_SetMasterEventHandler(id, Chip_I2C_EventHandlerPollingRetry);
   }
 }
 
