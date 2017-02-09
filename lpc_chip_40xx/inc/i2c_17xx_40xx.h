@@ -418,7 +418,7 @@ void Chip_I2C_EventHandlerPolling(I2C_ID_T id, I2C_EVENT_T event);
  * @param	event	: Event ID of the event that called the function
  * @return	Nothing
  */
-void Chip_I2C_EventHandlerPollingRetry(I2C_ID_T id, I2C_EVENT_T event);
+void Chip_I2C_EventHandlerPollingTimeout(I2C_ID_T id, I2C_EVENT_T event);
 
 /**
  * @brief	Default event handler for interrupt base operation

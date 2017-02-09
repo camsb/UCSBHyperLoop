@@ -371,9 +371,9 @@ void Chip_I2C_EventHandlerPolling(I2C_ID_T id, I2C_EVENT_T event)
 }
 
 /* UCSB Hyperloop - Chip polling event handler w/ limited retries */
-void Chip_I2C_EventHandlerPollingRetry(I2C_ID_T id, I2C_EVENT_T event)
+void Chip_I2C_EventHandlerPollingTimeout(I2C_ID_T id, I2C_EVENT_T event)
 {
-	int retry = 1000;
+	int retry = 2000;
 	struct i2c_interface *iic = &i2c[id];
 	volatile I2C_STATUS_T *stat;
 
