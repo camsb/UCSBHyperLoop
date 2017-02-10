@@ -1,6 +1,8 @@
 #include "state_machine.h"
 #include "initialization.h"
 
+int prototypeRunStartTime = 0;
+
 void performActuation(){
     // Actuate subsystems based on flags from state machine.
 
@@ -26,6 +28,7 @@ void performActuation(){
             // Set engine behavior
             if(HSM_Hyperloop.engine_flag) {
                 DEBUGOUT("Engines engaged.\n");
+                prototypeRunStartTime = getRuntime()/1000;
                 //update and maintain engine throttle
             }
             else {
@@ -54,13 +57,51 @@ void performActuation(){
         // Update engines, even if a transition did not occur
         if(HSM_Hyperloop.engine_flag) {
             // Update and maintain engine throttle
-            int i;
-            for(i = 0; i < NUM_MOTORS; i++) {
-                set_motor_target_throttle(i, 4);
-                set_motor_throttle(i, 4);
+            int time_sec = getRuntime()/1000;
+
+            if(PROTOTYPE_PRERUN) {  // PRERUN
+                if (time_sec < prototypeRunStartTime + 10) {    // Spin up to tenth power.
+
+                	DEBUGOUT("ENGINE 3 ON\n");
+                    motors[0]->throttle_voltage = 0;
+                    motors[1]->throttle_voltage = 0;
+                    motors[2]->throttle_voltage = 0.8;
+                    motors[3]->throttle_voltage = 0;
+
+
+                }
+                else if (time_sec < prototypeRunStartTime + 20) {   // Spin up to tenth power.
+                	DEBUGOUT("ENGINE 4 ON\n");
+                    motors[0]->throttle_voltage = 0;
+                    motors[1]->throttle_voltage = 0;
+                    motors[2]->throttle_voltage = 0;
+                    motors[3]->throttle_voltage = 0.8;
+                }
+                else if (time_sec < prototypeRunStartTime + 30) {   // Spin up to tenth power.
+                	DEBUGOUT("ENGINE 1 ON\n");
+                    motors[0]->throttle_voltage = 0.8;
+                    motors[1]->throttle_voltage = 0;
+                    motors[2]->throttle_voltage = 0;
+                    motors[3]->throttle_voltage = 0;
+                }
+                else if (time_sec < prototypeRunStartTime + 40) {   // Spin up to tenth power.
+                	DEBUGOUT("ENGINE 2 ON\n");
+                    motors[0]->throttle_voltage = 0;
+                    motors[1]->throttle_voltage = 0.8;
+                    motors[2]->throttle_voltage = 0;
+                    motors[3]->throttle_voltage = 0;
+                }
+            }
+            else{
+                int i;
+                for(i = 0; i < NUM_MOTORS; i++) {
+                    set_motor_target_throttle(i, 4.0);
+                    set_motor_throttle(i, 4.0);
+                }
             }
         }
         else {
+        	DEBUGOUT("ENGINES OFF\n");
             // Set throttle to 0
             int i;
             for(i = 0; i<NUM_MOTORS; i++) {

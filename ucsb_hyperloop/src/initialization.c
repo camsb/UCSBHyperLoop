@@ -50,10 +50,10 @@ void initializeSensorsAndControls(){
     	i2cInit(I2C2, SPEED_100KHZ);
 
     	// Create objects to hold parameters of the HEMS boards
-        motors[0] = initialize_HEMS(I2C1,0b01001001);   // Front Right
-        motors[1] = initialize_HEMS(I2C1,0);            // Back Right
-        motors[2] = initialize_HEMS(I2C2,0b01001001);   // Front Left
-        motors[3] = initialize_HEMS(I2C2,0);            // Back Left
+        motors[0] = initialize_HEMS(I2C1,0b01001001);   // back Right
+        motors[1] = initialize_HEMS(I2C1,0);            // front Right
+        motors[2] = initialize_HEMS(I2C2,0b01001001);   // back Left
+        motors[3] = initialize_HEMS(I2C2,0);            // front Left
 
     	// Enable GPIO interrupt.
     	Chip_GPIOINT_SetIntRising(LPC_GPIOINT, 2, 1 << 11);

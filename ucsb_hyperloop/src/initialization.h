@@ -3,7 +3,7 @@
 
 // State machine variables
 #define PROTOTYPE_TEST			0
-#define PROTOTYPE_PRERUN		0
+#define PROTOTYPE_PRERUN		0  // Spin up each motor to 0.8V in 10-second windows
 #define STATEMACHINE_TEST       1
 #define NO_OLD_PROTOTYPE_RUN    1
 

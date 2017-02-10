@@ -460,10 +460,10 @@ void sendPrototypePacket(){
 	/* DAC Output */
 	sprintf(PrototypePacket.dac, "%06.2f", motors[0]->throttle_voltage);
 	/* Short Ranging */
-	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.frontLeft);
-	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.frontRight);
-	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.backLeft);
-	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.backRight);
+//	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.frontLeft);
+//	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.frontRight);
+//	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.backLeft);
+//	sprintf(PrototypePacket.sr1, "%06.2f", sensorData.shortRangingData.backRight);
 	/* Current Output */
 	sprintf(PrototypePacket.cu1, "%06.2f", (float)motors[0]->amps);
 	sprintf(PrototypePacket.cu2, "%06.2f", (float)motors[1]->amps);
@@ -495,10 +495,10 @@ void sendPrototypePacket(){
 	/* DAC Data */
 	send_data_packet_helper(DAC, PrototypePacket.dac, &pos);
 	/* Current Data */
-	send_data_packet_helper(SR1, PrototypePacket.sr1, &pos);
-	send_data_packet_helper(SR2, PrototypePacket.sr2, &pos);
-	send_data_packet_helper(SR3, PrototypePacket.sr3, &pos);
-	send_data_packet_helper(SR4, PrototypePacket.sr4, &pos);
+//	send_data_packet_helper(SR1, PrototypePacket.sr1, &pos);
+//	send_data_packet_helper(SR2, PrototypePacket.sr2, &pos);
+//	send_data_packet_helper(SR3, PrototypePacket.sr3, &pos);
+//	send_data_packet_helper(SR4, PrototypePacket.sr4, &pos);
 	/* Current Data */
 	send_data_packet_helper(CU1, PrototypePacket.cu1, &pos);
 	send_data_packet_helper(CU2, PrototypePacket.cu2, &pos);

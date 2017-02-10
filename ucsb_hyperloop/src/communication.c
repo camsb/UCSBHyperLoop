@@ -20,7 +20,7 @@ void logData(){
         /* If Data Send Requested, Send Data */
         /* Function to write to SD card and Web App will be here*/
         if((sendDataFlag && connectionOpen)) {
-            //sendToWebAppSDCard();
+            sendToWebAppSDCard();
         }
 
         if(SDCARD_ACTIVE) {

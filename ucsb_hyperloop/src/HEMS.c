@@ -121,7 +121,7 @@ void update_HEMS(HEMS* engine) {
     engine->alarm |= 0b00000010;
 
   //Record Motor RPM
-  uint16_t current_tachometer_counter = IOX_read(engine->bus, engine->IOX_0_device_address);
+  uint16_t current_tachometer_counter = (IOX_read(engine->bus, engine->IOX_0_device_address) & (0x0FFF));
   uint16_t previous_tachometer_counter = engine->tachometer_counter;
   float current_time = runtime();
 
