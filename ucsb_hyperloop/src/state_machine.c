@@ -176,6 +176,10 @@ QState Hyperloop_engines_on(Hyperloop *me) {
         case DISENGAGE_ENGINES_SIG: {
 	    return Q_TRAN(&Hyperloop_power_down);
         }
+	case ENGINES_STOPPED_SIG: {
+            BSP_display("stopped-sig!;");
+            return Q_TRAN(&Hyperloop_idle);
+        }
     }
     return Q_SUPER(&QHsm_top);
 }
