@@ -1,5 +1,6 @@
 #include "qpn_port.h"
 #include "state_machine.h"
+#include "logging.h"
 #include "HEMS.h"
 
 // Macro to re-direct the state machine debug test to DEBUGOUT only if SM_DEBUG is 1
@@ -45,7 +46,8 @@ QState Hyperloop_stationary(Hyperloop *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("stationary-ENTRY;");
-	    HSM_Hyperloop.brake_flag = 0;
+            logEventString("State machine state: stationary");
+            HSM_Hyperloop.brake_flag = 0;
     	    HSM_Hyperloop.engine_flag = 0;
     	int i;
 	    for(i = 0; i < NUM_MOTORS; i++)
@@ -73,6 +75,7 @@ QState Hyperloop_idle(Hyperloop *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("idle-ENTRY;");
+            logEventString("State machine state: idle");
     	    HSM_Hyperloop.service_flag = 0;
     	    HSM_Hyperloop.update = 1;
             return Q_HANDLED();
@@ -108,6 +111,7 @@ QState Hyperloop_forward(Hyperloop *me) {
         case Q_ENTRY_SIG: {
             BSP_display("forward-ENTRY;");
             BSP_display("moving forward;");
+            logEventString("State machine state: forward");
 	    HSM_Hyperloop.service_flag = 1;
     	    HSM_Hyperloop.direction = 0;
 	    HSM_Hyperloop.update = 1;
@@ -135,6 +139,7 @@ QState Hyperloop_reverse(Hyperloop *me) {
         case Q_ENTRY_SIG: {
             BSP_display("reverse-ENTRY;");
             BSP_display("moving in reverse;");
+            logEventString("State machine state: reverse");
 	    HSM_Hyperloop.service_flag = 1;
     	    HSM_Hyperloop.direction = 1;
 	    HSM_Hyperloop.update = 1;
@@ -161,6 +166,7 @@ QState Hyperloop_engines_on(Hyperloop *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("engines_on-ENTRY;");
+            logEventString("State machine state: engnies_on");
 	    HSM_Hyperloop.engine_flag = 1;
             return Q_HANDLED();
         }
@@ -189,6 +195,7 @@ QState Hyperloop_rev_engines(Hyperloop *me) {
         case Q_ENTRY_SIG: {
             BSP_display("rev_engines-ENTRY;");
             BSP_display("revving engines;");
+            logEventString("State machine state: rev_engines");
         int i;
 	    for(i = 0; i < NUM_MOTORS; i++)
 	    	HSM_Hyperloop.engine_throttle[i] = 0.8;		//rev up to a tenth of throttle
@@ -216,6 +223,7 @@ QState Hyperloop_power_down(Hyperloop *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("power_down-ENTRY;");
+            logEventString("State machine state: power_down");
         int i;
 	    for(i = 0; i < NUM_MOTORS; i++)
 	    	HSM_Hyperloop.engine_throttle[i] = 0;	
@@ -244,7 +252,8 @@ QState Hyperloop_hover(Hyperloop *me) {
         case Q_ENTRY_SIG: {
 	    BSP_display("hover-ENTRY;");
             BSP_display("maintaining hovering conditions;");
-	    HSM_Hyperloop.update = 1;	
+            logEventString("State machine state: hover");
+            HSM_Hyperloop.update = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -267,6 +276,7 @@ QState Hyperloop_braking(Hyperloop *me) {
         case Q_ENTRY_SIG: {
             BSP_display("braking-ENTRY;");
             BSP_display("engaging brakes;");
+            logEventString("State machine state: braking");
 	    HSM_Hyperloop.brake_flag = 1;
 	    HSM_Hyperloop.update = 1;
             return Q_HANDLED();
