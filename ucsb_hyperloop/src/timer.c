@@ -6,7 +6,10 @@ void runtimeTimerInit() {
 	uint32_t timerFreq = Chip_Clock_GetSystemClockRate();
 
 	Chip_TIMER_Init(LPC_TIMER0);
-	Chip_TIMER_PrescaleSet(LPC_TIMER0, timerFreq/1200);	// Increment counter every millisecond.
+
+	// MAGIC CONSTANT 1923 - This was determined empirically based on TIMER0. Justify it somehow!!!
+	Chip_TIMER_PrescaleSet(LPC_TIMER0, timerFreq/1923);	// Increment counter every millisecond.
+
 	Chip_TIMER_Enable(LPC_TIMER0);
 }
 
