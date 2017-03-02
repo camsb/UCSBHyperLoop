@@ -444,6 +444,20 @@ void Chip_I2C_EventHandlerPollingTimeout(I2C_ID_T id, I2C_EVENT_T event)
 
 			// Re-init the I2C bus. This enables the I2C clock.
 			Chip_I2C_Init(id);
+			Chip_I2C_SetClockRate(id, 100000 /* 100KHZ */);
+
+			// Set mode.
+			int interrupt_num;
+			switch(id) {
+				case I2C0: interrupt_num = I2C0_IRQn; break;
+				case I2C1: interrupt_num = I2C1_IRQn; break;
+				case I2C2: interrupt_num = I2C2_IRQn; break;
+				default:
+					// Error state!
+					return;
+			}
+		    NVIC_DisableIRQ(interrupt_num);
+		    Chip_I2C_SetMasterEventHandler(id, Chip_I2C_EventHandlerPollingTimeout);
 
 #endif // 0|1
 			break;
