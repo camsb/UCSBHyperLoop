@@ -59,7 +59,7 @@ void GPIO_IRQHandler(void)
 //		}
 
 		wizIntFlag = 1;
-		DEBUGOUT("Wiznet Interrupt Flag\n");
+//		DEBUGOUT("Wiznet Interrupt Flag\n");
 		return;
 	}
 

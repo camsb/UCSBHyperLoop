@@ -93,15 +93,15 @@ void performActuation(){
                 }
             }
             else{
-                int i;
-                for(i = 0; i < NUM_MOTORS; i++) {
-                    set_motor_target_throttle(i, 4.0);
-                    set_motor_throttle(i, 4.0);
-                }
+//                int i;
+//                for(i = 0; i < NUM_MOTORS; i++) {
+//                    set_motor_target_throttle(i, 4.0);
+//                    set_motor_throttle(i, 4.0);
+//                }
             }
         }
         else {
-        	DEBUGOUT("ENGINES OFF\n");
+//        	DEBUGOUT("ENGINES OFF\n");
             // Set throttle to 0
             int i;
             for(i = 0; i<NUM_MOTORS; i++) {

@@ -259,6 +259,27 @@ void recvDataPacket() {
 //		printf("Emergency Brake!\n");
 //		send_data_ack_helper(BAK, &pos);
 //	}
+	if(strstr((char *)Net_Rx_Data, SETDAC) != NULL) {	// Set the DAC
+		printf("DAC SET RECEIVED\n");
+		printf("DAC recieved: %s\n", Net_Rx_Data);
+		int iterator;
+		float dacValue = 0;
+		for(iterator = 0; iterator < 30; iterator++){
+			if(Net_Rx_Data[iterator] == ':'){
+				dacValue = (float)(Net_Rx_Data[iterator+1] - '0');
+				dacValue += (float)(Net_Rx_Data[iterator+3] - '0')/10;
+				if((int)(Net_Rx_Data[iterator+4] - '0') == 9){
+					dacValue += 0.01;
+				}
+			}
+		}
+		if(dacValue)
+		printf("dacValue = %f\n", dacValue);
+		set_motor_throttle(0, dacValue);
+		set_motor_throttle(1, dacValue);
+		set_motor_throttle(2, dacValue);
+		set_motor_throttle(3, dacValue);
+	}
 	if(strstr((char *)Net_Rx_Data, INITTIME) != NULL) {	// Initialize Time
 		printf("Initialize Time!\n");
 		printf("Time recieved: %s\n", Net_Rx_Data);
@@ -562,7 +583,7 @@ void wizIntFunction() {
 			socket_int = Rx_Buf[4];
 			/* Handle Interrupt Request */
 			if( socket_int & SEND_OK ) {	 // Send Completed
-				printf("send ok interrupt\n");
+//				printf("send ok interrupt\n");
 			}
 			if( socket_int & TIMEOUT ) { // Timeout Occurred
 				printf("Timeout interrupt\n");

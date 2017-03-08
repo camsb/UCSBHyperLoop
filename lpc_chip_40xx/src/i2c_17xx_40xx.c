@@ -373,7 +373,7 @@ void Chip_I2C_EventHandlerPolling(I2C_ID_T id, I2C_EVENT_T event)
 /* UCSB Hyperloop - Chip polling event handler w/ limited retries */
 void Chip_I2C_EventHandlerPollingTimeout(I2C_ID_T id, I2C_EVENT_T event)
 {
-	int retry = 3000;
+	int retry = 30000;
 	struct i2c_interface *iic = &i2c[id];
 	volatile I2C_STATUS_T *stat;
 
@@ -389,7 +389,76 @@ void Chip_I2C_EventHandlerPollingTimeout(I2C_ID_T id, I2C_EVENT_T event)
 			Chip_I2C_MasterStateHandler(id);
 		}
 		if(retry <= 0)	{
+			// Set the STOP bit.
 			LPC_I2Cx(id)->CONSET &= I2C_CON_STO;
+		#if 1
+			// De-init the I2C bus. This disables the I2C clock.
+			Chip_I2C_DeInit(id);
+
+			// Get port and pin of the I2C SCL.
+			uint8_t port;
+			uint8_t pin;
+			uint32_t i2c_mode_func;
+			switch (id) {
+				case I2C0:
+					port = 5; pin = 3;
+					i2c_mode_func = (IOCON_FUNC0);
+					break;
+				case I2C1:
+					port = 0; pin = 1;
+					i2c_mode_func = (IOCON_FUNC3 | IOCON_MODE_PULLUP | IOCON_OPENDRAIN_EN);
+					break;
+				case I2C2:
+					port = 0; pin = 11;
+					i2c_mode_func = (IOCON_FUNC2 | IOCON_MODE_PULLUP | IOCON_OPENDRAIN_EN);
+					break;
+				default:
+					// Error state!
+					return;
+			}
+
+			// Set I2C SCL pin to be a GPIO pin.
+			Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin, (IOCON_FUNC0));
+			Chip_GPIO_SetPinDIROutput(LPC_GPIO, port, pin);
+			// Output 0.
+			Chip_GPIO_SetPinState(LPC_GPIO, port, pin, 0);
+
+			// Send out 10 clock cycles on the I2C clock wire to clear the slave peripheral.
+			int i;
+			uint32_t msec = Chip_TIMER_ReadCount(LPC_TIMER0);
+			for(i=0; i<10; i++) {
+				while(msec == Chip_TIMER_ReadCount(LPC_TIMER0));
+				msec = Chip_TIMER_ReadCount(LPC_TIMER0);
+				// Output 1.
+				Chip_GPIO_SetPinState(LPC_GPIO, port, pin, 1);
+
+				while(msec == Chip_TIMER_ReadCount(LPC_TIMER0));
+				msec = Chip_TIMER_ReadCount(LPC_TIMER0);
+				// Output 0.
+				Chip_GPIO_SetPinState(LPC_GPIO, port, pin, 0);
+			}
+
+			// Set I2C SCL pin to be a SCL pin.
+			Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin, i2c_mode_func);
+
+			// Re-init the I2C bus. This enables the I2C clock.
+			Chip_I2C_Init(id);
+			Chip_I2C_SetClockRate(id, 100000 /* 100KHZ */);
+
+			// Set mode.
+			int interrupt_num;
+			switch(id) {
+				case I2C0: interrupt_num = I2C0_IRQn; break;
+				case I2C1: interrupt_num = I2C1_IRQn; break;
+				case I2C2: interrupt_num = I2C2_IRQn; break;
+				default:
+					// Error state!
+					return;
+			}
+			NVIC_DisableIRQ(interrupt_num);
+			Chip_I2C_SetMasterEventHandler(id, Chip_I2C_EventHandlerPollingTimeout);
+
+		#endif // 0|1
 			break;
 		}
 		retry--;
@@ -464,8 +533,11 @@ int Chip_I2C_MasterTransfer(I2C_ID_T id, I2C_XFER_T *xfer)
 
 	/* Wait for stop condition to appear on bus */
 	int busFree;
+	int i = 0;
 	do {
+		if(i > 2000) return 0;
 		busFree = isI2CBusFree(iic->ip);
+		i++;
 	}
 	while (!busFree);
 
