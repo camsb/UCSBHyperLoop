@@ -11,6 +11,7 @@
 Hyperloop Maglev_HSM;
 
 // Forward declaration of all the possible states
+static QState Initial(Hyperloop *me);
 static QState Nominal(Hyperloop *me);
 static QState Nominal_motorsOff(Hyperloop *me);
 static QState Nominal_motorsOff_idle(Hyperloop *me);
@@ -24,13 +25,18 @@ static QState Fault_unrecoverable(Hyperloop *me);
 
 /*..........................................................................*/
 void initializeMaglevStateMachine(void) {
-    QHsm_ctor(&Maglev_HSM.super, (QStateHandler)&Nominal);
+    QHsm_ctor(&Maglev_HSM.super, (QStateHandler)&Initial);
     // Whether to provide throttle signal to maglev motors
     Maglev_HSM.enable_motors = 0;
     Maglev_HSM.update = 0; // Whether there was a change
     QHsm_init((QHsm *)&Maglev_HSM);
 }
 
+/*..........................................................................*/
+static QState Initial(Hyperloop *me) {
+    BSP_display("Initial-INIT;");
+    return Q_TRAN(&Nominal);
+}
 /*..........................................................................*/
 static QState Nominal(Hyperloop *me) {
     switch (Q_SIG(me)) {
@@ -54,10 +60,10 @@ static QState Nominal(Hyperloop *me) {
         	BSP_display("MAGLEV_FAULT_UNREC");
         	return Q_TRAN(&Fault_unrecoverable);
         }
-        default: {
-        	BSP_display("A signal got where it shouldn't.");
-        	return Q_HANDLED();
-        }
+//        default: {
+//        	BSP_display("A signal got where it shouldn't.");
+//        	return Q_HANDLED();
+//        }
     }
     return Q_SUPER(&QHsm_top);
 }
@@ -217,10 +223,10 @@ QState Fault(Hyperloop *me) {
         	BSP_display("MAGLEV_FAULT_UNREC");
         	return Q_TRAN(&Fault_unrecoverable);
         }
-        default: {
-        	BSP_display("A signal got where it shouldn't.");
-        	return Q_HANDLED();
-        }
+//        default: {
+//        	BSP_display("A signal got where it shouldn't.");
+//        	return Q_HANDLED();
+//        }
     }
     return Q_SUPER(&QHsm_top);
 }
