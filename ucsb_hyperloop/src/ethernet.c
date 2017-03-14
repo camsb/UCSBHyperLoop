@@ -7,7 +7,7 @@
 #include "rtc.h"
 #include "gpio.h"
 #include "qpn_port.h"
-#include "state_machine.h"
+#include "subsystems.h"
 
 /* Rx Buffer Addresses */
 uint16_t gSn_RX_BASE[] = {
@@ -199,7 +199,8 @@ void send_data_ack_helper(char *method, int *position) {
 
 
 void recvDataPacket() {
-	enum Hyperloop_Signals profile[4] = { ENGAGE_ENGINES_SIG, ENGINES_REVED_SIG, DISENGAGE_ENGINES_SIG, ENGINES_STOPPED_SIG};
+	// TODO: Expand this back to support other subsystems
+	enum control_signals profile[2] = {CS_MAGLEV_ENGAGE, CS_MAGLEV_DISENGAGE};
 	int pos = 0;
 	memset(Net_Tx_Data, 0, 64);
 
@@ -212,14 +213,13 @@ void recvDataPacket() {
 
 	if(strcmp((char *)Net_Rx_Data, ENGAGE_ENGINES) == 0){
 		printf("ENGAGE ENGINES SIG RECEIVED\n");
-		Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[0]);
-		QHsm_dispatch((QHsm *)&HSM_Hyperloop);
+		dispatch_signal_from_webapp(profile[0]);
 	}
 	if(strcmp((char *)Net_Rx_Data, DISENGAGE_ENGINES) == 0){
 		printf("DISENGAGE ENGINES SIG RECEIVED\n");
-		Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[2]);
-		QHsm_dispatch((QHsm *)&HSM_Hyperloop);
+		dispatch_signal_from_webapp(profile[1]);
 	}
+	/*
 	if(strcmp((char *)Net_Rx_Data, ENGINES_REVED) == 0){
 		printf("ENGINES REVED SIG RECEIVED\n");
 		Q_SIG((QHsm *)&HSM_Hyperloop) = (QSignal)(profile[1]);
@@ -259,6 +259,7 @@ void recvDataPacket() {
 //		printf("Emergency Brake!\n");
 //		send_data_ack_helper(BAK, &pos);
 //	}
+*/
 	if(strstr((char *)Net_Rx_Data, SETDAC) != NULL) {	// Set the DAC
 		printf("DAC SET RECEIVED\n");
 		printf("DAC recieved: %s\n", Net_Rx_Data);

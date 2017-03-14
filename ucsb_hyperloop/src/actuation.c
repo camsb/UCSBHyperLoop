@@ -1,4 +1,4 @@
-#include "state_machine.h"
+#include "maglev_state_machine.h"
 #include "initialization.h"
 
 int prototypeRunStartTime = 0;
@@ -10,23 +10,9 @@ void performActuation(){
     // State machine test routine
     if(STATEMACHINE_TEST) {
         // Apply changes if a transition occurred
-        if(HSM_Hyperloop.update) {
-
-            // Set service motor behavior
-            if(HSM_Hyperloop.service_flag) {
-                if(HSM_Hyperloop.direction) {
-                    DEBUGOUT("Service motor engaged, reverse.\n");
-                }
-                else {
-                    DEBUGOUT("Service motor engaged, forward.\n");
-                }
-            }
-            else {
-                DEBUGOUT("Service motor disengaged.\n");
-            }
-
+        if(Maglev_HSM.update) {
             // Set engine behavior
-            if(HSM_Hyperloop.engine_flag) {
+            if(Maglev_HSM.enable_motors) {
                 DEBUGOUT("Engines engaged.\n");
                 prototypeRunStartTime = getRuntime()/1000;
                 //update and maintain engine throttle
@@ -40,22 +26,12 @@ void performActuation(){
                     set_motor_throttle(i, 0);
                 }
             }
-
-            // Set brake behavior
-            if(HSM_Hyperloop.brake_flag) {
-                DEBUGOUT("Brakes engaged\n");
-                // TODO: Engage brakes here
-            }
-            else {
-                DEBUGOUT("Brakes disengaged\n");
-                // TODO: Disengage brakes here
-            }
-            HSM_Hyperloop.update = 0;
+            Maglev_HSM.update = 0;
             DEBUGOUT("\n\n");
         }
 
         // Update engines, even if a transition did not occur
-        if(HSM_Hyperloop.engine_flag) {
+        if(Maglev_HSM.enable_motors) {
             // Update and maintain engine throttle
             int time_sec = getRuntime()/1000;
 
@@ -67,8 +43,6 @@ void performActuation(){
                     motors[1]->throttle_voltage = 0;
                     motors[2]->throttle_voltage = 0.8;
                     motors[3]->throttle_voltage = 0;
-
-
                 }
                 else if (time_sec < prototypeRunStartTime + 20) {   // Spin up to tenth power.
                 	DEBUGOUT("ENGINE 4 ON\n");

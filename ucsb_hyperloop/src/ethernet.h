@@ -181,14 +181,21 @@
 
 /* Web App control signals for state machine */
 #define STOP				"STOP_SIG\0"
+// Maglev
 #define ENGAGE_ENGINES		"ENGAGE_ENGINES_SIG\0"
 #define DISENGAGE_ENGINES	"DISENGAGE_ENGINES_SIG\0"
+// Braking
 #define ENGAGE_BRAKES		"ENGAGE_BRAKES_SIG\0"
 #define DISENGAGE_BRAKES	"DISENGAGE_BRAKES_SIG\0"
-#define ENGINES_REVED		"ENGINES_REVED_SIG\0"
-#define ENGINES_STOPPED		"ENGINES_STOPPED_SIG\0"
+#
+// Payload Actuators
+#define ENGINES_REVED		"RAISE_ACTUATORS_SIG\0"
+#define ENGINES_STOPPED		"LOWER_ACTUATORS_SIG\0"
+// Surface Propulsion
+
 #define FORWARD				"FORWARD_SIG\0"
 #define REVERSE				"REVERSE_SIG\0"
+
 #define TERMINATE			"TERMINATE_SIG\0"
 #define IGNORE				"IGNORE_SIG\0"
 #define MAXSIG				"MAX_SIG\0"

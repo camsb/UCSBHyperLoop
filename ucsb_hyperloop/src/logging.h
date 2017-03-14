@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "ethernet.h"
-#include "state_machine.h"
+#include "subsystems.h"
 
 typedef enum {
 	MAX_EVT

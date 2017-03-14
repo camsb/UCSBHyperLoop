@@ -22,7 +22,7 @@
 #include "communication.h"
 #include "gpio.h"
 #include "qpn_port.h"
-#include "state_machine.h"
+#include "subsystems.h"
 #include "actuation.h"
 #include "ethernet.h"
 
@@ -37,19 +37,21 @@ int main(void)
 
     initializeCommunications();
     initializeSensorsAndControls();
-    initializeStateMachine();
+    initializeSubsystemStateMachines();
 
     DEBUGOUT("UCSB Hyperloop Controller Initialized\n");
     DEBUGOUT("_______________________________________\n");
 
+    /*
     int dispatch = 0;
 
     int oldRuntime = 0;
     int step = 0;
     //enum Hyperloop_Signals profile[10] = {FORWARD_SIG, STOP_SIG, REVERSE_SIG, STOP_SIG, ENGAGE_ENGINES_SIG, ENGINES_REVED_SIG, ENGAGE_BRAKES_SIG, DISENGAGE_BRAKES_SIG, DISENGAGE_ENGINES_SIG, ENGINES_STOPPED_SIG};
-    enum Hyperloop_Signals profile[2] = {ENGAGE_ENGINES_SIG, ENGINES_REVED_SIG};
+    enum Maglev_Signals profile[2] = {CS_MAGLEV_ENGAGE, CS_MAGLEV_DISENGAGE};
 
     int done = 0;
+*/
 
     // Main control loop
     while( 1 ) {
@@ -94,12 +96,14 @@ int main(void)
 //            }
 //        }
 
+        /*
         // If there is a state transition signal to dispatch, do so.
         if (dispatch){
           // Dispatch the signal
           QHsm_dispatch((QHsm *)&HSM_Hyperloop);
           dispatch = 0;
         }
+        */
 
         // ** DO ACTUATIONS FROM STATE MACHINE FLAGS **
         performActuation();
