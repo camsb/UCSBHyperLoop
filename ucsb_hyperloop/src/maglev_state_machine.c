@@ -1,286 +1,269 @@
-#include "qpn_port.h"
 #include "maglev_state_machine.h"
+#include "qpn_port.h"
 #include "logging.h"
-#include "HEMS.h"
 
 // Macro to re-direct the state machine debug test to DEBUGOUT only if SM_DEBUG is 1
 #define SM_DEBUG 0
 #define BSP_display(msg) if(SM_DEBUG){DEBUGOUT(msg);}
 
 // The global instance of the state machine object
-Hyperloop Maglev_HSM;
+Maglev_HSM_t Maglev_HSM;
 
 // Forward declaration of all the possible states
-static QState Initial(Hyperloop *me);
-static QState Nominal(Hyperloop *me);
-static QState Nominal_motorsOff(Hyperloop *me);
-static QState Nominal_motorsOff_idle(Hyperloop *me);
-static QState Nominal_motorsOff_spinDown(Hyperloop *me);
-static QState Nominal_motorsOn(Hyperloop *me);
-static QState Nominal_motorsOn_spinUp(Hyperloop *me);
-static QState Nominal_motorsOn_hover(Hyperloop *me);
-static QState Fault(Hyperloop *me);
-static QState Fault_recoverable(Hyperloop *me);
-static QState Fault_unrecoverable(Hyperloop *me);
+static QState Initial(Maglev_HSM_t *me);
+static QState Nominal(Maglev_HSM_t *me);
+static QState Nominal_motorsOff(Maglev_HSM_t *me);
+static QState Nominal_motorsOff_idle(Maglev_HSM_t *me);
+static QState Nominal_motorsOff_spinDown(Maglev_HSM_t *me);
+static QState Nominal_motorsOn(Maglev_HSM_t *me);
+static QState Nominal_motorsOn_spinUp(Maglev_HSM_t *me);
+static QState Nominal_motorsOn_hover(Maglev_HSM_t *me);
+static QState Fault(Maglev_HSM_t *me);
+static QState Fault_recoverable(Maglev_HSM_t *me);
+static QState Fault_unrecoverable(Maglev_HSM_t *me);
 
 /*..........................................................................*/
 void initializeMaglevStateMachine(void) {
     QHsm_ctor(&Maglev_HSM.super, (QStateHandler)&Initial);
-    // Whether to provide throttle signal to maglev motors
-    Maglev_HSM.enable_motors = 0;
-    Maglev_HSM.update = 0; // Whether there was a change
+    Maglev_HSM.enable_motors = 0;		// Whether to provide throttle signal to maglev motors
+    Maglev_HSM.update = 0; 				// Whether there was a change in enable flag
     QHsm_init((QHsm *)&Maglev_HSM);
 }
 
 /*..........................................................................*/
-static QState Initial(Hyperloop *me) {
-    BSP_display("Initial-INIT;");
+static QState Initial(Maglev_HSM_t *me) {
+    BSP_display("Initial-INIT\n");
     return Q_TRAN(&Nominal);
 }
 /*..........................................................................*/
-static QState Nominal(Hyperloop *me) {
+static QState Nominal(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
     	case Q_INIT_SIG: {
-    		BSP_display("Nominal-INIT;");
+    		BSP_display("Nominal-INIT\n");
     		return Q_TRAN(&Nominal_motorsOff);
     	}
         case Q_ENTRY_SIG: {
-            BSP_display("Nominal-ENTRY;");
+            BSP_display("Nominal-ENTRY\n");
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
-            BSP_display("Nominal-EXIT;");
+            BSP_display("Nominal-EXIT\n");
             return Q_HANDLED();
         }
         case MAGLEV_FAULT_REC: {
-        	BSP_display("MAGLEV_FAULT_REC");
+        	BSP_display("MAGLEV_FAULT_REC\n");
         	return Q_TRAN(&Fault_recoverable);
         }
         case MAGLEV_FAULT_UNREC: {
-        	BSP_display("MAGLEV_FAULT_UNREC");
+        	BSP_display("MAGLEV_FAULT_UNREC\n");
         	return Q_TRAN(&Fault_unrecoverable);
         }
-//        default: {
-//        	BSP_display("A signal got where it shouldn't.");
-//        	return Q_HANDLED();
-//        }
     }
     return Q_SUPER(&QHsm_top);
 }
 /*..........................................................................*/
-QState Nominal_motorsOff(Hyperloop *me) {
+QState Nominal_motorsOff(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
     	case Q_INIT_SIG: {
-    		BSP_display("Nominal_motorsOff-INIT;");
+    		BSP_display("Nominal_motorsOff-INIT\n");
     		return Q_TRAN(&Nominal_motorsOff_idle);
     	}
         case Q_ENTRY_SIG: {
-            BSP_display("Nominal_motorsOff-ENTRY;");
+            BSP_display("Nominal_motorsOff-ENTRY\n");
             logEventString("Maglev state machine state: Nominal_motorsOff");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
-            BSP_display("Nominal_motorsOff-EXIT;");
+            BSP_display("Nominal_motorsOff-EXIT\n");
             return Q_HANDLED();
         }
         case MAGLEV_ENGAGE: {
-        	BSP_display("ENGAGE MOTORS!");
+        	BSP_display("ENGAGE MOTORS!\n");
         	return Q_TRAN(&Nominal_motorsOn);
         }
-
     }
     return Q_SUPER(&Nominal);
 }
 /*..........................................................................*/
-QState Nominal_motorsOff_idle(Hyperloop *me) {
+QState Nominal_motorsOff_idle(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-            BSP_display("Nominal_motorsOff_idle-ENTRY;");
+            BSP_display("Nominal_motorsOff_idle-ENTRY\n");
             logEventString("Maglev state machine state: Nominal_motorsOff_idle");
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
-            BSP_display("Nominal_motorsOff_idle-EXIT;");
+            BSP_display("Nominal_motorsOff_idle-EXIT\n");
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
-            BSP_display("Nominal_motorsOff_idle-INIT;");
+            BSP_display("Nominal_motorsOff_idle-INIT\n");
             return Q_HANDLED();
         }
     }
     return Q_SUPER(&Nominal_motorsOff);
 }
 /*..........................................................................*/
-QState Nominal_motorsOff_spinDown(Hyperloop *me) {
+QState Nominal_motorsOff_spinDown(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-            BSP_display("Nominal_motorsOff_spinDown-ENTRY;");
+            BSP_display("Nominal_motorsOff_spinDown-ENTRY\n");
             logEventString("Maglev state machine state: Nominal_motorsOff_spinDown");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
 	        return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
-            BSP_display("Nominal_motorsOff_spinDown-EXIT;");
+            BSP_display("Nominal_motorsOff_spinDown-EXIT\n");
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
-            BSP_display("Nominal_motorsOff_spinDown-INIT;");
+            BSP_display("Nominal_motorsOff_spinDown-INIT\n");
             return Q_HANDLED();
+        }
+        case MAGLEV_SPUNDOWN: {
+        	BSP_display("MAGLEV_SPUNDOWN\n");
+        	return Q_TRAN(&Nominal_motorsOff_idle);
         }
     }
     return Q_SUPER(&Nominal_motorsOff);
 }
 /*..........................................................................*/
-QState Nominal_motorsOn(Hyperloop *me) {
+QState Nominal_motorsOn(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-            BSP_display("Nominal_motorsOn-ENTRY;");
+            BSP_display("Nominal_motorsOn-ENTRY\n");
             logEventString("Maglev state machine state: Nominal_motorsOn");
             Maglev_HSM.enable_motors = 1;
             Maglev_HSM.update = 1;
             return Q_TRAN(&Nominal_motorsOn_spinUp);
         }
         case Q_EXIT_SIG: {
-            BSP_display("Nominal_motorsOn-EXIT;");
+            BSP_display("Nominal_motorsOn-EXIT\n");
             Maglev_HSM.enable_motors = 0;
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
-            BSP_display("Nominal_motorsOn-INIT;");
+            BSP_display("Nominal_motorsOn-INIT\n");
             return Q_TRAN(&Nominal_motorsOn_spinUp);
         }
         case MAGLEV_DISENGAGE: {
-        	BSP_display("MAGLEV_DISENGAGE");
+        	BSP_display("MAGLEV_DISENGAGE\n");
         	return Q_TRAN(&Nominal_motorsOff_spinDown);
         }
     }
     return Q_SUPER(&Nominal);
 }
 /*..........................................................................*/
-QState Nominal_motorsOn_spinUp(Hyperloop *me) {
+QState Nominal_motorsOn_spinUp(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-            BSP_display("Nominal_motorsOn_spinUp-ENTRY;");
+            BSP_display("Nominal_motorsOn_spinUp-ENTRY\n");
             logEventString("Maglev state machine state: Nominal_motorsOn_spinUp");
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
-            BSP_display("Nominal_motorsOn_spinUp-EXIT;");
+            BSP_display("Nominal_motorsOn_spinUp-EXIT\n");
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
-            BSP_display("Nominal_motorsOn_spinUp-INIT;");
+            BSP_display("Nominal_motorsOn_spinUp-INIT\n");
             return Q_HANDLED();
         }
         case MAGLEV_SPUNUP: {
-            BSP_display("MAGLEV_SPUNUP!;");
+            BSP_display("MAGLEV_SPUNUP!\n");
             return Q_TRAN(&Nominal_motorsOn_hover);
         }
     }
     return Q_SUPER(&Nominal_motorsOn);
 }
 /*..........................................................................*/
-QState Nominal_motorsOn_hover(Hyperloop *me) {
+QState Nominal_motorsOn_hover(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-        	BSP_display("hover-ENTRY;");
-            BSP_display("maintaining hovering conditions;");
+        	BSP_display("Nominal_motorsOn_hover-ENTRY\n");
             logEventString("Maglev state machine state: Nominal_motorsOn_hover");
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
-            BSP_display("hover-EXIT;");
+            BSP_display("Nominal_motorsOn_hover-EXIT\n");
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
-            BSP_display("hover-INIT;");
+            BSP_display("Nominal_motorsOn_hover-INIT\n");
             return Q_HANDLED();
         }
     }
     return Q_SUPER(&Nominal_motorsOn);
 }
 /*..........................................................................*/
-QState Fault(Hyperloop *me) {
+QState Fault(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-            BSP_display("braking-ENTRY;");
-            BSP_display("engaging brakes;");
+            BSP_display("Fault-ENTRY\n");
             logEventString("Maglev state machine state: Fault");
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
-            BSP_display("braking-EXIT;");
+            BSP_display("Fault-EXIT\n");
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
-            BSP_display("braking-INIT;");
+            BSP_display("Fault-INIT\n");
             return Q_HANDLED();
         }
         case MAGLEV_FAULT_UNREC: {
-        	BSP_display("MAGLEV_FAULT_UNREC");
+        	BSP_display("MAGLEV_FAULT_UNREC\n");
         	return Q_TRAN(&Fault_unrecoverable);
         }
-//        default: {
-//        	BSP_display("A signal got where it shouldn't.");
-//        	return Q_HANDLED();
-//        }
     }
     return Q_SUPER(&QHsm_top);
 }
 /*..........................................................................*/
-QState Fault_recoverable(Hyperloop *me) {
+QState Fault_recoverable(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-            BSP_display("forward-ENTRY;");
+            BSP_display("Fault_recoverable-ENTRY\n");
             logEventString("Maglev state machine state: Fault_recoverable");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
-            BSP_display("forward-EXIT;");
+            BSP_display("Fault_recoverable-EXIT\n");
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
-            BSP_display("forward-INIT;");
+            BSP_display("Fault_recoverable-INIT\n");
             return Q_HANDLED();
         }
         case MAGLEV_FAULT_REC_CLEAR: {
-        	BSP_display("MAGLEV_FAULT_REC_CLEAR");
+        	BSP_display("MAGLEV_FAULT_REC_CLEAR\n");
         	return Q_TRAN(&Nominal_motorsOff_spinDown);
         }
-//        case STOP_SIG: {
-//            return Q_TRAN(&Nominal_motorsOff_idle);
-//        }
     }
     return Q_SUPER(&Fault);
 }
 /*..........................................................................*/
-QState Fault_unrecoverable(Hyperloop *me) {
+QState Fault_unrecoverable(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-            BSP_display("reverse-ENTRY;");
-            BSP_display("moving in reverse;");
+            BSP_display("Fault_unrecoverable-ENTRY\n");
             logEventString("Maglev state machine state: Fault_unrecoverable");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
-            BSP_display("reverse-EXIT;");
-            BSP_display("stopping;");
+            BSP_display("Fault_unrecoverable-EXIT\n");
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
-            BSP_display("reverse-INIT;");
+            BSP_display("Fault_unrecoverable-INIT\n");
             return Q_HANDLED();
         }
-//        case STOP_SIG: {
-//            return Q_TRAN(&Nominal_motorsOff_idle);
-//        }
     }
     return Q_SUPER(&Fault);
 }

@@ -1,5 +1,6 @@
 #include "maglev_state_machine.h"
 #include "initialization.h"
+#include "HEMS.h"
 
 int prototypeRunStartTime = 0;
 
