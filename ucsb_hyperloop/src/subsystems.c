@@ -1,9 +1,15 @@
 #include "subsystems.h"
 #include "maglev_state_machine.h"
+#include "HEMS.h"
+#include "initialization.h"
 
 void initializeSubsystemStateMachines(){
 	initializeMaglevStateMachine();
 }
+
+// Some temp flags
+int send_spunup = 0;
+int send_spundown = 0;
 
 void dispatch_signal_from_webapp(int signal){
 	switch(signal){
@@ -11,10 +17,27 @@ void dispatch_signal_from_webapp(int signal){
 			// TODO: Add check that payload actuators are supporting payload in upright position
 			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_ENGAGE);
 			QHsm_dispatch((QHsm *)&Maglev_HSM);
+			send_spunup = 1;
 		}
 		case CS_MAGLEV_DISENGAGE:{
 			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_DISENGAGE);
 			QHsm_dispatch((QHsm *)&Maglev_HSM);
+			send_spundown = 1;
+		}
+	}
+}
+
+void generate_signals_from_sensor_data(){
+	if (MOTOR_BOARD_I2C_ACTIVE){
+		if (send_spunup && (motors[0]->rpm > 500)){
+			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_SPUNUP);
+			QHsm_dispatch((QHsm *)&Maglev_HSM);
+			send_spunup = 0;
+		}
+		else if (send_spundown && (motors[0]->rpm < 500)){
+			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_SPUNDOWN);
+			QHsm_dispatch((QHsm *)&Maglev_HSM);
+			send_spundown = 0;
 		}
 	}
 }

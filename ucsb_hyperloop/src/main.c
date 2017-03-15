@@ -80,6 +80,10 @@ int main(void)
         // Look at sensor data to determine if a state machine transition signal should be sent.
         // Set 'dispatch' to 1 if a signal was generated.
 
+        if (collectDataFlag){
+        	generate_signals_from_sensor_data();
+        }
+
         // Simulate transitions to the state machine from "test profiles"
         // This section will probably get replaced with signal thresholds from actual sensors soon.
 //        int newRuntime = getRuntime();
