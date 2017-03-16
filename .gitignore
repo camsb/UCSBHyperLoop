@@ -4,6 +4,7 @@
 !/lpc_board_ea_devkit_4088/
 !/lpc_chip_40xx/
 !/ucsb_hyperloop/
+!/vacuum_test/
 
 # Whitelist other files we want to include
 !README.md
