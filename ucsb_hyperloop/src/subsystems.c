@@ -15,10 +15,12 @@ void dispatch_signal_from_webapp(int signal){
 			// TODO: Add check that payload actuators are supporting payload in upright position
 			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_ENGAGE);
 			QHsm_dispatch((QHsm *)&Maglev_HSM);
+			break;
 		}
 		case CS_MAGLEV_DISENGAGE:{
 			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_DISENGAGE);
 			QHsm_dispatch((QHsm *)&Maglev_HSM);
+			break;
 		}
 	}
 }
