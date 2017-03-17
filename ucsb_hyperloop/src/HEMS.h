@@ -19,7 +19,7 @@
 #include "initialization.h"
 #include "i2c.h"
 #include "timer.h"
-
+#define NUM_MOTORS 4
 //I2C Bus Select
 
 #endif //LPC
@@ -81,6 +81,10 @@ typedef struct {
   //Safety
   uint8_t alarm;
 } HEMS;
+
+#ifdef LPC
+HEMS *motors[4];
+#endif
 
 HEMS* initialize_HEMS(uint8_t I2C_BUS, uint8_t I2C_DIP);  //See below for I2C DIP addressing
 uint8_t update_HEMS(HEMS* engine);
@@ -221,6 +225,6 @@ void DAC_write(uint8_t i2c_bus, uint8_t DAC_address, uint16_t output_voltage);
 //IOX Associated Functions:
 void IOX_setup(uint8_t i2c_bus, uint8_t IOX_address);
 uint16_t IOX_read(uint8_t i2c_bus, uint8_t IOX_address);
-
+void set_motor_throttle(uint8_t motor_num, float voltage);
 
 #endif //I2CPERIPHS_H

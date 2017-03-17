@@ -119,6 +119,7 @@ Maglev_BMS* intialize_Maglev_BMS(uint8_t I2C_BUS) {
   return bms;
 }
 
+// This appears unfinished. Don't run it.
 uint8_t update_Maglev_BMS(Maglev_BMS* bms) {
   int batt, i, cell;
   float prev_voltage;
@@ -136,6 +137,7 @@ uint8_t update_Maglev_BMS(Maglev_BMS* bms) {
     bms->battery_voltage[batt] = prev_voltage;
 
   }
+  return 0; // For compilation
 }
 
 
@@ -246,4 +248,21 @@ float runtime() {
 #endif // LPC
 
   return runtime_in_seconds;
+}
+
+void set_motor_throttle(uint8_t motor_num, float voltage){
+  // Set the motor's throttle directly, but only if HEMS is enabled
+  #if MOTOR_BOARD_I2C_ACTIVE
+    if (motor_num < 4){
+        if (voltage <= MAX_THROTTLE_VOLTAGE && voltage >= 0){
+            motors[motor_num]->throttle_voltage = voltage;
+        }
+        else{
+            DEBUGOUT("Invalid voltage specified in set_motor_target_throttle");
+        }
+    }
+    else{
+        DEBUGOUT("Invalid motor number in set_motor_target_throttle!\n");
+    }
+  #endif
 }

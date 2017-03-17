@@ -491,11 +491,11 @@ void sendPrototypePacket(){
 	sprintf(PrototypePacket.cu2, "%06.2f", (float)motors[1]->amps);
 	sprintf(PrototypePacket.cu3, "%06.2f", (float)motors[2]->amps);
 	sprintf(PrototypePacket.cu4, "%06.2f", (float)motors[3]->amps);
-	/* Tachometer Output */
-	sprintf(PrototypePacket.ta1, "%06.2f", (float)motors[0]->rpm);
-	sprintf(PrototypePacket.ta2, "%06.2f", (float)motors[1]->rpm);
-	sprintf(PrototypePacket.ta3, "%06.2f", (float)motors[2]->rpm);
-	sprintf(PrototypePacket.ta4, "%06.2f", (float)motors[3]->rpm);
+	/* Tachometer Output */ // TODO: EXPAND THIS TO READING BOTH VALUES
+	sprintf(PrototypePacket.ta1, "%06.2f", (float)motors[0]->rpm[0]);
+	sprintf(PrototypePacket.ta2, "%06.2f", (float)motors[1]->rpm[0]);
+	sprintf(PrototypePacket.ta3, "%06.2f", (float)motors[2]->rpm[0]);
+	sprintf(PrototypePacket.ta4, "%06.2f", (float)motors[3]->rpm[0]);
 	/* Temperature Output */
 	sprintf(PrototypePacket.m1tmp1, "%06.f", (float)motors[0]->temperatures[0]);
 	sprintf(PrototypePacket.m1tmp2, "%06.f", (float)motors[0]->temperatures[1]);

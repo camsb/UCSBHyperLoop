@@ -23,7 +23,6 @@ void performActuation(){
                 // Set throttle to 0
                 int i = 0;
                 for(i = 0; i < NUM_MOTORS; i++) {
-                    set_motor_target_throttle(i, 0);
                     set_motor_throttle(i, 0);
                 }
             }
@@ -70,7 +69,6 @@ void performActuation(){
             else{
 //                int i;
 //                for(i = 0; i < NUM_MOTORS; i++) {
-//                    set_motor_target_throttle(i, 4.0);
 //                    set_motor_throttle(i, 4.0);
 //                }
             }
@@ -79,8 +77,7 @@ void performActuation(){
 //        	DEBUGOUT("ENGINES OFF\n");
             // Set throttle to 0
             int i;
-            for(i = 0; i<NUM_MOTORS; i++) {
-                set_motor_target_throttle(i, 0);
+            for(i = 0; i < 4; i++) {
                 set_motor_throttle(i, 0);
             }
         }
@@ -114,33 +111,33 @@ void performActuation(){
 
                 if(PROTOTYPE_PRERUN) {  // PRERUN
                     if (time_sec < prototypeRunStartTime + 10) {    // Spin up to tenth power.
-                        motors[0]->target_throttle_voltage = 0.8;
-                        motors[1]->target_throttle_voltage = 0;
-                        motors[2]->target_throttle_voltage = 0;
-                        motors[3]->target_throttle_voltage = 0;
+                        motors[0]->throttle_voltage = 0.8;
+                        motors[1]->throttle_voltage = 0;
+                        motors[2]->throttle_voltage = 0;
+                        motors[3]->throttle_voltage = 0;
                     }
                     else if (time_sec < prototypeRunStartTime + 20) {   // Spin up to tenth power.
-                        motors[0]->target_throttle_voltage = 0;
-                        motors[1]->target_throttle_voltage = 0.8;
-                        motors[2]->target_throttle_voltage = 0;
-                        motors[3]->target_throttle_voltage = 0;
+                        motors[0]->throttle_voltage = 0;
+                        motors[1]->throttle_voltage = 0.8;
+                        motors[2]->throttle_voltage = 0;
+                        motors[3]->throttle_voltage = 0;
                     }
                     else if (time_sec < prototypeRunStartTime + 30) {   // Spin up to tenth power.
-                        motors[0]->target_throttle_voltage = 0;
-                        motors[1]->target_throttle_voltage = 0;
-                        motors[2]->target_throttle_voltage = 0.8;
-                        motors[3]->target_throttle_voltage = 0;
+                        motors[0]->throttle_voltage = 0;
+                        motors[1]->throttle_voltage = 0;
+                        motors[2]->throttle_voltage = 0.8;
+                        motors[3]->throttle_voltage = 0;
                     }
                     else if (time_sec < prototypeRunStartTime + 40) {   // Spin up to tenth power.
-                        motors[0]->target_throttle_voltage = 0;
-                        motors[1]->target_throttle_voltage = 0;
-                        motors[2]->target_throttle_voltage = 0;
-                        motors[3]->target_throttle_voltage = 0.8;
+                        motors[0]->throttle_voltage = 0;
+                        motors[1]->throttle_voltage = 0;
+                        motors[2]->throttle_voltage = 0;
+                        motors[3]->throttle_voltage = 0.8;
                     } else {    // Spin down.
-                        motors[0]->target_throttle_voltage = 0;
-                        motors[1]->target_throttle_voltage = 0;
-                        motors[2]->target_throttle_voltage = 0;
-                        motors[3]->target_throttle_voltage = 0;
+                        motors[0]->throttle_voltage = 0;
+                        motors[1]->throttle_voltage = 0;
+                        motors[2]->throttle_voltage = 0;
+                        motors[3]->throttle_voltage = 0;
                         motors[0]->throttle_voltage = 0;
                         motors[1]->throttle_voltage = 0;
                         motors[2]->throttle_voltage = 0;
@@ -152,10 +149,10 @@ void performActuation(){
                 }
                 else {  // RUN
                     if (time_sec < prototypeRunStartTime + 60) {    // Spin up to half power.
-                        motors[0]->target_throttle_voltage = 4;
-                        motors[1]->target_throttle_voltage = 4;
-                        motors[2]->target_throttle_voltage = 4;
-                        motors[3]->target_throttle_voltage = 4;
+                        motors[0]->throttle_voltage = 4;
+                        motors[1]->throttle_voltage = 4;
+                        motors[2]->throttle_voltage = 4;
+                        motors[3]->throttle_voltage = 4;
 #if 1
                         motors[0]->throttle_voltage = 4;
                         motors[1]->throttle_voltage = 4;
@@ -164,10 +161,10 @@ void performActuation(){
 #endif  // 0
 
                     } else {    // Spin down.
-                        motors[0]->target_throttle_voltage = 0;
-                        motors[1]->target_throttle_voltage = 0;
-                        motors[2]->target_throttle_voltage = 0;
-                        motors[3]->target_throttle_voltage = 0;
+                        motors[0]->throttle_voltage = 0;
+                        motors[1]->throttle_voltage = 0;
+                        motors[2]->throttle_voltage = 0;
+                        motors[3]->throttle_voltage = 0;
                         motors[0]->throttle_voltage = 0;
                         motors[1]->throttle_voltage = 0;
                         motors[2]->throttle_voltage = 0;
@@ -180,16 +177,16 @@ void performActuation(){
 
             }
             else {  // The motors should not be spinning right now.
-                motors[0]->target_throttle_voltage = 0;
-                motors[1]->target_throttle_voltage = 0;
-                motors[2]->target_throttle_voltage = 0;
-                motors[3]->target_throttle_voltage = 0;
+                motors[0]->throttle_voltage = 0;
+                motors[1]->throttle_voltage = 0;
+                motors[2]->throttle_voltage = 0;
+                motors[3]->throttle_voltage = 0;
                 motors[0]->throttle_voltage = 0;
                 motors[1]->throttle_voltage = 0;
                 motors[2]->throttle_voltage = 0;
                 motors[3]->throttle_voltage = 0;
             }
-            //DEBUGOUT("Target throttle voltages: FR%0.2f BR%0.2f FL%0.2f BL%0.2f\n", motors[0]->target_throttle_voltage, motors[1]->target_throttle_voltage, motors[2]->target_throttle_voltage, motors[3]->target_throttle_voltage);
+            //DEBUGOUT("Target throttle voltages: FR%0.2f BR%0.2f FL%0.2f BL%0.2f\n", motors[0]->throttle_voltage, motors[1]->throttle_voltage, motors[2]->throttle_voltage, motors[3]->throttle_voltage);
             //DEBUGOUT("Throttle voltages: FR%0.2f BR%0.2f FL%0.2f BL%0.2f\n", motors[0]->throttle_voltage, motors[1]->throttle_voltage, motors[2]->throttle_voltage, motors[3]->throttle_voltage);
         }
 #endif // NO_OLD_PROTOTYPE_RUN

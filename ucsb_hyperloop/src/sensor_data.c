@@ -89,7 +89,7 @@ void collectData(){
 
     if(MOTOR_BOARD_I2C_ACTIVE) {
     	int i;
-    	for(i=0; i<NUM_MOTORS; i++) {
+    	for(i=0; i < NUM_MOTORS; i++) {
     		update_HEMS(motors[i]);
     	}
 
