@@ -1,12 +1,14 @@
-//Hyperloop Hover Engine Management System
+//Hyperloop Peripheral Management System
 //Kevin Kha
-//If using on the Arduino, this should be saved as a .cpp file. Otherwise it should be saved as a .c
+
+//For use with HEMSv3, Maglev BMS, I2C Hub
+//If using this on the Arduino, this should be saved as a .cpp file. Otherwise it should be saved as a .c
 
 #include "HEMS.h"
-#include "initialization.h"
+
 
 // Global variables.
-const uint8_t ADC_Address_Select[4] = {0x8, 0xA, 0x1A, 0x14};
+const uint8_t ADC_Address_Select[4] = {0x8, 0xA, 0x1A, 0x28};
 const uint8_t DAC_Address_Select[2] = {0x62, 0x63};
 const uint8_t IOX_Address_Select[8] = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27};
 
@@ -26,13 +28,17 @@ const uint8_t ADC_CHANNEL_SELECT[8] = {
 HEMS* initialize_HEMS(uint8_t I2C_BUS, uint8_t I2C_DIP) {
   HEMS* engine = malloc(sizeof(HEMS));
   engine->bus = I2C_BUS;
-  engine->ADC_0_device_address = ADC_Address_Select[(I2C_DIP >> 6) & 0b11];
-  engine->DAC_0_device_address = DAC_Address_Select[(I2C_DIP >> 3) & 0b1];
-  engine->IOX_0_device_address = IOX_Address_Select[(I2C_DIP >> 0) & 0b111];
+  engine->ADC_device_address[0] = ADC_Address_Select[(I2C_DIP >> 6) & 0b11];
+  engine->DAC_device_address[0] = DAC_Address_Select[(I2C_DIP >> 5) & 0b1];
+  engine->IOX_device_address[0] = IOX_Address_Select[(I2C_DIP >> 2) & 0b110];
+  engine->IOX_device_address[1] = IOX_Address_Select[((I2C_DIP >> 2) & 0b110) + 1];
 
+  int n;
+  for (n = 0; n < 2; n++) {
+    IOX_setup(engine->bus, engine->IOX_device_address[n]);
+    engine->tachometer_counter[n] = IOX_read(engine->bus, engine->IOX_device_address[n]);
+  }
 
-  IOX_setup(engine->bus, engine->IOX_0_device_address);
-  engine->tachometer_counter = IOX_read(engine->bus, engine->IOX_0_device_address);
   engine->throttle_voltage = 0;
   engine->timestamp = 0;
 
@@ -41,102 +47,118 @@ HEMS* initialize_HEMS(uint8_t I2C_BUS, uint8_t I2C_DIP) {
   return engine;
 }
 
-void set_motor_target_throttle(uint8_t motor_num, float voltage){
-  // Set the motor's target throttle, but only if HEMS is enabled
-  #if MOTOR_BOARD_I2C_ACTIVE
-  if (motor_num < NUM_MOTORS){
-      if (voltage <= MAX_THROTTLE_VOLTAGE && voltage >= 0){
-          motors[motor_num]->target_throttle_voltage = voltage;
-      }
-      else{
-          DEBUGOUT("Invald voltage specified in set_motor_target_throttle");
-      }
-  }
-  else{
-      DEBUGOUT("Invalid motor number in set_motor_target_throttle!\n");
-  }
-  #endif
-}
+uint8_t update_HEMS(HEMS* engine) {
+  //Set throttle;
+  DAC_write(engine->bus, engine->DAC_device_address[0], engine->throttle_voltage * 4095 / 5);
+  engine->DAC_diagnostic = ADC_read(engine->bus, engine->ADC_device_address[0], 0) / 4095.0 * 5;
 
-void set_motor_throttle(uint8_t motor_num, float voltage){
-  // Set the motor's throttle directly, but only if HEMS is enabled
-  #if MOTOR_BOARD_I2C_ACTIVE
-    if (motor_num < NUM_MOTORS){
-        if (voltage <= MAX_THROTTLE_VOLTAGE && voltage >= 0){
-            motors[motor_num]->throttle_voltage = voltage;
-        }
-        else{
-            DEBUGOUT("Invald voltage specified in set_motor_target_throttle");
-        }
-    }
-    else{
-        DEBUGOUT("Invalid motor number in set_motor_target_throttle!\n");
-    }
-  #endif
-}
-
-void update_HEMS(HEMS* engine) {
-#if 0
-	if(engine->throttle_voltage > engine->target_throttle_voltage) {
-		engine->throttle_voltage -= 0.1;
-	}
-	if(engine->throttle_voltage < engine->target_throttle_voltage) {
-		engine->throttle_voltage += 0.1;
-	}
-
-	if(engine->throttle_voltage > 5) {
-		engine->throttle_voltage = 5;
-	}
-#endif
-	//Set throttle;
-	DAC_write(engine->bus, engine->DAC_0_device_address, engine->throttle_voltage * 4095 / 5);
-
-#if 1
   //Record Temperatures
   int temp_counter;
   for (temp_counter = 0; temp_counter < NUM_THERMISTORS; temp_counter++) {
-    float thermistor_ratio = ADC_read(engine->bus, engine->ADC_0_device_address, temp_counter);
-
-    //Calculate thermistor resistance
-    float thermistance = (4095 - thermistor_ratio) * REFERENCE_RESISTANCE / thermistor_ratio;
-
-    //Calculate temperature based on the thermistor resistance (formula based on https://en.wikipedia.org/wiki/Thermistor#B_or_.CE.B2_parameter_equation and datasheet values)
-    int new_temperature = THERMISTOR_BETA / (log(thermistance) - THERMISTOR_OFFSET) - 272;
-
-    //Exponential average and record new temperature
+    int new_temperature = calculate_temperature(ADC_read(engine->bus, engine->ADC_device_address[0], temp_counter + 1));
     new_temperature = ((1 - THERMISTOR_AVG_WEIGHT) * new_temperature + THERMISTOR_AVG_WEIGHT * engine->temperatures[temp_counter]);
-
     engine->temperatures[temp_counter] = new_temperature;
-    if (new_temperature > SAFE_TEMPERATURE)
+    if (new_temperature > HEMS_MAX_TEMP || new_temperature < HEMS_MIN_TEMP)
       engine->alarm |= 0b00000001;
   }
 
   //Record Motor Controller Current
   //With no current, the ACS759x150B should output 3.3V/2
-  uint16_t ammeter_ratio = ADC_read(engine->bus, engine->ADC_0_device_address, AMMETER_CHANNEL);
+  uint16_t ammeter_ratio = ADC_read(engine->bus, engine->ADC_device_address[0], 7);
   uint8_t new_amps = abs(ammeter_ratio * 5000.0 / 4095 - 1000 * AMMETER_VCC / 2) * AMMETER_CONVERSION; //Done in mV
   engine->amps = new_amps;
 
-  if (new_amps > SAFE_CURRENT)
+  if (new_amps > HEMS_MAX_CURRENT)
     engine->alarm |= 0b00000010;
 
-  //Record Motor RPM
-  uint16_t current_tachometer_counter = (IOX_read(engine->bus, engine->IOX_0_device_address) & (0x0FFF));
-  uint16_t previous_tachometer_counter = engine->tachometer_counter;
-  float current_time = runtime();
+  //Record RPMs
+  uint16_t current_tachometer_counter[2];
+  uint16_t previous_tachometer_counter[2];
 
-  uint16_t delta_counter; //Calculate # of pulses since last checked
-  if(current_tachometer_counter >= previous_tachometer_counter)
-    delta_counter = current_tachometer_counter - previous_tachometer_counter;
-  else  //Account for edge case where the binary counter overflows and resets back to 0.
-    delta_counter = current_tachometer_counter + (4095 - previous_tachometer_counter);
+  int n;
+  float current_time[2];
+  uint16_t current_rpm[2];
+  for (n = 0; n < 2; n++) {
+    current_tachometer_counter[n] = (IOX_read(engine->bus, engine->IOX_device_address[n]) & (0x0FFF));
+    previous_tachometer_counter[n] = engine->tachometer_counter[n];
+    current_time[n] = runtime();
 
-  uint16_t current_rpm = 60.0 / TACHOMETER_TICKS * delta_counter / (current_time - engine->timestamp);
-  engine->rpm = (1 - TACHOMETER_AVG_WEIGHT) * current_rpm + TACHOMETER_AVG_WEIGHT * engine->rpm;
-  engine->timestamp = current_time;
-  engine->tachometer_counter = current_tachometer_counter;
-#endif	// 0
+    uint16_t delta_counter; //Calculate # of pulses since last checked
+    if (current_tachometer_counter[n] >= previous_tachometer_counter[n])
+      delta_counter = current_tachometer_counter[n] - previous_tachometer_counter[n];
+    else  //Account for edge case where the binary counter overflows and resets back to 0.
+      delta_counter = current_tachometer_counter[n] + (4096 - previous_tachometer_counter[n]);
+
+    current_rpm[n] = 60.0 / TACHOMETER_TICKS * delta_counter / (current_time[n] - engine->timestamp);
+    engine->rpm[n] = (1 - TACHOMETER_AVG_WEIGHT) * current_rpm[n] + TACHOMETER_AVG_WEIGHT * engine->rpm[n];
+    engine->tachometer_counter[n] = current_tachometer_counter[n];
+  }
+  engine->timestamp = runtime();
+
+  return engine->alarm;
 }
+
+
+
+
+
+
+
+
+
+
+uint8_t I2C_ADC_Maglev_BMS_Addresses[3] = {0x19, 0x0B, 0x18};
+Maglev_BMS* intialize_Maglev_BMS(uint8_t I2C_BUS) {
+  Maglev_BMS* bms = malloc(sizeof(Maglev_BMS));
+  bms->bus = I2C_BUS;
+
+  bms->relay_active = 1;
+
+  bms->timestamp = 0;
+  bms->alarm = 0;
+  return bms;
+}
+
+uint8_t update_Maglev_BMS(Maglev_BMS* bms) {
+  int batt, i, cell;
+  float prev_voltage;
+
+  //0x19 FLOAT LOW
+  //0x0B FLOAT HIGH
+  //0x18 FLOAT FLOAT
+  for (batt = 0; batt < 3; batt++) {
+    prev_voltage = 0;
+    for (i = 0; i < 6; i++) {
+      float voltage = ADC_read(bms->bus, I2C_ADC_Maglev_BMS_Addresses[batt], i) / 4096.0 * 5.0 * bms->conversion[batt][i];
+      bms->cell_voltages[batt][i] = voltage - prev_voltage;
+      prev_voltage = voltage;
+    }
+    bms->battery_voltage[batt] = prev_voltage;
+
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int calculate_temperature(uint16_t therm_adc_val) {
+  //Calculate thermistor resistance
+  float thermistance = therm_adc_val / 4095.0 * REFERENCE_RESISTANCE / (1 - therm_adc_val / 4095.0);
+
+  //Calculate temperature based on the thermistor resistance (formula based on https://en.wikipedia.org/wiki/Thermistor#B_or_.CE.B2_parameter_equation and datasheet values)
+  return THERMISTOR_BETA / (log(thermistance) - THERMISTOR_OFFSET) - 272;
+}
+
 
 uint16_t ADC_read(uint8_t bus, uint8_t ADC_address, uint8_t ADC_channel) {
   uint8_t input_buffer[2];
@@ -220,7 +242,7 @@ float runtime() {
   runtime_in_seconds = millis() / 1000.0;
 #endif //ARDUINO
 #ifdef LPC
-  runtime_in_seconds = getRuntime()/1000.0;
+  runtime_in_seconds = getRuntime() / 1000.0;
 #endif // LPC
 
   return runtime_in_seconds;
