@@ -27,6 +27,9 @@ void initializeMaglevStateMachine(void) {
     QHsm_ctor(&Maglev_HSM.super, (QStateHandler)&Initial);
     Maglev_HSM.enable_motors = 0;		// Whether to provide throttle signal to maglev motors
     Maglev_HSM.update = 0; 				// Whether there was a change in enable flag
+    Maglev_HSM.send_spunup = 0;
+    Maglev_HSM.send_spundown = 0;
+    Maglev_HSM.faulted = 0;
     QHsm_init((QHsm *)&Maglev_HSM);
 }
 
@@ -113,6 +116,7 @@ QState Nominal_motorsOff_spinDown(Maglev_HSM_t *me) {
             logEventString("Maglev state machine state: Nominal_motorsOff_spinDown");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
+            Maglev_HSM.send_spundown = 1;
 	        return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -162,6 +166,7 @@ QState Nominal_motorsOn_spinUp(Maglev_HSM_t *me) {
         case Q_ENTRY_SIG: {
             BSP_display("Nominal_motorsOn_spinUp-ENTRY\n");
             logEventString("Maglev state machine state: Nominal_motorsOn_spinUp");
+            Maglev_HSM.send_spunup = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -229,10 +234,12 @@ QState Fault_recoverable(Maglev_HSM_t *me) {
             logEventString("Maglev state machine state: Fault_recoverable");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
+            Maglev_HSM.faulted = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
             BSP_display("Fault_recoverable-EXIT\n");
+            Maglev_HSM.faulted = 1;
             return Q_HANDLED();
         }
         case Q_INIT_SIG: {
@@ -254,6 +261,7 @@ QState Fault_unrecoverable(Maglev_HSM_t *me) {
             logEventString("Maglev state machine state: Fault_unrecoverable");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
+            Maglev_HSM.faulted = 2;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {

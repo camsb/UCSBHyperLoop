@@ -30,5 +30,7 @@ enum control_signals{
 
 void initializeSubsystemStateMachines();
 void dispatch_signal_from_webapp(int signal);
+void maglev_service_state_machine();
+int maglev_fault_from_sensors();
 
 #endif
