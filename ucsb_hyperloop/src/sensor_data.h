@@ -56,6 +56,8 @@ typedef struct{
   float pressure2;
   float power;
 
+  float photoelectric;
+
   rangingData shortRangingData;
   rangingData longRangingData;
 

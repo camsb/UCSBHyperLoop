@@ -154,6 +154,7 @@
 #define SR2				"SR2"		// Short Ranging 2
 #define SR3				"SR3"		// Short Ranging 3
 #define SR4				"SR4"		// Short Ranging 4
+#define PH1				"PH1"		// Photoelectric 1
 #define TA1				"TA1"		// Motor 1 Tachometer
 #define TA2				"TA2"		// Motor 2 Tachometer
 #define TA3				"TA3"		// Motor 3 Tachometer
@@ -256,6 +257,8 @@ struct prototype_packet {
 	char sr2[6];	// Short Ranging 2
 	char sr3[6];	// Short Ranging 3
 	char sr4[6];	// Short Ranging 4
+	/* Photoelectric Data */
+	char ph1[6];     // Photoelectric 1
 	/* Tachometer Data*/
 	char ta1[6]; 	// Motor 1 Tachometer
 	char ta2[6]; 	// Motor 2 Tachometer

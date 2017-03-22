@@ -19,6 +19,7 @@
 #include "initialization.h"
 #include "i2c.h"
 #include "timer.h"
+#include "ranging.h"
 #define NUM_MOTORS 4
 //I2C Bus Select
 
@@ -31,6 +32,7 @@
 #define MAX_THROTTLE_VOLTAGE 5    //[V]
 
 #define NUM_THERMISTORS 4
+#define NUM_SHORTIR 2
 #define REFERENCE_RESISTANCE 5100 //[ohms]
 #define THERMISTOR_BETA 3380
 #define THERMISTOR_OFFSET -2.126
@@ -66,6 +68,7 @@ typedef struct {
   //Data Storage
   float DAC_diagnostic;
   int temperatures[NUM_THERMISTORS];
+  uint8_t short_data[NUM_SHORTIR];
   uint8_t amps;
   uint16_t rpm[2];
 

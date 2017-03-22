@@ -33,6 +33,7 @@ void initializeSensorsAndControls(){
     }
     if(PHOTO_ELECTRIC_ACTIVE){
         photoelectricInit();
+        sensorData.photoelectric = 0.0;
     }
 
     if(RANGING_SENSORS_ACTIVE){

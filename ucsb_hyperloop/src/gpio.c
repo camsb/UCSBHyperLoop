@@ -82,7 +82,7 @@ void GPIO_Interrupt_Enable() {
 void GPIO_Input_Init(uint8_t port, uint8_t pin) {
 	/* Configure photoelectric interrupt pin as output */
 	Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin, IOCON_FUNC0);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, port, pin);
+	Chip_GPIO_SetPinDIRInput(LPC_GPIO, port, pin); // used to be output, which was probably wrong
 }
 
 /* Setup GPIO port[pin] as output */

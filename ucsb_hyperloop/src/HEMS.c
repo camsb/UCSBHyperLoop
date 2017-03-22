@@ -62,6 +62,19 @@ uint8_t update_HEMS(HEMS* engine) {
       engine->alarm |= 0b00000001;
   }
 
+  int short_counter;
+  float ShortRangingMovingAverage;
+	for (short_counter = 0; short_counter < NUM_SHORTIR; short_counter++){
+	  float ShortRangingDataRaw = ADC_read(engine->bus, engine->ADC_device_address[0], short_counter + 5);
+	  float voltage = ((float)ShortRangingDataRaw) / 1300;
+
+		if (!((voltage < 0.34) || (voltage > 2.43))){
+			uint16_t index = (uint16_t)(voltage * 100.0 + 0.5) - 34;
+			ShortRangingMovingAverage = ALPHA*ShortRangingMovingAverage + BETA*shortRangingDistanceLUT[index];
+		}
+		engine->short_data[short_counter] = ShortRangingMovingAverage;
+	}
+
   //Record Motor Controller Current
   //With no current, the ACS759x150B should output 3.3V/2
   uint16_t ammeter_ratio = ADC_read(engine->bus, engine->ADC_device_address[0], 7);

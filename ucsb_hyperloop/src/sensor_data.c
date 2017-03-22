@@ -8,7 +8,6 @@
 #include "photo_electric.h"
 
 int y = 0;
-
 void collectCalibrationData( I2C_ID_T id ){
 	XYZ initialAccel;
 
@@ -81,9 +80,11 @@ void collectData(){
     if (PHOTO_ELECTRIC_ACTIVE){
         /* Handle Photoelectric Strip Detected */
         if(stripDetectedFlag) {
-            stripDetected();
-            DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
-
+//            stripDetected();
+        	stripDetectedFlag = 0;
+            //DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
+            DEBUGOUT("Distance: %f feet\n", sensorData.photoelectric);
+            sensorData.photoelectric+=100.0;
         }
     }
 
