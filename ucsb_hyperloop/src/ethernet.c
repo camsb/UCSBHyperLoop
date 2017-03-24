@@ -270,11 +270,10 @@ void recvDataPacket() {
 				dacValue = (float)(Net_Rx_Data[iterator+1] - '0');
 				dacValue += (float)(Net_Rx_Data[iterator+3] - '0')/10;
 				if((int)(Net_Rx_Data[iterator+4] - '0') == 9){
-					dacValue += 0.01;
+					dacValue += 0.1;
 				}
 			}
 		}
-		if(dacValue)
 		printf("dacValue = %f\n", dacValue);
 		set_motor_throttle(0, dacValue);
 		set_motor_throttle(1, dacValue);
@@ -494,10 +493,10 @@ void sendPrototypePacket(){
 	sprintf(PrototypePacket.cu3, "%06.2f", (float)motors[2]->amps);
 	sprintf(PrototypePacket.cu4, "%06.2f", (float)motors[3]->amps);
 	/* Tachometer Output */ // TODO: EXPAND THIS TO READING BOTH VALUES
-	sprintf(PrototypePacket.ta1, "%06.2f", (float)motors[0]->rpm[0]);
-	sprintf(PrototypePacket.ta2, "%06.2f", (float)motors[1]->rpm[0]);
-	sprintf(PrototypePacket.ta3, "%06.2f", (float)motors[2]->rpm[0]);
-	sprintf(PrototypePacket.ta4, "%06.2f", (float)motors[3]->rpm[0]);
+	sprintf(PrototypePacket.ta1, "%06.2f", (float)motors[0]->rpm[1]);
+	sprintf(PrototypePacket.ta2, "%06.2f", (float)motors[1]->rpm[1]);
+	sprintf(PrototypePacket.ta3, "%06.2f", (float)motors[2]->rpm[1]);
+	sprintf(PrototypePacket.ta4, "%06.2f", (float)motors[3]->rpm[1]);
 	/* Temperature Output */
 	sprintf(PrototypePacket.m1tmp1, "%06.f", (float)motors[0]->temperatures[0]);
 	sprintf(PrototypePacket.m1tmp2, "%06.f", (float)motors[0]->temperatures[1]);
@@ -518,13 +517,6 @@ void sendPrototypePacket(){
 
 	/* DAC Data */
 	send_data_packet_helper(DAC, PrototypePacket.dac, &pos);
-	/* Short Ranging Data */
-	send_data_packet_helper(SR1, PrototypePacket.sr1, &pos);
-	send_data_packet_helper(SR2, PrototypePacket.sr2, &pos);
-	send_data_packet_helper(SR3, PrototypePacket.sr3, &pos);
-	send_data_packet_helper(SR4, PrototypePacket.sr4, &pos);
-	/* Photoelectric Data */
-	send_data_packet_helper(PH1, PrototypePacket.ph1, &pos);
 	/* Current Data */
 	send_data_packet_helper(CU1, PrototypePacket.cu1, &pos);
 	send_data_packet_helper(CU2, PrototypePacket.cu2, &pos);
@@ -552,6 +544,25 @@ void sendPrototypePacket(){
 	send_data_packet_helper(T14, PrototypePacket.m4tmp2, &pos);
 	send_data_packet_helper(T15, PrototypePacket.m4tmp3, &pos);
 	send_data_packet_helper(T16, PrototypePacket.m4tmp4, &pos);
+
+	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+
+	// Copy strings to Net_Tx_Data
+	pos = 0;
+	memset(Net_Tx_Data, 0, 512); // Make sure this clears enough space
+
+	/* Short Ranging Data */
+	send_data_packet_helper(SR1, PrototypePacket.sr1, &pos);
+	send_data_packet_helper(SR2, PrototypePacket.sr2, &pos);
+	send_data_packet_helper(SR3, PrototypePacket.sr3, &pos);
+	send_data_packet_helper(SR4, PrototypePacket.sr4, &pos);
+	/* Photoelectric Data */
+	send_data_packet_helper(PH1, PrototypePacket.ph1, &pos);
+
+//	int i;
+//	for (i = 0; i < DATA_BUF_SIZE; i++) {
+//		printf("%i:%c\n", i, Net_Tx_Data[i]);
+//	}
 
 	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 }

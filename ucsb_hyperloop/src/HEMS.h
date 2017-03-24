@@ -68,7 +68,7 @@ typedef struct {
   //Data Storage
   float DAC_diagnostic;
   int temperatures[NUM_THERMISTORS];
-  uint8_t short_data[NUM_SHORTIR];
+  float short_data[NUM_SHORTIR];
   uint8_t amps;
   uint16_t rpm[2];
 

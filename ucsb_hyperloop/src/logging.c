@@ -14,7 +14,19 @@ void initErrorLogFile()
 void logEventString(char* desc)
 {
 	// Send to web app.
+	// Copy strings to Net_Tx_Data
+//	int pos = 0;
+//	memset(Net_Tx_Data, 0, 512); // Make sure this clears enough space
 
+	/* DAC Output */
+//	char errorMsg[512];
+
+//	sprintf(errorMsg, "%s", desc);
+
+	/* DAC Data */
+//	send_data_packet_helper(DAC, errorMsg, &pos);
+
+//	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 	// Save to SD card file.
 
 }

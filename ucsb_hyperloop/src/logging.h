@@ -14,6 +14,8 @@ typedef enum {
 	MAX_ERR
 } Error;
 
+#define ERR
+
 void initEventLogFile();
 void initErrorLogFile();
 void logEventString(char* desc);
