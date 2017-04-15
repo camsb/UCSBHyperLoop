@@ -13,6 +13,8 @@ void initErrorLogFile()
 
 void logEventString(char* desc)
 {
+	// ADD GUARDS for web app or SD card here!
+
 	// Send to web app.
 	// Copy strings to Net_Tx_Data
 //	int pos = 0;

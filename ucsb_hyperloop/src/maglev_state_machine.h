@@ -1,5 +1,5 @@
-#ifndef hyperloop_sm_h
-#define hyperloop_sm_h
+#ifndef maglev_sm_h
+#define maglev_sm_h
 #include <stdint.h>
 #include "qepn.h"
 
@@ -21,7 +21,7 @@ void initializeMaglevStateMachine(void);
 
 // Signals that can be sent to the state machine
 enum Maglev_Signals {
-    STOP_SIG = Q_USER_SIG,
+    MAGLEV_STOP_SIG = Q_USER_SIG,
 	MAGLEV_ENGAGE,
 	MAGLEV_DISENGAGE,
 	MAGLEV_SPUNUP,
@@ -29,10 +29,7 @@ enum Maglev_Signals {
     MAGLEV_FAULT_REC,
     MAGLEV_FAULT_UNREC,
     MAGLEV_FAULT_REC_CLEAR,
-    MAX_SIG
+    MAGLEV_MAX_SIG
 };
-
-// Assertion function
-void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line);
 
 #endif

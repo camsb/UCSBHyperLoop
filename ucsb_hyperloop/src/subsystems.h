@@ -1,5 +1,6 @@
 #ifndef SUBSYSTEMS_H
 #define SUBSYSTEMS_H
+#include "qepn.h"
 
 // All control signals that can be issued from the web-app
 // CS_ prefixes are to differentiate these values from the signals *internal* to the state machines
@@ -32,5 +33,7 @@ void initializeSubsystemStateMachines();
 void dispatch_signal_from_webapp(int signal);
 void maglev_service_state_machine();
 int maglev_fault_from_sensors();
+
+void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line);
 
 #endif

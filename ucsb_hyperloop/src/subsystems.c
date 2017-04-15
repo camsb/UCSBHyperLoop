@@ -1,16 +1,56 @@
 #include "subsystems.h"
 #include "maglev_state_machine.h"
+#include "braking_state_machine.h"
+#include "payload_actuator_sm.h"
+#include "service_propulsion_sm.h"
 #include "HEMS.h"
 #include "initialization.h"
 
 #define IGNORE_FAULTS 1 	// For testing
 
 void initializeSubsystemStateMachines(){
+	initializeBrakingStateMachine();
 	initializeMaglevStateMachine();
+	initializePayloadActuatorStateMachine();
+	initializeServicePropulsionStateMachine();
 }
 
 void dispatch_signal_from_webapp(int signal){
 	switch(signal){
+
+		// BRAKES
+		case CS_BRAKES_ENGAGE:{
+			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_ENGAGE);
+			QHsm_dispatch((QHsm *)&Braking_HSM);
+			break;
+		}
+		case CS_BRAKES_DISENGAGE:{
+			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_DISENGAGE);
+			QHsm_dispatch((QHsm *)&Braking_HSM);
+			break;
+		}
+		case CS_BRAKES_EMERGENCY:{
+			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_EMERGENCY);
+			QHsm_dispatch((QHsm *)&Braking_HSM);
+			break;
+		}
+		case CS_BRAKES_EMERGENCY_RELEASE:{
+			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_EMERGENCY_RELEASE);
+			QHsm_dispatch((QHsm *)&Braking_HSM);
+			break;
+		}
+		case CS_BRAKES_TEST_ENTER:{
+			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_TEST_ENTER);
+			QHsm_dispatch((QHsm *)&Braking_HSM);
+			break;
+		}
+		case CS_BRAKES_TEST_EXIT:{
+			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_TEST_EXIT);
+			QHsm_dispatch((QHsm *)&Braking_HSM);
+			break;
+		}
+
+		// MAGLEV
 		case CS_MAGLEV_ENGAGE:{
 			// TODO: Add check that payload actuators are supporting payload in upright position
 			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_ENGAGE);
@@ -22,10 +62,26 @@ void dispatch_signal_from_webapp(int signal){
 			QHsm_dispatch((QHsm *)&Maglev_HSM);
 			break;
 		}
+
+		// PAYLOAD ACUTATOR
+		case CS_ACTUATORS_RAISE:{
+			Q_SIG((QHsm *)&Payload_Actuator_HSM) = (QSignal)(PA_ADVANCE);
+			QHsm_dispatch((QHsm *)&Payload_Actuator_HSM);
+			break;
+		}
+		case CS_ACTUATORS_LOWER:{
+			Q_SIG((QHsm *)&Payload_Actuator_HSM) = (QSignal)(PA_RETRACT);
+			QHsm_dispatch((QHsm *)&Payload_Actuator_HSM);
+			break;
+		}
+
+		// SURFACE PROPULSION
 	}
 }
 
 void generate_signals_from_sensor_data(){
+    // Look at sensor data to determine if a state machine transition signal should be sent.
+
 #if MOTOR_BOARD_I2C_ACTIVE
 	maglev_service_state_machine();
 #endif
@@ -35,13 +91,13 @@ void generate_signals_from_sensor_data(){
 void maglev_service_state_machine(){
 	if (Maglev_HSM.faulted == 0){
 		// Nominal transitions - only evaluated/issued when the system is not faulted
-		if (Maglev_HSM.send_spunup && (motors[0]->rpm > 500)){
+		if (Maglev_HSM.send_spunup && (motors[0]->rpm[1] > 500)){
 			// Motors are spun up
 			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_SPUNUP);
 			QHsm_dispatch((QHsm *)&Maglev_HSM);
 			Maglev_HSM.send_spunup = 0;
 		}
-		else if (Maglev_HSM.send_spundown && (motors[0]->rpm < 500)){
+		else if (Maglev_HSM.send_spundown && (motors[0]->rpm[1] < 500)){
 			// Motors are spun down
 			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_SPUNDOWN);
 			QHsm_dispatch((QHsm *)&Maglev_HSM);
@@ -136,4 +192,11 @@ void go_routine(){
 	• Disengage brakes
 	• Disengage magnetic levitation motors
 	*/
+}
+
+
+// This assertion function is required for the state machine. It's called if things go haywire.
+void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
+    DEBUGOUT("Assertion failed in %s, line %d", file, line);
+	//exit(-1);
 }

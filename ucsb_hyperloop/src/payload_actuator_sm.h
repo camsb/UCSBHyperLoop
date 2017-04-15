@@ -20,8 +20,8 @@ void initializePayloadActuatorStateMachine(void);
 
 // Signals that can be sent to the state machine
 enum Payload_Actuator_HSM_t_Signals {
-    PA_ADVANCE_SIG = Q_USER_SIG,
-    PA_RETRACT_SIG,
+    PA_ADVANCE = Q_USER_SIG,
+    PA_RETRACT,
     PA_TERMINATE_SIG,
     PA_IGNORE_SIG,
     PA_MAX_SIG

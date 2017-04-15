@@ -275,10 +275,3 @@ QState Fault_unrecoverable(Maglev_HSM_t *me) {
     }
     return Q_SUPER(&Fault);
 }
-/*..........................................................................*/
-
-// This assertion function is required for the state machine. It's called if things go haywire.
-void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
-    DEBUGOUT("Assertion failed in %s, line %d", file, line);
-    //exit(-1);
-}
