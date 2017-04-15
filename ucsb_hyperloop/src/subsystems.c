@@ -9,83 +9,77 @@
 #define IGNORE_FAULTS 1 	// For testing
 
 void initializeSubsystemStateMachines(){
+#if BRAKING_ACTIVE
 	initializeBrakingStateMachine();
+#endif
+#if MOTOR_BOARD_I2C_ACTIVE
 	initializeMaglevStateMachine();
+#endif
+#if PAYLOAD_ACTUATORS_ACTIVE
 	initializePayloadActuatorStateMachine();
+#endif
+#if SURFACE_PROPULSION_ACTIVE
 	initializeServicePropulsionStateMachine();
+#endif
 }
 
 void dispatch_signal_from_webapp(int signal){
-	switch(signal){
+	// Determine the state machine to issue the control signal to, translate it, and dispatch it
 
-		// BRAKES
-		case CS_BRAKES_ENGAGE:{
-			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_ENGAGE);
-			QHsm_dispatch((QHsm *)&Braking_HSM);
-			break;
-		}
-		case CS_BRAKES_DISENGAGE:{
-			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_DISENGAGE);
-			QHsm_dispatch((QHsm *)&Braking_HSM);
-			break;
-		}
-		case CS_BRAKES_EMERGENCY:{
-			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_EMERGENCY);
-			QHsm_dispatch((QHsm *)&Braking_HSM);
-			break;
-		}
-		case CS_BRAKES_EMERGENCY_RELEASE:{
-			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_EMERGENCY_RELEASE);
-			QHsm_dispatch((QHsm *)&Braking_HSM);
-			break;
-		}
-		case CS_BRAKES_TEST_ENTER:{
-			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_TEST_ENTER);
-			QHsm_dispatch((QHsm *)&Braking_HSM);
-			break;
-		}
-		case CS_BRAKES_TEST_EXIT:{
-			Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(BRAKES_TEST_EXIT);
-			QHsm_dispatch((QHsm *)&Braking_HSM);
-			break;
-		}
-
-		// MAGLEV
-		case CS_MAGLEV_ENGAGE:{
-			// TODO: Add check that payload actuators are supporting payload in upright position
-			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_ENGAGE);
-			QHsm_dispatch((QHsm *)&Maglev_HSM);
-			break;
-		}
-		case CS_MAGLEV_DISENGAGE:{
-			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_DISENGAGE);
-			QHsm_dispatch((QHsm *)&Maglev_HSM);
-			break;
-		}
-
-		// PAYLOAD ACUTATOR
-		case CS_ACTUATORS_RAISE:{
-			Q_SIG((QHsm *)&Payload_Actuator_HSM) = (QSignal)(PA_ADVANCE);
-			QHsm_dispatch((QHsm *)&Payload_Actuator_HSM);
-			break;
-		}
-		case CS_ACTUATORS_LOWER:{
-			Q_SIG((QHsm *)&Payload_Actuator_HSM) = (QSignal)(PA_RETRACT);
-			QHsm_dispatch((QHsm *)&Payload_Actuator_HSM);
-			break;
-		}
-
-		// SURFACE PROPULSION
+	// Braking
+	if (signal >= CS_BRAKES_ENGAGE && signal <= CS_BRAKES_TEST_EXIT){
+		int new_signal = (signal - CS_BRAKES_ENGAGE) + BRAKES_ENGAGE;
+		Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(new_signal);
+		QHsm_dispatch((QHsm *)&Braking_HSM);
 	}
+	// Mag-lev Motors
+	else if (signal >= CS_MAGLEV_ENGAGE && signal <= CS_MAGLEV_DISENGAGE){
+		int new_signal = (signal - CS_MAGLEV_ENGAGE) + MAGLEV_ENGAGE;
+		Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(new_signal);
+		QHsm_dispatch((QHsm *)&Maglev_HSM);
+	}
+	// Payload Actuators
+	else if (signal >= CS_ACTUATORS_RAISE && signal <= CS_ACTUATORS_LOWER){
+		int new_signal = (signal - CS_ACTUATORS_RAISE) + PA_ADVANCE;
+		Q_SIG((QHsm *)&Payload_Actuator_HSM) = (QSignal)(new_signal);
+		QHsm_dispatch((QHsm *)&Payload_Actuator_HSM);
+	}
+	// Surface Propulsion Motors
+	else if (signal >= CS_SURFPROP_ACTUATOR_LOWER && signal <= CS_SURFPROP_DISENGAGE){
+		int new_signal = (signal - CS_SURFPROP_ACTUATOR_LOWER) + SP_ADVANCE_SIG;
+		Q_SIG((QHsm *)&Service_Propulsion_HSM) = (QSignal)(new_signal);
+		QHsm_dispatch((QHsm *)&Service_Propulsion_HSM);
+	}
+	else{
+		// Handle "GO" and "ALL STOP" signals here!
+	}
+
 }
 
 void generate_signals_from_sensor_data(){
     // Look at sensor data to determine if a state machine transition signal should be sent.
 
+#if BRAKING_ACTIVE
+	braking_service_state_machine();
+#endif
 #if MOTOR_BOARD_I2C_ACTIVE
 	maglev_service_state_machine();
 #endif
+#if PAYLOAD_ACTUATORS_ACTIVE
+	payload_service_state_machine();
+#endif
+#if SURFACE_PROPULSION_ACTIVE
+	surface_propulsion_service_state_machine();
+#endif
 
+#if !IGNORE_FAULTS
+	generate_faults_from_sensor_data();
+#endif
+
+}
+
+void braking_service_state_machine(){
+	// TODO: Implement this stub.
 }
 
 void maglev_service_state_machine(){
@@ -134,8 +128,36 @@ void maglev_service_state_machine(){
 	}
 }
 
+void payload_service_state_machine(){
+	// TODO: Implement this stub.
+}
+
+void surface_propulsion_service_state_machine(){
+	// TODO: Implement this stub.
+}
+
+void generate_faults_from_sensor_data(){
+	// Examine sensor data to determine if a fault transition signal should be issued
+
+#if BRAKING_ACTIVE
+	braking_fault_from_sensors();
+#endif
+#if MOTOR_BOARD_I2C_ACTIVE
+	maglev_fault_from_sensors();
+#endif
+#if PAYLOAD_ACTUATORS_ACTIVE
+	payload_fault_from_sensors();
+#endif
+#if SURFACE_PROPULSION_ACTIVE
+	surface_fault_from_sensors();
+#endif
+}
+
+void braking_fault_from_sensors(){
+	// TODO: Implement this stub.
+}
+
 int maglev_fault_from_sensors(){
-#if !IGNORE_FAULTS
 	// Calculates and returns whether the motors have a fault condition
 	int i, j;
 	// Unrecoverable faults
@@ -147,35 +169,41 @@ int maglev_fault_from_sensors(){
 
 	// Recoverable faults
 	// Find the average RPM of all the motors
-	int avg_rpm;
+	int avg_rpm = 0;
 	for (i = 0; i < NUM_MOTORS; i++){
-		avg_rpm += motors[i].rpm;
+		avg_rpm += motors[i]->rpm[1];
 	}
 	avg_rpm /= NUM_MOTORS;
 	for (i = 0; i < NUM_MOTORS; i++){
 		// Check current readings
-		if (motors[i].amps > SAFE_CURRENT){
+		if (motors[i]->amps > HEMS_MAX_CURRENT){
 			return 1;
 		}
 
 		// Check that no motors have an RPM > 25% different from the others
 		// TODO: Check that tolerance
-		if (motors[i].rpm < (0.75 * avg_rpm) || (motors[i].rpm) > (1.25 * avg_rpm)){
+		if (motors[i]->rpm[1] < (0.75 * avg_rpm) || (motors[i]->rpm[1]) > (1.25 * avg_rpm)){
 			return 1;
 		}
 
 		// Check that no thermistors are above the safe temperature
 		for (j = 0; j < NUM_THERMISTORS; j++){
-			if (motors[i].temperatures[j] >= SAFE_TEMPERATURE){
+			if (motors[i]->temperatures[j] >= HEMS_MAX_TEMP){
 				return 1;
 			}
 		}
 	}
 	return 0;
-#else
-	return 0;
-#endif
 }
+
+void payload_fault_from_sensors(){
+	// TODO: Implement this stub.
+}
+
+void surface_fault_from_sensors(){
+	// TODO: Implement this stub.
+}
+
 
 void go_routine(){
 	// Do some rad stuff.
