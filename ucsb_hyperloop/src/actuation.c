@@ -6,80 +6,92 @@ int prototypeRunStartTime = 0;
 
 void performActuation(){
     // Actuate subsystems based on flags from state machine.
+#if BRAKING_ACTIVE
+	//actuate_brakes();
+#endif
+#if MOTOR_BOARD_I2C_ACTIVE
+	actuate_maglev();
+#endif
+#if PAYLOAD_ACTUATORS_ACTIVE
+	//actuate_payload();
+#endif
+#if SURFACE_PROPULSION_ACTIVE
+	//actuate_surface();
+#endif
+}
 
-    // State machine test routine
-    if(STATEMACHINE_TEST) {
-        // Apply changes if a transition occurred
-        if(Maglev_HSM.update) {
-            // Set engine behavior
-            if(Maglev_HSM.enable_motors) {
-                DEBUGOUT("Engines engaged.\n");
-                prototypeRunStartTime = getRuntime()/1000;
-                //update and maintain engine throttle
-            }
-            else {
-                DEBUGOUT("Engines disengaged\n.");
-                // Set throttle to 0
-                int i = 0;
-                for(i = 0; i < NUM_MOTORS; i++) {
-                    set_motor_throttle(i, 0);
-                }
-            }
-            Maglev_HSM.update = 0;
-            DEBUGOUT("\n\n");
-        }
+void actuate_maglev(){
+	// Apply changes if a transition occurred
+	if(Maglev_HSM.update) {
+		// Set engine behavior
+		if(Maglev_HSM.enable_motors) {
+			DEBUGOUT("Engines engaged.\n");
+			prototypeRunStartTime = getRuntime()/1000;
+			//update and maintain engine throttle
+		}
+		else {
+			DEBUGOUT("Engines disengaged\n.");
+			// Set throttle to 0
+			int i = 0;
+			for(i = 0; i < NUM_MOTORS; i++) {
+				set_motor_throttle(i, 0);
+			}
+		}
+		Maglev_HSM.update = 0;
+		DEBUGOUT("\n\n");
+	}
 
-        // Update engines, even if a transition did not occur
-        if(Maglev_HSM.enable_motors) {
-            // Update and maintain engine throttle
-            int time_sec = getRuntime()/1000;
+	// Update engines, even if a transition did not occur
+	if(Maglev_HSM.enable_motors) {
+		// Update and maintain engine throttle
+		int time_sec = getRuntime()/1000;
 
-            if(PROTOTYPE_PRERUN) {  // PRERUN
-                if (time_sec < prototypeRunStartTime + 10) {    // Spin up to tenth power.
+		if(PROTOTYPE_PRERUN) {  // PRERUN
+			if (time_sec < prototypeRunStartTime + 10) {    // Spin up to tenth power.
 
-                	DEBUGOUT("ENGINE 3 ON\n");
-                    motors[0]->throttle_voltage = 0;
-                    motors[1]->throttle_voltage = 0;
-                    motors[2]->throttle_voltage = 0.8;
-                    motors[3]->throttle_voltage = 0;
-                }
-                else if (time_sec < prototypeRunStartTime + 20) {   // Spin up to tenth power.
-                	DEBUGOUT("ENGINE 4 ON\n");
-                    motors[0]->throttle_voltage = 0;
-                    motors[1]->throttle_voltage = 0;
-                    motors[2]->throttle_voltage = 0;
-                    motors[3]->throttle_voltage = 0.8;
-                }
-                else if (time_sec < prototypeRunStartTime + 30) {   // Spin up to tenth power.
-                	DEBUGOUT("ENGINE 1 ON\n");
-                    motors[0]->throttle_voltage = 0.8;
-                    motors[1]->throttle_voltage = 0;
-                    motors[2]->throttle_voltage = 0;
-                    motors[3]->throttle_voltage = 0;
-                }
-                else if (time_sec < prototypeRunStartTime + 40) {   // Spin up to tenth power.
-                	DEBUGOUT("ENGINE 2 ON\n");
-                    motors[0]->throttle_voltage = 0;
-                    motors[1]->throttle_voltage = 0.8;
-                    motors[2]->throttle_voltage = 0;
-                    motors[3]->throttle_voltage = 0;
-                }
-            }
-            else{
+				DEBUGOUT("ENGINE 3 ON\n");
+				motors[0]->throttle_voltage = 0;
+				motors[1]->throttle_voltage = 0;
+				motors[2]->throttle_voltage = 0.8;
+				motors[3]->throttle_voltage = 0;
+			}
+			else if (time_sec < prototypeRunStartTime + 20) {   // Spin up to tenth power.
+				DEBUGOUT("ENGINE 4 ON\n");
+				motors[0]->throttle_voltage = 0;
+				motors[1]->throttle_voltage = 0;
+				motors[2]->throttle_voltage = 0;
+				motors[3]->throttle_voltage = 0.8;
+			}
+			else if (time_sec < prototypeRunStartTime + 30) {   // Spin up to tenth power.
+				DEBUGOUT("ENGINE 1 ON\n");
+				motors[0]->throttle_voltage = 0.8;
+				motors[1]->throttle_voltage = 0;
+				motors[2]->throttle_voltage = 0;
+				motors[3]->throttle_voltage = 0;
+			}
+			else if (time_sec < prototypeRunStartTime + 40) {   // Spin up to tenth power.
+				DEBUGOUT("ENGINE 2 ON\n");
+				motors[0]->throttle_voltage = 0;
+				motors[1]->throttle_voltage = 0.8;
+				motors[2]->throttle_voltage = 0;
+				motors[3]->throttle_voltage = 0;
+			}
+		}
+		else{
+			// This part is currently superseded by the throttle signal as set by the web app!
 //                int i;
 //                for(i = 0; i < NUM_MOTORS; i++) {
 //                    set_motor_throttle(i, 4.0);
 //                }
-            }
-        }
-        else {
+		}
+	}
+	else {
 //        	DEBUGOUT("ENGINES OFF\n");
-            // Set throttle to 0
-            int i;
-            for(i = 0; i < 4; i++) {
-                set_motor_throttle(i, 0);
-            }
-        }
-        // TODO: Update HEMS here.
-    }
+		// Set throttle to 0
+		int i;
+		for(i = 0; i < 4; i++) {
+			set_motor_throttle(i, 0);
+		}
+	}
+	// TODO: Update HEMS here.
 }

@@ -4,7 +4,6 @@
 
 // All control signals that can be issued from the web-app
 // CS_ prefixes are to differentiate these values from the signals *internal* to the state machines
-// Changing these signals requires changes to subsystems.c to make sure that they are properly dispatched!!!
 enum control_signals{
 	// Special sequences
 	CS_GO,
@@ -28,6 +27,7 @@ enum control_signals{
 	CS_SURFPROP_ENGAGE_FORWARD,
 	CS_SURFPROP_ENGAGE_REVERSE,
 	CS_SURFPROP_DISENGAGE
+	// Changing these signals requires changes to subsystems.c to make sure that they are properly dispatched!!!
 };
 
 void initializeSubsystemStateMachines();
@@ -49,6 +49,7 @@ int maglev_fault_from_sensors();
 void payload_fault_from_sensors();
 void surface_fault_from_sensors();
 
+// Assertion function
 void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line);
 
 #endif
