@@ -79,7 +79,7 @@ uint8_t update_HEMS(HEMS* engine) {
   //With no current, the ACS759x150B should output 3.3V/2
   uint16_t ammeter_ratio = ADC_read(engine->bus, engine->ADC_device_address[0], 7);
   //DEBUGOUT("Current sensor ADC: %d\n", ammeter_ratio);
-  uint8_t new_amps = abs(ammeter_ratio * 1.22 - 1650) / 8.8; //Done in mV
+  uint8_t new_amps = abs(ammeter_ratio * VREF / 4096.0 * 1000 - 1650) / 8.8; //Done in mV
   engine->amps = new_amps;
 
   if (new_amps > HEMS_MAX_CURRENT)

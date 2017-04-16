@@ -548,23 +548,23 @@ void sendPrototypePacket(){
 	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 
 	// Copy strings to Net_Tx_Data
-	pos = 0;
-	memset(Net_Tx_Data, 0, 512); // Make sure this clears enough space
+//	pos = 0;
+//	memset(Net_Tx_Data, 0, 512); // Make sure this clears enough space
 
 	/* Short Ranging Data */
-	send_data_packet_helper(SR1, PrototypePacket.sr1, &pos);
-	send_data_packet_helper(SR2, PrototypePacket.sr2, &pos);
-	send_data_packet_helper(SR3, PrototypePacket.sr3, &pos);
-	send_data_packet_helper(SR4, PrototypePacket.sr4, &pos);
+//	send_data_packet_helper(SR1, PrototypePacket.sr1, &pos);
+//	send_data_packet_helper(SR2, PrototypePacket.sr2, &pos);
+//	send_data_packet_helper(SR3, PrototypePacket.sr3, &pos);
+//	send_data_packet_helper(SR4, PrototypePacket.sr4, &pos);
 	/* Photoelectric Data */
-	send_data_packet_helper(PH1, PrototypePacket.ph1, &pos);
+//	send_data_packet_helper(PH1, PrototypePacket.ph1, &pos);
 
 //	int i;
 //	for (i = 0; i < DATA_BUF_SIZE; i++) {
 //		printf("%i:%c\n", i, Net_Tx_Data[i]);
 //	}
 
-	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+//	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 }
 
 // Singular, will change to multiple, or do an interrupt or something

@@ -37,6 +37,7 @@
 #define THERMISTOR_BETA 3380
 #define THERMISTOR_OFFSET -2.126
 
+#define VREF 5.08
 #define AMMETER_SENSITIVITY 8.8		//[mV/A] for the 150B version of the sensor
 #define AMMETER_CONVERSION 0.1136	//[A/mV] 1/AMMETER_SENSITIVITY
 #define AMMETER_VCC 3.3           //Ammeter referenced to 3.3V; everything else runs off 5V
