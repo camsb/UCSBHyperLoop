@@ -1,5 +1,23 @@
-Debug
-Release
+# Exclude all projects in this root folder
+/*
+# Whitelist the Hyperloop projects to re-include them
+!/lpc_board_ea_devkit_4088/
+!/lpc_chip_40xx/
+!/ucsb_hyperloop/
 
-ucsb_hyperloop Debug.launch
-ucsb_hyperloop Release.launch
+# Whitelist other files we want to include
+!README.md
+!.gitignore
+!lpcopen_2_10_lpcxpresso_ea_devkit_4088.zip
+
+# Ignore thumbnail files
+/**/Thumbs.db
+/**/.DS_Store
+
+# Ignore build folders
+/*/Debug/
+/*/Release/
+
+# Ignore temporary launch files
+/*/*.launch
+
