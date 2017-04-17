@@ -1,3 +1,4 @@
+#include "actuation.h"
 #include "braking_state_machine.h"
 #include "maglev_state_machine.h"
 #include "payload_actuator_sm.h"
@@ -18,8 +19,8 @@ void performActuation(){
 #if PAYLOAD_ACTUATORS_ACTIVE
 	actuate_payload();
 #endif
-#if SURFACE_PROPULSION_ACTIVE
-	actuate_surface();
+#if SERVICE_PROPULSION_ACTIVE
+	actuate_service();
 #endif
 }
 
@@ -117,6 +118,6 @@ void actuate_payload(){
 	// TODO: Implement this stub.
 }
 
-void actuate_surface(){
+void actuate_service(){
 	// TODO: Implement this stub.
 }

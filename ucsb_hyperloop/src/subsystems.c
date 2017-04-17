@@ -24,7 +24,7 @@ void initializeSubsystemStateMachines(){
 #if PAYLOAD_ACTUATORS_ACTIVE
 	initializePayloadActuatorStateMachine();
 #endif
-#if SURFACE_PROPULSION_ACTIVE
+#if SERVICE_PROPULSION_ACTIVE
 	initializeServicePropulsionStateMachine();
 #endif
 }
@@ -78,8 +78,8 @@ void generate_signals_from_sensor_data(){
 #if PAYLOAD_ACTUATORS_ACTIVE
 	payload_service_state_machine();
 #endif
-#if SURFACE_PROPULSION_ACTIVE
-	surface_propulsion_service_state_machine();
+#if SERVICe_PROPULSION_ACTIVE
+	service_propulsion_service_state_machine();
 #endif
 
 }
@@ -179,7 +179,7 @@ void payload_service_state_machine(){
 	// TODO: Implement this stub.
 }
 
-void surface_propulsion_service_state_machine(){
+void service_propulsion_service_state_machine(){
 	// TODO: Implement this stub.
 }
 
@@ -195,8 +195,8 @@ void generate_faults_from_sensor_data(){
 #if PAYLOAD_ACTUATORS_ACTIVE
 	payload_fault_from_sensors();
 #endif
-#if SURFACE_PROPULSION_ACTIVE
-	surface_fault_from_sensors();
+#if SERVICE_PROPULSION_ACTIVE
+	service_fault_from_sensors();
 #endif
 }
 
@@ -259,7 +259,7 @@ void payload_fault_from_sensors(){
 	// TODO: Implement this stub.
 }
 
-void surface_fault_from_sensors(){
+void service_fault_from_sensors(){
 	// TODO: Implement this stub.
 }
 

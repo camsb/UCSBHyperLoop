@@ -40,14 +40,14 @@ void generate_signals_from_sensor_data();
 void braking_service_state_machine();
 void maglev_service_state_machine();
 void payload_service_state_machine();
-void surface_propulsion_service_state_machine();
+void service_propulsion_service_state_machine();
 
 // Fault signals
 void generate_faults_from_sensor_data();
 void braking_fault_from_sensors();
 int maglev_fault_from_sensors();
 void payload_fault_from_sensors();
-void surface_fault_from_sensors();
+void service_fault_from_sensors();
 
 // Assertion function
 void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line);

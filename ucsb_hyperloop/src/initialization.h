@@ -16,7 +16,7 @@
 // Other subsystems
 #define BRAKING_ACTIVE				1
 #define PAYLOAD_ACTUATORS_ACTIVE	1
-#define SURFACE_PROPULSION_ACTIVE	1
+#define SERVICE_PROPULSION_ACTIVE	1
 
 // Communications
 #define ETHERNET_ACTIVE         	1
