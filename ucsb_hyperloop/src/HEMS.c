@@ -63,7 +63,7 @@ uint8_t update_HEMS(HEMS* engine) {
   }
 
   int short_counter;
-  float ShortRangingMovingAverage;
+  float ShortRangingMovingAverage = 0;
 	for (short_counter = 0; short_counter < NUM_SHORTIR; short_counter++){
 	  float ShortRangingDataRaw = ADC_read(engine->bus, engine->ADC_device_address[0], short_counter + 5);
 	  float voltage = ((float)ShortRangingDataRaw) / 1300;
