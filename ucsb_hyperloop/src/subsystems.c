@@ -6,7 +6,13 @@
 #include "HEMS.h"
 #include "initialization.h"
 
+#define ISSUE_SIG(hsm, sig) do {\
+	Q_SIG((QHsm *)&hsm) = (QSignal)(sig);\
+	QHsm_dispatch((QHsm *)&hsm);\
+	} while(0)
+
 #define IGNORE_FAULTS 1 	// For testing
+
 
 void initializeSubsystemStateMachines(){
 #if BRAKING_ACTIVE
@@ -59,6 +65,10 @@ void dispatch_signal_from_webapp(int signal){
 void generate_signals_from_sensor_data(){
     // Look at sensor data to determine if a state machine transition signal should be sent.
 
+#if !IGNORE_FAULTS
+	generate_faults_from_sensor_data();
+#endif
+
 #if BRAKING_ACTIVE
 	braking_service_state_machine();
 #endif
@@ -72,14 +82,52 @@ void generate_signals_from_sensor_data(){
 	surface_propulsion_service_state_machine();
 #endif
 
-#if !IGNORE_FAULTS
-	generate_faults_from_sensor_data();
-#endif
-
 }
 
 void braking_service_state_machine(){
-	// TODO: Implement this stub.
+
+	if (Braking_HSM.stationary_test){
+		/* TODO
+		if (ANY CONDITIONS INDICATING MOVEMENT){
+			DEBUGOUT("Exiting braking test mode due to movement!!!\n");
+			ISSUE_SIG(Braking_HSM, BRAKES_TEST_EXIT)
+		}
+		 */
+	}
+
+	uint8_t pusher_go = 0; // TODO: IF PUSHER RELEASED
+	uint8_t acc_go = 0; // TODO: IF ACC NEGATIVE
+
+	if (Braking_HSM.using_pushsens && Braking_HSM.using_accsens){
+		if (pusher_go && acc_go){
+			ISSUE_SIG(Braking_HSM, BRAKES_BOTHSENS_GO);
+		}
+	}
+	else if (Braking_HSM.using_pushsens && !Braking_HSM.using_accsens){
+		if (pusher_go){
+			ISSUE_SIG(Braking_HSM, BRAKES_PUSHSENS_GO);
+		}
+	}
+	else if (Braking_HSM.using_accsens && !Braking_HSM.using_pushsens){
+		if (acc_go){
+			ISSUE_SIG(Braking_HSM, BRAKES_ACC_GO);
+		}
+	}
+	else if (Braking_HSM.using_timer){
+		/* TODO
+		if (TIMER PASSES THRESHOLD){
+			issue BRAKES_TIMER_PERMIT
+		}
+		*/
+	}
+	/* TODO
+	if (ENGAGE BRAKES AUTOMATICALLY VIA TIME / DISTANCE){
+		ISSUE_SIG(Braking_HSM, BRAKES_ENGAGE);
+	}
+
+	if SWITCHING BETWEEN BRAKE PAIRS
+		DO THAT SWITCHING HERE!
+	*/
 }
 
 void maglev_service_state_machine(){
@@ -87,8 +135,7 @@ void maglev_service_state_machine(){
 		// Nominal transitions - only evaluated/issued when the system is not faulted
 		if (Maglev_HSM.send_spunup && (motors[0]->rpm[1] > 500)){
 			// Motors are spun up
-			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_SPUNUP);
-			QHsm_dispatch((QHsm *)&Maglev_HSM);
+			ISSUE_SIG(Maglev_HSM, MAGLEV_SPUNUP);
 			Maglev_HSM.send_spunup = 0;
 		}
 		else if (Maglev_HSM.send_spundown && (motors[0]->rpm[1] < 500)){
@@ -155,6 +202,18 @@ void generate_faults_from_sensor_data(){
 
 void braking_fault_from_sensors(){
 	// TODO: Implement this stub.
+	/*
+	if (Braking_HSM.using_pushsens){
+		if (PUSHER FAULTED){
+			issue BRAKES_PUSHSENS_FAULT
+		}
+	}
+	if (Braking_HSM.using_acc){
+		if (ACC FAULTED){
+			issue BRAKES_ACC_FAULT
+		}
+	}
+	*/
 }
 
 int maglev_fault_from_sensors(){

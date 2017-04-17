@@ -1,4 +1,7 @@
+#include "braking_state_machine.h"
 #include "maglev_state_machine.h"
+#include "payload_actuator_sm.h"
+#include "service_propulsion_sm.h"
 #include "initialization.h"
 #include "HEMS.h"
 
@@ -7,17 +10,31 @@ int prototypeRunStartTime = 0;
 void performActuation(){
     // Actuate subsystems based on flags from state machine.
 #if BRAKING_ACTIVE
-	//actuate_brakes();
+	actuate_brakes();
 #endif
 #if MOTOR_BOARD_I2C_ACTIVE
 	actuate_maglev();
 #endif
 #if PAYLOAD_ACTUATORS_ACTIVE
-	//actuate_payload();
+	actuate_payload();
 #endif
 #if SURFACE_PROPULSION_ACTIVE
-	//actuate_surface();
+	actuate_surface();
 #endif
+}
+
+void actuate_brakes(){
+	// TODO: Implement this!
+	if(Braking_HSM.engage_1){
+		/* TODO
+		ENGAGE PAIR 1
+		 */
+	}
+	if(Braking_HSM.engage_2){
+		/* TODO
+		ENGAGE PAIR 2
+		 */
+	}
 }
 
 void actuate_maglev(){
@@ -94,4 +111,12 @@ void actuate_maglev(){
 		}
 	}
 	// TODO: Update HEMS here.
+}
+
+void actuate_payload(){
+	// TODO: Implement this stub.
+}
+
+void actuate_surface(){
+	// TODO: Implement this stub.
 }

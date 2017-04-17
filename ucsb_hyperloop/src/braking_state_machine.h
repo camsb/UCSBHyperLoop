@@ -6,11 +6,13 @@
 // Structure of data members to be shared between main and the state machine
 typedef struct Braking_HSM_data {
     QHsm super;
-    uint8_t enable_motors;
-    uint8_t update;
-    uint8_t send_spunup;
-    uint8_t send_spundown;
+    uint8_t stationary_test;
+    uint8_t using_pushsens;
+    uint8_t using_accsens;
+    uint8_t using_timer;
     uint8_t faulted;
+    uint8_t engage_1;
+    uint8_t engage_2;
 } Braking_HSM_t;
 
 // The global instance of the state machine object (with added data members defined above)
@@ -21,6 +23,7 @@ void initializeBrakingStateMachine(void);
 
 // Signals that can be sent to the state machine
 enum Braking_Signals {
+	// CONTROL SIGNALS
     BRAKES_STOP_SIG = Q_USER_SIG,
 	BRAKES_ENGAGE,
 	BRAKES_DISENGAGE,
@@ -31,6 +34,13 @@ enum Braking_Signals {
     BRAKES_FAULT_REC,
     BRAKES_FAULT_UNREC,
     BRAKES_FAULT_REC_CLEAR,
+    // SENSOR-ORIGIN SIGNALS
+    BRAKES_PUSHSENS_FAULT,
+    BRAKES_ACC_FAULT,
+    BRAKES_PUSHSENS_GO,
+    BRAKES_ACC_GO,
+    BRAKES_BOTHSENS_GO,
+    BRAKES_TIMER_PERMIT,
     BRAKES_MAX_SIG,
 };
 
