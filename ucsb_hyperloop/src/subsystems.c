@@ -35,26 +35,22 @@ void dispatch_signal_from_webapp(int signal){
 	// Braking
 	if (signal >= CS_BRAKES_ENGAGE && signal <= CS_BRAKES_TEST_EXIT){
 		int new_signal = (signal - CS_BRAKES_ENGAGE) + BRAKES_ENGAGE;
-		Q_SIG((QHsm *)&Braking_HSM) = (QSignal)(new_signal);
-		QHsm_dispatch((QHsm *)&Braking_HSM);
+		ISSUE_SIG(Braking_HSM, new_signal);
 	}
 	// Mag-lev Motors
 	else if (signal >= CS_MAGLEV_ENGAGE && signal <= CS_MAGLEV_DISENGAGE){
 		int new_signal = (signal - CS_MAGLEV_ENGAGE) + MAGLEV_ENGAGE;
-		Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(new_signal);
-		QHsm_dispatch((QHsm *)&Maglev_HSM);
+		ISSUE_SIG(Maglev_HSM, new_signal);
 	}
 	// Payload Actuators
 	else if (signal >= CS_ACTUATORS_RAISE && signal <= CS_ACTUATORS_LOWER){
 		int new_signal = (signal - CS_ACTUATORS_RAISE) + PA_ADVANCE;
-		Q_SIG((QHsm *)&Payload_Actuator_HSM) = (QSignal)(new_signal);
-		QHsm_dispatch((QHsm *)&Payload_Actuator_HSM);
+		ISSUE_SIG(Payload_Actuator_HSM, new_signal);
 	}
 	// Surface Propulsion Motors
 	else if (signal >= CS_SURFPROP_ACTUATOR_LOWER && signal <= CS_SURFPROP_DISENGAGE){
 		int new_signal = (signal - CS_SURFPROP_ACTUATOR_LOWER) + SP_ADVANCE_SIG;
-		Q_SIG((QHsm *)&Service_Propulsion_HSM) = (QSignal)(new_signal);
-		QHsm_dispatch((QHsm *)&Service_Propulsion_HSM);
+		ISSUE_SIG(Service_Propulsion_HSM, new_signal);
 	}
 	else{
 		// Handle "GO" and "ALL STOP" signals here!
@@ -78,7 +74,7 @@ void generate_signals_from_sensor_data(){
 #if PAYLOAD_ACTUATORS_ACTIVE
 	payload_service_state_machine();
 #endif
-#if SERVICe_PROPULSION_ACTIVE
+#if SERVICE_PROPULSION_ACTIVE
 	service_propulsion_service_state_machine();
 #endif
 
@@ -164,19 +160,47 @@ void maglev_service_state_machine(){
 		int fault = maglev_fault_from_sensors();
 		if (fault == 0){
 			// Recoverable fault is CLEARED
-			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_FAULT_REC_CLEAR);
-			QHsm_dispatch((QHsm *)&Maglev_HSM);
+			ISSUE_SIG(Maglev_HSM, MAGLEV_FAULT_REC_CLEAR);
 		}
 		else if (fault == 2){
 			// Unrecoverable fault
-			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_FAULT_UNREC);
-			QHsm_dispatch((QHsm *)&Maglev_HSM);
+			ISSUE_SIG(Maglev_HSM, MAGLEV_FAULT_UNREC);
 		}
 	}
 }
 
 void payload_service_state_machine(){
 	// TODO: Implement this stub.
+	int i;
+
+	// Transition signals due to actuators hitting end stops
+	for(i = 0; i < NUM_PAYLOAD_ACTUATORS; i++){
+		// TODO: FIX THIS IF DOING BOTH TOGETHER?
+		if (Payload_Actuator_HSM.actuator_enable[i]){
+			if (Payload_Actuator_HSM.actuator_direction[i]){
+				// Forward direction
+				// if (HIT END STOP){
+				//    ISSUE_SIG(PA_ADVANCE_DONE);
+				// }
+			}
+			else{
+				// Backwards direction
+				// if (HIT END STOP){
+				//    ISSUE_SIG(PA_RETRACT_DONE);
+				// }
+			}
+		}
+	}
+
+	// TODO: Add signal due to motors supporting weight or not, here!!!
+	/*
+	if (MOTORS NEWLY SUPPORTING WEIGHT){
+		ISSUE_SIG(Payload_Actuator_HSM, PA_SUPPORT_GAINED);
+	}
+	else if(MOTORS NEWLY NOT SUPPORTING WEIGHT){
+	    ISSUE_SIG(Payload_Actuator_HSM, PA_SUPPORT_LOST);
+	}
+	*/
 }
 
 void service_propulsion_service_state_machine(){
