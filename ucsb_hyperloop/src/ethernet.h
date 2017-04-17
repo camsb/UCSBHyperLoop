@@ -150,35 +150,11 @@
 
 /* Prototype methods */
 #define DAC				"DAC"		// DAC
-#define SR1				"SR1"		// Short Ranging 1
-#define SR2				"SR2"		// Short Ranging 2
-#define SR3				"SR3"		// Short Ranging 3
-#define SR4				"SR4"		// Short Ranging 4
-#define PH1				"PH1"		// Photoelectric 1
-#define TA1				"TA1"		// Motor 1 Tachometer
-#define TA2				"TA2"		// Motor 2 Tachometer
-#define TA3				"TA3"		// Motor 3 Tachometer
-#define TA4				"TA4"		// Motor 4 Tachometer
-#define CU1				"CU1"		// Motor 1 Current
-#define CU2				"CU2"		// Motor 2 Current
-#define CU3				"CU3"		// Motor 3 Current
-#define CU4				"CU4"		// Motor 4 Current
-#define TM1				"TM1"		// Motor 1 Temperature 1
-#define TM2				"TM2"		// Motor 1 Temperature 2
-#define TM3				"TM3"		// Motor 1 Temperature 3
-#define TM4				"TM4"		// Motor 1 Temperature 4
-#define TM5				"TM5"		// Motor 2 Temperature 1
-#define TM6				"TM6"		// Motor 2 Temperature 2
-#define TM7				"TM7"		// Motor 2 Temperature 3
-#define TM8				"TM8"		// Motor 2 Temperature 4
-#define TM9				"TM9"		// Motor 3 Temperature 1
-#define T10				"T10"		// Motor 3 Temperature 2
-#define T11				"T11"		// Motor 3 Temperature 3
-#define T12				"T12"		// Motor 3 Temperature 4
-#define T13				"T13"		// Motor 4 Temperature 1
-#define T14				"T14"		// Motor 4 Temperature 2
-#define T15				"T15"		// Motor 4 Temperature 3
-#define T16				"T16"		// Motor 4 Temperature 4
+#define SR				"SR"		// Short Ranging
+#define PH				"PH"		// Photoelectric
+#define TA				"TA"		// Motor Tachometer
+#define CU				"CU"		// Motor Current
+#define TM				"TM"		// Motor Temperature
 
 /* Web App control signals for state machine */
 #define STOP				"STOP_SIG\0"
@@ -336,11 +312,16 @@ void spi_Send_Blocking(uint16_t address, uint16_t length);
 void spi_Recv_Blocking(uint16_t address, uint16_t length);
 void TIMER2_IRQHandler(void);
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
-void send_data_packet_helper(char *method, char *val, int *position);
+void send_data_packet_helper(char *method, int index, char *val, int *position);
 void send_data_ack_helper(char *method, int *position);
 uint8_t Wiz_Check_Socket(uint8_t n);
 uint8_t Wiz_Int_Clear(uint8_t n);
 uint16_t Wiz_Send_Blocking(uint8_t n, uint8_t* message);
 uint16_t Wiz_Recv_Blocking(uint8_t n, uint8_t* message);
+/* Used by logging.c */
+int tx_pos;
+void ethernet_prepare_packet();
+void ethernet_add_data_to_packet(char *method, int index, char* val);
+void ethernet_send_packet();
 
 #endif

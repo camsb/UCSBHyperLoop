@@ -1,5 +1,66 @@
 #include "logging.h"
 #include "subsystems.h"
+#include "ethernet.h"
+#include "HEMS.h"
+#include "sensor_data.h"
+
+void logData(){
+	ethernet_prepare_packet();
+	
+	logPosition();
+
+	int i;
+	for(i=0; i<4; i++) {
+		logHEMS(i);
+	}
+
+	// logBMS()
+
+	if((sendDataFlag && connectionOpen))
+		ethernet_send_packet();
+
+}
+
+void logPosition(){
+
+	char data[6];
+	sprintf(data, "%06.2f", sensorData.photoelectric);
+	ethernet_add_data_to_packet(PH, -1, data);
+}
+
+void logHEMS(int index){
+	char data[6];
+	// DAC
+	if(index == 0) {
+		sprintf(data, "%06.2f", motors[index]->throttle_voltage);
+		ethernet_add_data_to_packet(DAC, -1, data);
+	}
+
+	// Current
+	sprintf(data, "%06.2f", (float)motors[index]->amps);
+	ethernet_add_data_to_packet(CU, index, data);
+
+	// RPM
+	sprintf(data, "%06.2f", (float)motors[index]->rpm[1]);
+	ethernet_add_data_to_packet(TA, index, data);
+
+	// Temperature (0 to 3)
+	int i;
+	for(i=0; i<4; i++){
+		sprintf(data, "%06.f", (float)motors[index]->temperatures[i]);
+		ethernet_add_data_to_packet(TM, index*4 + i, data);
+	}
+
+	// Short Ranging
+	sprintf(data, "%06.2f", motors[index]->short_data[0]);
+	ethernet_add_data_to_packet(SR, index, data);
+
+}
+
+void logBMS(int index){
+
+}
+
 
 void initEventLogFile()
 {

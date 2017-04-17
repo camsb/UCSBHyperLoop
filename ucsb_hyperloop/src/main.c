@@ -19,7 +19,7 @@
 // Hyperloop specific libraries
 #include "initialization.h"
 #include "sensor_data.h"
-#include "communication.h"
+#include "logging.h"
 #include "gpio.h"
 #include "qpn_port.h"
 #include "subsystems.h"

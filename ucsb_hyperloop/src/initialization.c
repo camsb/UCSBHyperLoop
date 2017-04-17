@@ -5,7 +5,7 @@
 #include "ethernet.h"
 #include "pwm.h"
 #include "sensor_data.h"
-#include "communication.h"
+#include "HEMS.h"
 #include "sdcard.h"
 #include "gpio.h"
 

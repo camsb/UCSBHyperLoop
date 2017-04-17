@@ -6,6 +6,7 @@
 #include "temp_press.h"
 #include "kinematics.h"
 #include "photo_electric.h"
+#include "HEMS.h"
 
 int y = 0;
 void collectCalibrationData( I2C_ID_T id ){

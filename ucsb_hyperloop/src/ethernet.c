@@ -177,10 +177,16 @@ void send_method(char *method, char* val, int val_len) {
 
 }
 
-void send_data_packet_helper(char *method, char *val, int *position) {
+void send_data_packet_helper(char *method, int index, char *val, int *position) {
 	if (val != 0) {
-		memcpy(Net_Tx_Data + *position, method, 3);
-		*position += 3;
+		memcpy(Net_Tx_Data + *position, method, strlen(method));
+		*position += strlen(method);
+		if(index != -1){
+			char *index_string[4];
+			sprintf(index_string, "%d", index);
+			memcpy(Net_Tx_Data + *position, index_string, strlen(index_string));
+			*position += strlen(index_string);
+		}
 		memcpy(Net_Tx_Data + *position, ":", 1);
 		*position += 1;
 		memcpy(Net_Tx_Data + *position, val, 6);
@@ -439,33 +445,33 @@ void sendDataPacket() {
 	sprintf(DataPacket.yaw, "%06.2f", sensorData.yaw);
 
 	/* Atmospheric, Miscellaneous Data */
-	send_data_packet_helper(BM1, DataPacket.bm1, &pos);
-	send_data_packet_helper(BM2, DataPacket.bm2, &pos);
-	send_data_packet_helper(TM1, DataPacket.tm1, &pos);
-	send_data_packet_helper(TM2, DataPacket.tm2, &pos);
-	send_data_packet_helper(TM3, DataPacket.tm3, &pos);
-	send_data_packet_helper(TM4, DataPacket.tm4, &pos);
-	send_data_packet_helper(TA1, DataPacket.ta1, &pos);
-	send_data_packet_helper(TA2, DataPacket.ta2, &pos);
-	send_data_packet_helper(TA3, DataPacket.ta3, &pos);
-	send_data_packet_helper(TA4, DataPacket.ta4, &pos);
-	send_data_packet_helper(PWR, DataPacket.pwr, &pos);
-	/* Positional Data */
-	send_data_packet_helper(POX, DataPacket.pox, &pos);
-	send_data_packet_helper(POY, DataPacket.poy, &pos);
-	send_data_packet_helper(POZ, DataPacket.poz, &pos);
-	/* Velocity Data */
-	send_data_packet_helper(VEX, DataPacket.vex, &pos);
-	send_data_packet_helper(VEY, DataPacket.vey, &pos);
-	send_data_packet_helper(VEZ, DataPacket.vez, &pos);
-	/* Acceleration Data */
-	send_data_packet_helper(ACX, DataPacket.acx, &pos);
-	send_data_packet_helper(ACY, DataPacket.acy, &pos);
-	send_data_packet_helper(ACZ, DataPacket.acz, &pos);
-	/* Attitudinal Data */
-	send_data_packet_helper(ROL, DataPacket.rol, &pos);
-	send_data_packet_helper(PIT, DataPacket.pit, &pos);
-	send_data_packet_helper(YAW, DataPacket.yaw, &pos);
+//	send_data_packet_helper(BM1, DataPacket.bm1, &pos);
+//	send_data_packet_helper(BM2, DataPacket.bm2, &pos);
+//	send_data_packet_helper(TM1, DataPacket.tm1, &pos);
+//	send_data_packet_helper(TM2, DataPacket.tm2, &pos);
+//	send_data_packet_helper(TM3, DataPacket.tm3, &pos);
+//	send_data_packet_helper(TM4, DataPacket.tm4, &pos);
+//	send_data_packet_helper(TA1, DataPacket.ta1, &pos);
+//	send_data_packet_helper(TA2, DataPacket.ta2, &pos);
+//	send_data_packet_helper(TA3, DataPacket.ta3, &pos);
+//	send_data_packet_helper(TA4, DataPacket.ta4, &pos);
+//	send_data_packet_helper(PWR, DataPacket.pwr, &pos);
+//	/* Positional Data */
+//	send_data_packet_helper(POX, DataPacket.pox, &pos);
+//	send_data_packet_helper(POY, DataPacket.poy, &pos);
+//	send_data_packet_helper(POZ, DataPacket.poz, &pos);
+//	/* Velocity Data */
+//	send_data_packet_helper(VEX, DataPacket.vex, &pos);
+//	send_data_packet_helper(VEY, DataPacket.vey, &pos);
+//	send_data_packet_helper(VEZ, DataPacket.vez, &pos);
+//	/* Acceleration Data */
+//	send_data_packet_helper(ACX, DataPacket.acx, &pos);
+//	send_data_packet_helper(ACY, DataPacket.acy, &pos);
+//	send_data_packet_helper(ACZ, DataPacket.acz, &pos);
+//	/* Attitudinal Data */
+//	send_data_packet_helper(ROL, DataPacket.rol, &pos);
+//	send_data_packet_helper(PIT, DataPacket.pit, &pos);
+//	send_data_packet_helper(YAW, DataPacket.yaw, &pos);
 
 	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 
@@ -516,34 +522,34 @@ void sendPrototypePacket(){
 	sprintf(PrototypePacket.m4tmp4, "%06.f", (float)motors[3]->temperatures[3]);
 
 	/* DAC Data */
-	send_data_packet_helper(DAC, PrototypePacket.dac, &pos);
-	/* Current Data */
-	send_data_packet_helper(CU1, PrototypePacket.cu1, &pos);
-	send_data_packet_helper(CU2, PrototypePacket.cu2, &pos);
-	send_data_packet_helper(CU3, PrototypePacket.cu3, &pos);
-	send_data_packet_helper(CU4, PrototypePacket.cu4, &pos);
-	/* Tachometer Data */
-	send_data_packet_helper(TA1, PrototypePacket.ta1, &pos);
-	send_data_packet_helper(TA2, PrototypePacket.ta2, &pos);
-	send_data_packet_helper(TA3, PrototypePacket.ta3, &pos);
-	send_data_packet_helper(TA4, PrototypePacket.ta4, &pos);
-	/* Temperature Data */
-	send_data_packet_helper(TM1, PrototypePacket.m1tmp1, &pos);
-	send_data_packet_helper(TM2, PrototypePacket.m1tmp2, &pos);
-	send_data_packet_helper(TM3, PrototypePacket.m1tmp3, &pos);
-	send_data_packet_helper(TM4, PrototypePacket.m1tmp4, &pos);
-	send_data_packet_helper(TM5, PrototypePacket.m2tmp1, &pos);
-	send_data_packet_helper(TM6, PrototypePacket.m2tmp2, &pos);
-	send_data_packet_helper(TM7, PrototypePacket.m2tmp3, &pos);
-	send_data_packet_helper(TM8, PrototypePacket.m2tmp4, &pos);
-	send_data_packet_helper(TM9, PrototypePacket.m3tmp1, &pos);
-	send_data_packet_helper(T10, PrototypePacket.m3tmp2, &pos);
-	send_data_packet_helper(T11, PrototypePacket.m3tmp3, &pos);
-	send_data_packet_helper(T12, PrototypePacket.m3tmp4, &pos);
-	send_data_packet_helper(T13, PrototypePacket.m4tmp1, &pos);
-	send_data_packet_helper(T14, PrototypePacket.m4tmp2, &pos);
-	send_data_packet_helper(T15, PrototypePacket.m4tmp3, &pos);
-	send_data_packet_helper(T16, PrototypePacket.m4tmp4, &pos);
+//	send_data_packet_helper(DAC, PrototypePacket.dac, &pos);
+//	/* Current Data */
+//	send_data_packet_helper(CU1, PrototypePacket.cu1, &pos);
+//	send_data_packet_helper(CU2, PrototypePacket.cu2, &pos);
+//	send_data_packet_helper(CU3, PrototypePacket.cu3, &pos);
+//	send_data_packet_helper(CU4, PrototypePacket.cu4, &pos);
+//	/* Tachometer Data */
+//	send_data_packet_helper(TA1, PrototypePacket.ta1, &pos);
+//	send_data_packet_helper(TA2, PrototypePacket.ta2, &pos);
+//	send_data_packet_helper(TA3, PrototypePacket.ta3, &pos);
+//	send_data_packet_helper(TA4, PrototypePacket.ta4, &pos);
+//	/* Temperature Data */
+//	send_data_packet_helper(TM1, PrototypePacket.m1tmp1, &pos);
+//	send_data_packet_helper(TM2, PrototypePacket.m1tmp2, &pos);
+//	send_data_packet_helper(TM3, PrototypePacket.m1tmp3, &pos);
+//	send_data_packet_helper(TM4, PrototypePacket.m1tmp4, &pos);
+//	send_data_packet_helper(TM5, PrototypePacket.m2tmp1, &pos);
+//	send_data_packet_helper(TM6, PrototypePacket.m2tmp2, &pos);
+//	send_data_packet_helper(TM7, PrototypePacket.m2tmp3, &pos);
+//	send_data_packet_helper(TM8, PrototypePacket.m2tmp4, &pos);
+//	send_data_packet_helper(TM9, PrototypePacket.m3tmp1, &pos);
+//	send_data_packet_helper(T10, PrototypePacket.m3tmp2, &pos);
+//	send_data_packet_helper(T11, PrototypePacket.m3tmp3, &pos);
+//	send_data_packet_helper(T12, PrototypePacket.m3tmp4, &pos);
+//	send_data_packet_helper(T13, PrototypePacket.m4tmp1, &pos);
+//	send_data_packet_helper(T14, PrototypePacket.m4tmp2, &pos);
+//	send_data_packet_helper(T15, PrototypePacket.m4tmp3, &pos);
+//	send_data_packet_helper(T16, PrototypePacket.m4tmp4, &pos);
 
 	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 
@@ -565,6 +571,19 @@ void sendPrototypePacket(){
 //	}
 
 //	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+}
+
+void ethernet_prepare_packet(){
+	memset(Net_Tx_Data, 0, 512);
+	tx_pos = 0;
+}
+
+void ethernet_add_data_to_packet(char *method, int index, char* val){
+	send_data_packet_helper(method, index, val, &tx_pos);
+}
+
+void ethernet_send_packet(){
+	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 }
 
 // Singular, will change to multiple, or do an interrupt or something

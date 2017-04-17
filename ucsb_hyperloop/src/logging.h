@@ -16,6 +16,11 @@ typedef enum {
 
 #define ERR
 
+void logData();
+void logPosition();
+void logHEMS(int index);
+void logBMS(int index);
+
 void initEventLogFile();
 void initErrorLogFile();
 void logEventString(char* desc);

@@ -3,7 +3,6 @@
 
 #include "board.h"
 #include "ranging.h"
-#include "HEMS.h"
 
 void 	collectCalibrationData(I2C_ID_T id);
 void    collectData();
