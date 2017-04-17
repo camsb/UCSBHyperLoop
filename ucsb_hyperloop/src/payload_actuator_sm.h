@@ -9,6 +9,7 @@ typedef struct Payload_Actuator_HSM_data {
     QHsm super;
     uint8_t actuator_direction[NUM_PAYLOAD_ACTUATORS];
     uint8_t actuator_enable[NUM_PAYLOAD_ACTUATORS];
+    uint8_t fault;
 } Payload_Actuator_HSM_t;
 
 // The global instance of the state machine object (with added data members defined above)

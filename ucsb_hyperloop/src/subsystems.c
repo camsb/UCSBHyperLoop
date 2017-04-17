@@ -69,13 +69,19 @@ void generate_signals_from_sensor_data(){
 	braking_service_state_machine();
 #endif
 #if MOTOR_BOARD_I2C_ACTIVE
-	maglev_service_state_machine();
+	if (!Maglev_HSM.fault){
+		maglev_service_state_machine();
+	}
 #endif
 #if PAYLOAD_ACTUATORS_ACTIVE
-	payload_service_state_machine();
+	if (!Payload_Actuator_HSM.fault){
+		payload_service_state_machine();
+	}
 #endif
 #if SERVICE_PROPULSION_ACTIVE
-	service_propulsion_service_state_machine();
+	if (!Service_Propulsion_HSM.fault){
+		service_propulsion_service_state_machine();
+	}
 #endif
 
 }
@@ -127,45 +133,16 @@ void braking_service_state_machine(){
 }
 
 void maglev_service_state_machine(){
-	if (Maglev_HSM.faulted == 0){
-		// Nominal transitions - only evaluated/issued when the system is not faulted
-		if (Maglev_HSM.send_spunup && (motors[0]->rpm[1] > 500)){
-			// Motors are spun up
-			ISSUE_SIG(Maglev_HSM, MAGLEV_SPUNUP);
-			Maglev_HSM.send_spunup = 0;
-		}
-		else if (Maglev_HSM.send_spundown && (motors[0]->rpm[1] < 500)){
-			// Motors are spun down
-			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_SPUNDOWN);
-			QHsm_dispatch((QHsm *)&Maglev_HSM);
-			Maglev_HSM.send_spundown = 0;
-		}
-
-		// Fault transitions
-		int fault = maglev_fault_from_sensors();
-		if (fault == 1){
-			// Recoverable fault
-			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_FAULT_REC);
-			QHsm_dispatch((QHsm *)&Maglev_HSM);
-		}
-		else if (fault == 2){
-			// Unrecoverable fault
-			Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_FAULT_UNREC);
-			QHsm_dispatch((QHsm *)&Maglev_HSM);
-		}
-
+	if (Maglev_HSM.send_spunup && (motors[0]->rpm[1] > 500)){
+		// Motors are spun up
+		ISSUE_SIG(Maglev_HSM, MAGLEV_SPUNUP);
+		Maglev_HSM.send_spunup = 0;
 	}
-	else if (Maglev_HSM.faulted == 1){
-		// Check if the recoverable fault conditions are all cleared
-		int fault = maglev_fault_from_sensors();
-		if (fault == 0){
-			// Recoverable fault is CLEARED
-			ISSUE_SIG(Maglev_HSM, MAGLEV_FAULT_REC_CLEAR);
-		}
-		else if (fault == 2){
-			// Unrecoverable fault
-			ISSUE_SIG(Maglev_HSM, MAGLEV_FAULT_UNREC);
-		}
+	else if (Maglev_HSM.send_spundown && (motors[0]->rpm[1] < 500)){
+		// Motors are spun down
+		Q_SIG((QHsm *)&Maglev_HSM) = (QSignal)(MAGLEV_SPUNDOWN);
+		QHsm_dispatch((QHsm *)&Maglev_HSM);
+		Maglev_HSM.send_spundown = 0;
 	}
 }
 
@@ -209,18 +186,89 @@ void service_propulsion_service_state_machine(){
 
 void generate_faults_from_sensor_data(){
 	// Examine sensor data to determine if a fault transition signal should be issued
+	// This function can't (easily) be condensed because of the different signals that need to be issued to each state machine!
+	int fault;
 
 #if BRAKING_ACTIVE
 	braking_fault_from_sensors();
 #endif
 #if MOTOR_BOARD_I2C_ACTIVE
-	maglev_fault_from_sensors();
+	if (Maglev_HSM.fault != 2){
+		// If the system is not in an unrecoverable fault condition, check for faults
+		fault = maglev_fault_from_sensors();
+		if (fault == 2){
+			// New unrecoverable fault condition has occurred
+			ISSUE_SIG(Maglev_HSM, MAGLEV_FAULT_UNREC);
+		}
+		else if (Maglev_HSM.fault == 0){
+			// System currently not faulted at all
+			if (fault == 1){
+				// New recoverable fault has occurred
+				ISSUE_SIG(Maglev_HSM, MAGLEV_FAULT_REC);
+			}
+			// Else no fault condition is present
+		}
+		else if (Maglev_HSM.fault == 1){
+			if (fault == 0){
+				// Recoverable fault condition is newly cleared
+				ISSUE_SIG(Maglev_HSM, MAGLEV_FAULT_REC_CLEAR);
+			}
+			// Else recoverable fault condition is sustained
+		}
+	}
+	// Else system has already entered an unrecoverable fault condition
 #endif
 #if PAYLOAD_ACTUATORS_ACTIVE
-	payload_fault_from_sensors();
+	if (Payload_Actuator_HSM.fault != 2){
+		// If the system is not in an unrecoverable fault condition, check for faults
+		fault = payload_fault_from_sensors();
+		if (fault == 2){
+			// New unrecoverable fault condition has occurred
+			ISSUE_SIG(Payload_Actuator_HSM, PA_FAULT_UNREC);
+		}
+		else if (Payload_Actuator_HSM.fault == 0){
+			// System currently not faulted at all
+			if (fault == 1){
+				// New recoverable fault has occurred
+				ISSUE_SIG(Payload_Actuator_HSM, PA_FAULT_REC);
+			}
+			// Else no fault condition is present
+		}
+		else if (Payload_Actuator_HSM.fault == 1){
+			if (fault == 0){
+				// Recoverable fault condition is newly cleared
+				ISSUE_SIG(Payload_Actuator_HSM, PA_FAULT_REC_CLEAR);
+			}
+			// Else recoverable fault condition is sustained
+		}
+	}
+	// Else system has already entered an unrecoverable fault condition
 #endif
 #if SERVICE_PROPULSION_ACTIVE
-	service_fault_from_sensors();
+	if (Service_Propulsion_HSM.fault != 2){
+		// If the system is not in an unrecoverable fault condition, check for faults
+		fault = service_fault_from_sensors();
+		if (fault == 2){
+			// New unrecoverable fault condition has occurred
+			ISSUE_SIG(Service_Propulsion_HSM, SP_FAULT_UNREC);
+		}
+		else if (Service_Propulsion_HSM.fault == 0){
+			// System currently not faulted at all
+			if (fault == 1){
+				// New recoverable fault has occurred
+				ISSUE_SIG(Service_Propulsion_HSM, SP_FAULT_REC);
+			}
+			// Else no fault condition is present
+		}
+		else if (Service_Propulsion_HSM.fault == 1){
+			if (fault == 0){
+				// Recoverable fault condition is newly cleared
+				ISSUE_SIG(Service_Propulsion_HSM, SP_FAULT_REC_CLEAR);
+			}
+			// Else recoverable fault condition is sustained
+		}
+	}
+	// Else system has already entered an unrecoverable fault condition
 #endif
 }
 
@@ -241,16 +289,21 @@ void braking_fault_from_sensors(){
 }
 
 int maglev_fault_from_sensors(){
-	// Calculates and returns whether the motors have a fault condition
+	// Returns current fault condition of maglev subsystem, if any.
+	// 0 = none, 1 = recoverable, 2 = unrecoverable
 	int i, j;
-	// Unrecoverable faults
+
+	// TODO: Unrecoverable faults (new only)
+	// • Motor batteries have too low voltage / state of charge
+	// • Motor batteries have a significant cell voltage imbalance
+	// • Feedback or control signals are inoperable on one or more motors
 	/*
-	• Motor batteries have too low voltage / state of charge
-	• Motor batteries have a significant cell voltage imbalance
-	• Feedback or control signals are inoperable on one or more motors
+	if (UNRECOVERABLE FAULT){
+		return 2;
+	}
 	*/
 
-	// Recoverable faults
+	// Recoverable faults (new or existing)
 	// Find the average RPM of all the motors
 	int avg_rpm = 0;
 	for (i = 0; i < NUM_MOTORS; i++){
@@ -279,12 +332,34 @@ int maglev_fault_from_sensors(){
 	return 0;
 }
 
-void payload_fault_from_sensors(){
+int payload_fault_from_sensors(){
+	// Returns current fault condition of payload actuator subsystem, if any.
+	// 0 = none, 1 = recoverable, 2 = unrecoverable
 	// TODO: Implement this stub.
+	/*
+	if (UNRECOVERABLE FAULT){
+		return 2;
+	}
+	else if (RECOVERABLE FAULT){
+		return 1;
+	}
+	 */
+	return 0;
 }
 
-void service_fault_from_sensors(){
+int service_fault_from_sensors(){
+	// Returns current fault condition of service propulsion subsystem, if any.
+	// 0 = none, 1 = recoverable, 2 = unrecoverable
 	// TODO: Implement this stub.
+	/*
+	if (UNRECOVERABLE FAULT){
+		return 2;
+	}
+	else if (RECOVERABLE FAULT){
+		return 1;
+	}
+	 */
+	return 0;
 }
 
 

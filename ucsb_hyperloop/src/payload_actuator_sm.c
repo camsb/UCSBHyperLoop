@@ -27,7 +27,7 @@ static QState Nominal_raised_not_supporting_disengaged(Payload_Actuator_HSM_t *m
 static QState Fault(Payload_Actuator_HSM_t *me);
 static QState Fault_recoverable(Payload_Actuator_HSM_t *me);
 static QState Fault_unrecoverable(Payload_Actuator_HSM_t *me);
-int maglev_status_dummy = 0;
+
 int i;
 /*..........................................................................*/
 void initializePayloadActuatorStateMachine(void) {
@@ -38,6 +38,7 @@ void initializePayloadActuatorStateMachine(void) {
         Payload_Actuator_HSM.actuator_direction[i] = 0;
         Payload_Actuator_HSM.actuator_enable[i] = 0;
     }
+    Payload_Actuator_HSM.fault = 0;
     QHsm_init((QHsm *)&Payload_Actuator_HSM);
 }
 
@@ -253,12 +254,7 @@ QState Nominal_raised_supporting_engaged(Payload_Actuator_HSM_t *me) {
         }
         case PA_RETRACT: {
             BSP_display("Retracting;");
-            if(maglev_status_dummy){
-            	return Q_TRAN(&Nominal_raised_not_supporting_retracting);
-            }
-            else{
-                return Q_TRAN(&Nominal_lowered_retracting);
-            }
+            return Q_TRAN(&Nominal_lowered_retracting);
         }
     }
     return Q_SUPER(&Nominal_raised_supporting);
@@ -455,6 +451,7 @@ QState Fault(Payload_Actuator_HSM_t *me) {
 QState Fault_recoverable(Payload_Actuator_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
+            Payload_Actuator_HSM.fault = 1;
             BSP_display("stationary-ENTRY;");
             return Q_HANDLED();
         }
@@ -468,6 +465,7 @@ QState Fault_recoverable(Payload_Actuator_HSM_t *me) {
         }
         case PA_FAULT_REC_CLEAR: {
         	BSP_display("PA_FAULT_REC_CLEAR\n");
+            Payload_Actuator_HSM.fault = 0;
         	return Q_TRAN(&Nominal_lowered_retracting);
         }
     }
@@ -478,6 +476,7 @@ QState Fault_unrecoverable(Payload_Actuator_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("stationary-ENTRY;");
+            Payload_Actuator_HSM.fault = 2;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {

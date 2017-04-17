@@ -29,6 +29,8 @@ void initializeServicePropulsionStateMachine(void) {
     Service_Propulsion_HSM.actuator_direction = 0;
     Service_Propulsion_HSM.actuator_enable = 0;
     Service_Propulsion_HSM.motor_direction = 0;
+    Service_Propulsion_HSM.motor_enable = 0;
+    Service_Propulsion_HSM.fault = 0;
     QHsm_init((QHsm *)&Service_Propulsion_HSM);
 }
 
@@ -52,10 +54,13 @@ QState Nominal(Service_Propulsion_HSM_t *me) {
             BSP_display("Nominal-INIT;");
             return Q_HANDLED();
         }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
-            return Q_HANDLED();
+        case SP_FAULT_REC: {
+        	BSP_display("SP_FAULT_REC\n");
+        	return Q_TRAN(&Fault_recoverable);
+        }
+        case SP_FAULT_UNREC: {
+        	BSP_display("SP_FAULT_UNREC\n");
+        	return Q_TRAN(&Fault_unrecoverable);
         }
     }
     return Q_SUPER(&QHsm_top);
@@ -73,11 +78,6 @@ QState Nominal_lowered(Service_Propulsion_HSM_t *me) {
         }
         case Q_INIT_SIG: {
             BSP_display("Lowered-INIT;");
-            return Q_HANDLED();
-        }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
             return Q_HANDLED();
         }
     }
@@ -100,26 +100,21 @@ QState Nominal_lowered_idle(Service_Propulsion_HSM_t *me) {
             BSP_display("Idle-INIT;");
             return Q_HANDLED();
         }
-	case SP_FORWARD_SIG: {
+        case SP_FORWARD_SIG: {
             BSP_display("Moving forward;");
             return Q_TRAN(&Nominal_lowered_forward);
         }
-	case SP_REVERSE_SIG: {
+        case SP_REVERSE_SIG: {
             BSP_display("Moving in reverse;");
             return Q_TRAN(&Nominal_lowered_reverse);
         }
-	case SP_ADVANCE_SIG: {
+        case SP_ADVANCE_SIG: {
             BSP_display("Cannot advance further;");
             return Q_HANDLED();
         }
-	case SP_RETRACT_SIG: {
+        case SP_RETRACT_SIG: {
             BSP_display("Retracting;");
             return Q_TRAN(&Nominal_raised_retracting);
-        }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
-            return Q_HANDLED();
         }
     }
     return Q_SUPER(&Nominal_lowered);
@@ -141,14 +136,9 @@ QState Nominal_lowered_forward(Service_Propulsion_HSM_t *me) {
             BSP_display("Forward-INIT;");
             return Q_HANDLED();
         }
-	case SP_STOP_SIG: {
+        case SP_STOP_SIG: {
             BSP_display("Stopping;");
             return Q_TRAN(&Nominal_lowered_idle);
-        }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
-            return Q_HANDLED();
         }
     }
     return Q_SUPER(&Nominal_lowered);
@@ -170,14 +160,9 @@ QState Nominal_lowered_reverse(Service_Propulsion_HSM_t *me) {
             BSP_display("Reverse-INIT;");
             return Q_HANDLED();
         }
-	case SP_STOP_SIG: {
+        case SP_STOP_SIG: {
             BSP_display("Stopping;");
             return Q_TRAN(&Nominal_lowered_idle);
-	}
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
-            return Q_HANDLED();
         }
     }
     return Q_SUPER(&Nominal_lowered);
@@ -187,7 +172,7 @@ QState Nominal_raised(Service_Propulsion_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("stationary-ENTRY;");
-	    Service_Propulsion_HSM.motor_enable = 0;
+            Service_Propulsion_HSM.motor_enable = 0;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -198,11 +183,6 @@ QState Nominal_raised(Service_Propulsion_HSM_t *me) {
             BSP_display("stationary-INIT;");
             return Q_HANDLED();
         }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
-            return Q_HANDLED();
-        }
     }
     return Q_SUPER(&Nominal);
 }
@@ -211,7 +191,7 @@ QState Nominal_raised_idle(Service_Propulsion_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("Idle-ENTRY;");
-	    Service_Propulsion_HSM.actuator_enable = 0;
+            Service_Propulsion_HSM.actuator_enable = 0;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -222,18 +202,13 @@ QState Nominal_raised_idle(Service_Propulsion_HSM_t *me) {
             BSP_display("Idle-INIT;");
             return Q_HANDLED();
         }
-	case SP_ADVANCE_SIG: {
+        case SP_ADVANCE_SIG: {
             BSP_display("Advancing;");
             return Q_TRAN(&Nominal_raised_advancing);
         }
-	case SP_RETRACT_SIG: {
+		case SP_RETRACT_SIG: {
             BSP_display("Retracting;");
             return Q_TRAN(&Nominal_raised_retracting);
-        }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
-            return Q_HANDLED();
         }
     }
     return Q_SUPER(&Nominal_raised);
@@ -243,8 +218,8 @@ QState Nominal_raised_advancing(Service_Propulsion_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("Advancing-ENTRY;");
-	    Service_Propulsion_HSM.actuator_direction = 1;
-	    Service_Propulsion_HSM.actuator_enable = 1;
+            Service_Propulsion_HSM.actuator_direction = 1;
+            Service_Propulsion_HSM.actuator_enable = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -255,18 +230,13 @@ QState Nominal_raised_advancing(Service_Propulsion_HSM_t *me) {
             BSP_display("Advancing-INIT;");
             return Q_HANDLED();
         }
-	case SP_ADVANCE_SIG: {
+        case SP_ADVANCE_SIG: {
             BSP_display("Continuing to advance;");
             return Q_TRAN(&Nominal_lowered_idle);
         }
-	case SP_RETRACT_SIG: {
+        case SP_RETRACT_SIG: {
             BSP_display("Halting advance, retracting;");
             return Q_TRAN(&Nominal_raised_retracting);
-        }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
-            return Q_HANDLED();
         }
     }
     return Q_SUPER(&Nominal_raised);
@@ -276,8 +246,8 @@ QState Nominal_raised_retracting(Service_Propulsion_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("Retracting-ENTRY;");
-	    Service_Propulsion_HSM.actuator_direction = 0;
-	    Service_Propulsion_HSM.actuator_enable = 1;
+            Service_Propulsion_HSM.actuator_direction = 0;
+            Service_Propulsion_HSM.actuator_enable = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -288,18 +258,13 @@ QState Nominal_raised_retracting(Service_Propulsion_HSM_t *me) {
             BSP_display("Retracting-INIT;");
             return Q_HANDLED();
         }
-	case SP_ADVANCE_SIG: {
+        case SP_ADVANCE_SIG: {
             BSP_display("Halting retraction, advancing;");
             return Q_TRAN(&Nominal_raised_advancing);
         }
-	case SP_RETRACT_SIG: {
+        case SP_RETRACT_SIG: {
             BSP_display("Continuing to reverse;");
             return Q_TRAN(&Nominal_raised_idle);
-        }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
-            return Q_HANDLED();
         }
     }
     return Q_SUPER(&Nominal_raised);
@@ -319,10 +284,9 @@ QState Fault(Service_Propulsion_HSM_t *me) {
             BSP_display("Fault-INIT;");
             return Q_HANDLED();
         }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
-            return Q_HANDLED();
+        case SP_FAULT_UNREC: {
+        	BSP_display("SP_FAULT_UNREC\n");
+        	return Q_TRAN(&Fault_unrecoverable);
         }
     }
     return Q_SUPER(&QHsm_top);
@@ -332,6 +296,7 @@ QState Fault_recoverable(Service_Propulsion_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("stationary-ENTRY;");
+            Service_Propulsion_HSM.fault = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -342,10 +307,10 @@ QState Fault_recoverable(Service_Propulsion_HSM_t *me) {
             BSP_display("stationary-INIT;");
             return Q_HANDLED();
         }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
-            return Q_HANDLED();
+        case SP_FAULT_REC_CLEAR: {
+        	BSP_display("SP_FAULT_REC_CLEAR\n");
+        	Service_Propulsion_HSM.fault = 0;
+        	return Q_TRAN(Nominal_raised_retracting);
         }
     }
     return Q_SUPER(&Fault);
@@ -355,6 +320,7 @@ QState Fault_unrecoverable(Service_Propulsion_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("stationary-ENTRY;");
+            Service_Propulsion_HSM.fault = 2;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -363,11 +329,6 @@ QState Fault_unrecoverable(Service_Propulsion_HSM_t *me) {
         }
         case Q_INIT_SIG: {
             BSP_display("stationary-INIT;");
-            return Q_HANDLED();
-        }
-        case SP_TERMINATE_SIG: {
-            //BSP_exit();
-            // TODO: Handle this.
             return Q_HANDLED();
         }
     }
