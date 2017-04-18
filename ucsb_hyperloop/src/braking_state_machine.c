@@ -18,17 +18,11 @@ static QState Tube_lockout_pusherfault(Braking_HSM_t *me);
 static QState Tube_lockout_accelfault(Braking_HSM_t *me);
 static QState Tube_lockout_bothfault(Braking_HSM_t *me);
 static QState Tube_permitted(Braking_HSM_t *me);
-static QState Tube_permitted_regular(Braking_HSM_t *me);
-static QState Tube_permitted_regular_idle(Braking_HSM_t *me);
-static QState Tube_permitted_regular_activated(Braking_HSM_t *me);
-static QState Tube_permitted_regular_activated_pair1(Braking_HSM_t *me);
-static QState Tube_permitted_regular_activated_pair2(Braking_HSM_t *me);
-static QState Tube_permitted_emergency(Braking_HSM_t *me);
+static QState Tube_permitted_idle(Braking_HSM_t *me);
+static QState Tube_permitted_activated(Braking_HSM_t *me);
 static QState Test(Braking_HSM_t *me);
 static QState Test_idle(Braking_HSM_t *me);
-static QState Test_pair1(Braking_HSM_t *me);
-static QState Test_pair2(Braking_HSM_t *me);
-static QState Test_emergency(Braking_HSM_t *me);
+static QState Test_activated(Braking_HSM_t *me);
 
 /*..........................................................................*/
 void initializeBrakingStateMachine(void) {
@@ -80,6 +74,8 @@ static QState Tube_lockout(Braking_HSM_t *me) {
     	}
         case Q_ENTRY_SIG: {
             BSP_display("Nominal-ENTRY\n");
+            Braking_HSM.engage_1 = 0;
+            Braking_HSM.engage_2 = 0;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -212,10 +208,12 @@ static QState Tube_permitted(Braking_HSM_t *me) {
     	}
         case Q_ENTRY_SIG: {
             BSP_display("Nominal-ENTRY\n");
-            return Q_TRAN(&Tube_permitted_regular);
+            return Q_TRAN(&Tube_permitted_idle);
         }
         case Q_EXIT_SIG: {
             BSP_display("Nominal-EXIT\n");
+            Braking_HSM.engage_1 = 0;
+            Braking_HSM.engage_2 = 0;
             return Q_HANDLED();
         }
     }
@@ -223,7 +221,7 @@ static QState Tube_permitted(Braking_HSM_t *me) {
 }
 /*..........................................................................*/
 
-static QState Tube_permitted_regular(Braking_HSM_t *me) {
+static QState Tube_permitted_idle(Braking_HSM_t *me) {
     switch (Q_SIG(me)) {
     	case Q_INIT_SIG: {
     		BSP_display("Nominal-INIT\n");
@@ -231,18 +229,24 @@ static QState Tube_permitted_regular(Braking_HSM_t *me) {
     	}
         case Q_ENTRY_SIG: {
             BSP_display("Nominal-ENTRY\n");
-            return Q_TRAN(&Tube_permitted_regular_idle);
+            Braking_HSM.engage_1 = 0;
+            Braking_HSM.engage_2 = 0;
+            return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
             BSP_display("Nominal-EXIT\n");
             return Q_HANDLED();
+        }
+        case BRAKES_ENGAGE: {
+        	BSP_display("permitted_idle - BRAKES_ENGAGE");
+        	return Q_TRAN(&Tube_permitted_activated);
         }
     }
     return Q_SUPER(&Tube_permitted);
 }
 /*..........................................................................*/
 
-static QState Tube_permitted_regular_idle(Braking_HSM_t *me) {
+static QState Tube_permitted_activated(Braking_HSM_t *me) {
     switch (Q_SIG(me)) {
     	case Q_INIT_SIG: {
     		BSP_display("Nominal-INIT\n");
@@ -250,90 +254,22 @@ static QState Tube_permitted_regular_idle(Braking_HSM_t *me) {
     	}
         case Q_ENTRY_SIG: {
             BSP_display("Nominal-ENTRY\n");
+            Braking_HSM.engage_1 = 1;
+            Braking_HSM.engage_2 = 1;
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
             BSP_display("Nominal-EXIT\n");
+            Braking_HSM.engage_1 = 0;
+            Braking_HSM.engage_2 = 0;
             return Q_HANDLED();
+        }
+        case BRAKES_DISENGAGE: {
+        	BSP_display("permitted_activated - BRAKES_DISENGAGE");
+        	return Q_TRAN(&Tube_permitted_idle);
         }
     }
-    return Q_SUPER(&Tube_permitted_regular);
-}
-/*..........................................................................*/
-
-static QState Tube_permitted_regular_activated(Braking_HSM_t *me) {
-    switch (Q_SIG(me)) {
-    	case Q_INIT_SIG: {
-    		BSP_display("Nominal-INIT\n");
-    		return Q_HANDLED();
-    	}
-        case Q_ENTRY_SIG: {
-            BSP_display("Nominal-ENTRY\n");
-            return Q_HANDLED();
-        }
-        case Q_EXIT_SIG: {
-            BSP_display("Nominal-EXIT\n");
-            return Q_HANDLED();
-        }
-    }
-    return Q_SUPER(&Tube_permitted_regular);
-}
-/*..........................................................................*/
-
-static QState Tube_permitted_regular_activated_pair1(Braking_HSM_t *me) {
-    switch (Q_SIG(me)) {
-    	case Q_INIT_SIG: {
-    		BSP_display("Nominal-INIT\n");
-    		return Q_HANDLED();
-    	}
-        case Q_ENTRY_SIG: {
-            BSP_display("Nominal-ENTRY\n");
-            return Q_HANDLED();
-        }
-        case Q_EXIT_SIG: {
-            BSP_display("Nominal-EXIT\n");
-            return Q_HANDLED();
-        }
-    }
-    return Q_SUPER(&Tube_permitted_regular_activated);
-}
-/*..........................................................................*/
-
-static QState Tube_permitted_regular_activated_pair2(Braking_HSM_t *me) {
-    switch (Q_SIG(me)) {
-    	case Q_INIT_SIG: {
-    		BSP_display("Nominal-INIT\n");
-    		return Q_HANDLED();
-    	}
-        case Q_ENTRY_SIG: {
-            BSP_display("Nominal-ENTRY\n");
-            return Q_HANDLED();
-        }
-        case Q_EXIT_SIG: {
-            BSP_display("Nominal-EXIT\n");
-            return Q_HANDLED();
-        }
-    }
-    return Q_SUPER(&Tube_permitted_regular_activated);
-}
-/*..........................................................................*/
-
-static QState Tube_permitted_emergency(Braking_HSM_t *me) {
-    switch (Q_SIG(me)) {
-    	case Q_INIT_SIG: {
-    		BSP_display("Nominal-INIT\n");
-    		return Q_HANDLED();
-    	}
-        case Q_ENTRY_SIG: {
-            BSP_display("Nominal-ENTRY\n");
-            return Q_HANDLED();
-        }
-        case Q_EXIT_SIG: {
-            BSP_display("Nominal-EXIT\n");
-            return Q_HANDLED();
-        }
-    }
-    return Q_SUPER(&Tube_permitted);
+    return Q_SUPER(&Tube_permitted_idle);
 }
 /*..........................................................................*/
 
@@ -376,76 +312,14 @@ static QState Test_idle(Braking_HSM_t *me) {
         }
         case BRAKES_ENGAGE: {
         	BSP_display("Test_idle - BRAKES_ENGAGE\n");
-        	return Q_TRAN(&Test_pair1);
-        }
-        case BRAKES_EMERGENCY: {
-        	BSP_display("Test_idle - BRAKES_EMERGENCY\n");
-        	return Q_TRAN(&Test_emergency);
+        	return Q_TRAN(&Test_activated);
         }
     }
     return Q_SUPER(&Test);
 }
 /*..........................................................................*/
 
-static QState Test_pair1(Braking_HSM_t *me) {
-    switch (Q_SIG(me)) {
-    	case Q_INIT_SIG: {
-    		BSP_display("Nominal-INIT\n");
-    		return Q_HANDLED();
-    	}
-        case Q_ENTRY_SIG: {
-            BSP_display("Nominal-ENTRY\n");
-            Braking_HSM.engage_1 = 1;
-            return Q_HANDLED();
-        }
-        case Q_EXIT_SIG: {
-            BSP_display("Nominal-EXIT\n");
-            Braking_HSM.engage_1 = 0;
-            return Q_HANDLED();
-        }
-        case BRAKES_ENGAGE: {
-        	BSP_display("Test_pair1 - ENGAGE\n");
-        	return Q_TRAN(&Test_pair2);
-        }
-        case BRAKES_DISENGAGE: {
-        	BSP_display("Test_pair1 - DISENGAGE\n");
-        	return Q_TRAN(&Test_idle);
-        }
-    }
-    return Q_SUPER(&Test);
-}
-/*..........................................................................*/
-
-static QState Test_pair2(Braking_HSM_t *me) {
-    switch (Q_SIG(me)) {
-    	case Q_INIT_SIG: {
-    		BSP_display("Nominal-INIT\n");
-    		return Q_HANDLED();
-    	}
-        case Q_ENTRY_SIG: {
-            BSP_display("Nominal-ENTRY\n");
-            Braking_HSM.engage_1 = 0;
-            Braking_HSM.engage_2 = 1;
-            return Q_HANDLED();
-        }
-        case Q_EXIT_SIG: {
-            BSP_display("Nominal-EXIT\n");
-            return Q_HANDLED();
-        }
-        case BRAKES_ENGAGE: {
-        	BSP_display("Test_pair2 - ENGAGE\n");
-        	return Q_TRAN(&Test_idle);
-        }
-        case BRAKES_DISENGAGE: {
-        	BSP_display("Test_pair2 - DISENGAGE\n");
-        	return Q_TRAN(&Test_idle);
-        }
-    }
-    return Q_SUPER(&Test);
-}
-/*..........................................................................*/
-
-static QState Test_emergency(Braking_HSM_t *me) {
+static QState Test_activated(Braking_HSM_t *me) {
     switch (Q_SIG(me)) {
     	case Q_INIT_SIG: {
     		BSP_display("Nominal-INIT\n");
@@ -463,8 +337,8 @@ static QState Test_emergency(Braking_HSM_t *me) {
             Braking_HSM.engage_2 = 0;
             return Q_HANDLED();
         }
-        case BRAKES_EMERGENCY_RELEASE: {
-        	BSP_display("Test_emergency - EMERGENCY_RELEASE\n");
+        case BRAKES_DISENGAGE: {
+        	BSP_display("Test_activated - BRAKES_DISENGAGE\n");
         	return Q_TRAN(&Test_idle);
         }
     }

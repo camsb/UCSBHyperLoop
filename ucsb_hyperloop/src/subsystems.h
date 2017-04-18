@@ -21,12 +21,12 @@ enum control_signals{
 	// Maglev motors
 	CS_MAGLEV_ENGAGE,
 	CS_MAGLEV_DISENGAGE,
-	// Surface propulsion
-	CS_SURFPROP_ACTUATOR_LOWER,
-	CS_SURFPROP_ACTUATOR_RAISE,
-	CS_SURFPROP_ENGAGE_FORWARD,
-	CS_SURFPROP_ENGAGE_REVERSE,
-	CS_SURFPROP_DISENGAGE
+	// Service propulsion
+	CS_SERVPROP_ACTUATOR_LOWER,
+	CS_SERVPROP_ACTUATOR_RAISE,
+	CS_SERVPROP_ENGAGE_FORWARD,
+	CS_SERVPROP_ENGAGE_REVERSE,
+	CS_SERVPROP_DISENGAGE
 	// Changing these signals requires changes to subsystems.c to make sure that they are properly dispatched!!!
 };
 

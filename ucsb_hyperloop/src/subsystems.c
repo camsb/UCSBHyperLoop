@@ -48,8 +48,8 @@ void dispatch_signal_from_webapp(int signal){
 		ISSUE_SIG(Payload_Actuator_HSM, new_signal);
 	}
 	// Surface Propulsion Motors
-	else if (signal >= CS_SURFPROP_ACTUATOR_LOWER && signal <= CS_SURFPROP_DISENGAGE){
-		int new_signal = (signal - CS_SURFPROP_ACTUATOR_LOWER) + SP_ADVANCE_SIG;
+	else if (signal >= CS_SERVPROP_ACTUATOR_LOWER && signal <= CS_SERVPROP_DISENGAGE){
+		int new_signal = (signal - CS_SERVPROP_ACTUATOR_LOWER) + SP_ADVANCE_SIG;
 		ISSUE_SIG(Service_Propulsion_HSM, new_signal);
 	}
 	else{
