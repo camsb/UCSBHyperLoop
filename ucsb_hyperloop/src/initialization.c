@@ -38,6 +38,7 @@ void initializeSensorsAndControls(){
 
     if(RANGING_SENSORS_ACTIVE){
         rangingSensorsInit();
+        CALIBRATE_FLAG = 0;
     }
     if(GPIO_INT_ACTIVE){
         /* Enable GPIO Interrupts */
