@@ -219,6 +219,10 @@ void recvDataPacket() {
 		printf("DISENGAGE ENGINES SIG RECEIVED\n");
 		dispatch_signal_from_webapp(profile[1]);
 	}
+	if(strcmp((char *)Net_Rx_Data, CALIBRATE_SIG) == 0){
+		printf("CALIBRATE_SIG RECEIVED\n");
+		getPressureFlag = 1;
+	}
 	/*
 	if(strcmp((char *)Net_Rx_Data, ENGINES_REVED) == 0){
 		printf("ENGINES REVED SIG RECEIVED\n");

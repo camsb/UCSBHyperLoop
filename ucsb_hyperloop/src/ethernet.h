@@ -201,6 +201,9 @@
 #define IGNORE				"IGNORE_SIG\0"
 #define MAXSIG				"MAX_SIG\0"
 
+/* Web App control for intializing the positioning */
+#define CALIBRATE			"CALIBRATE_SIG\0"
+
 struct data_packet {
 	// all pointers are ini
 	// pass in pointer to null terminated data string
