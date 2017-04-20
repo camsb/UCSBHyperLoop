@@ -5,6 +5,7 @@
 #include "service_propulsion_sm.h"
 #include "HEMS.h"
 #include "initialization.h"
+#include "logging.h"
 
 #define ISSUE_SIG(hsm, sig) do {\
 	Q_SIG((QHsm *)&hsm) = (QSignal)(sig);\
@@ -13,8 +14,35 @@
 
 #define IGNORE_FAULTS 1 	// For testing
 
+const char *control_signal_names[] = {
+		// Special sequences
+		"GO",
+		"ALL_STOP",
+		// Brakes
+		"BRAKES_ENGAGE",
+		"BRAKES_DISENGAGE",
+		"BRAKES_EMERGENCY",
+		"BRAKES_EMERGENCY_RELEASE",
+		"BRAKES_TEST_ENTER",
+		"BRAKES_TEST_EXIT",
+		// Payload Actuators
+		"ACTUATORS_RAISE",
+		"ACTUATORS_LOWER",
+		// Maglev motors
+		"ENGAGE_ENGINES_SIG", 		//"MAGLEV_ENGAGE",
+		"DISENGAGE_ENGINES_SIG", 	//"MAGLEV_DISENGAGE",
+		// Service propulsion
+		"SERVPROP_ACTUATOR_LOWER",
+		"SERVPROP_ACTUATOR_RAISE",
+		"SERVPROP_ENGAGE_FORWARD",
+		"SERVPROP_ENGAGE_REVERSE",
+		"SERVPROP_DISENGAGE"
+	};
+
 
 void initializeSubsystemStateMachines(){
+
+
 #if BRAKING_ACTIVE
 	initializeBrakingStateMachine();
 #endif
@@ -31,6 +59,8 @@ void initializeSubsystemStateMachines(){
 
 void dispatch_signal_from_webapp(int signal){
 	// Determine the state machine to issue the control signal to, translate it, and dispatch it
+
+	logStateMachineEvent(signal);
 
 	// Braking
 	if (signal >= CS_BRAKES_ENGAGE && signal <= CS_BRAKES_TEST_EXIT){
@@ -181,7 +211,17 @@ void payload_service_state_machine(){
 }
 
 void service_propulsion_service_state_machine(){
-	// TODO: Implement this stub.
+	// Issue transition signals if the service propulsion motor actuator has reached an endstop
+	/*
+	if (Service_Propulsion_Hsm.actuator_enable){
+		if (ADVANCE ENDSTOP REACHED){
+			ISSUE_SIG(SP_ADVANCE_DONE);
+		}
+		else if (RETRACT ENDSTOP REACHED){
+			ISSUE_SIG(SP_RETRACT_DONE);
+		}
+	}
+	*/
 }
 
 void generate_faults_from_sensor_data(){

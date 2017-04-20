@@ -26,9 +26,13 @@ enum control_signals{
 	CS_SERVPROP_ACTUATOR_RAISE,
 	CS_SERVPROP_ENGAGE_FORWARD,
 	CS_SERVPROP_ENGAGE_REVERSE,
-	CS_SERVPROP_DISENGAGE
+	CS_SERVPROP_DISENGAGE,
 	// Changing these signals requires changes to subsystems.c to make sure that they are properly dispatched!!!
+	CS_SIZE // Used for sizing array of names below
 };
+
+// Names of control signals, as strings. Used for communications (web app and logging)
+extern const char * control_signal_names[];
 
 void initializeSubsystemStateMachines();
 
