@@ -23,6 +23,8 @@ void initializeServicePropulsionStateMachine(void);
 enum Service_Propulsion_HSM_t_Signals {
     SP_ADVANCE_SIG = Q_USER_SIG,
     SP_RETRACT_SIG,
+    SP_ADVANCE_DONE,
+    SP_RETRACT_DONE,
     SP_FORWARD_SIG,
     SP_REVERSE_SIG,
     SP_STOP_SIG,

@@ -232,11 +232,15 @@ QState Nominal_raised_advancing(Service_Propulsion_HSM_t *me) {
         }
         case SP_ADVANCE_SIG: {
             BSP_display("Continuing to advance;");
-            return Q_TRAN(&Nominal_lowered_idle);
+            return Q_HANDLED();
         }
         case SP_RETRACT_SIG: {
             BSP_display("Halting advance, retracting;");
             return Q_TRAN(&Nominal_raised_retracting);
+        }
+        case SP_ADVANCE_DONE: {
+        	BSP_display("Nominal_raised_advancing - SP_ADVANCE_DONE");
+        	return Q_TRAN(&Nominal_lowered_idle);
         }
     }
     return Q_SUPER(&Nominal_raised);
@@ -264,7 +268,11 @@ QState Nominal_raised_retracting(Service_Propulsion_HSM_t *me) {
         }
         case SP_RETRACT_SIG: {
             BSP_display("Continuing to reverse;");
-            return Q_TRAN(&Nominal_raised_idle);
+            return Q_HANDLED();
+        }
+        case SP_RETRACT_DONE: {
+        	BSP_display("Nominal_raised_retracting - SP_RETRACT_DONE");
+        	return Q_TRAN(&Nominal_raised_idle);
         }
     }
     return Q_SUPER(&Nominal_raised);
