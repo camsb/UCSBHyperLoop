@@ -73,7 +73,7 @@ QState Nominal_motorsOff(Maglev_HSM_t *me) {
     	}
         case Q_ENTRY_SIG: {
             BSP_display("Nominal_motorsOff-ENTRY\n");
-            logEventString("Maglev state machine state: Nominal_motorsOff");
+            logEventString("Maglev state machine state: Nominal_motorsOff\n");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
             return Q_HANDLED();
@@ -94,7 +94,7 @@ QState Nominal_motorsOff_idle(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("Nominal_motorsOff_idle-ENTRY\n");
-            logEventString("Maglev state machine state: Nominal_motorsOff_idle");
+            logEventString("Maglev state machine state: Nominal_motorsOff_idle\n");
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -113,7 +113,7 @@ QState Nominal_motorsOff_spinDown(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("Nominal_motorsOff_spinDown-ENTRY\n");
-            logEventString("Maglev state machine state: Nominal_motorsOff_spinDown");
+            logEventString("Maglev state machine state: Nominal_motorsOff_spinDown\n");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
             Maglev_HSM.send_spundown = 1;
@@ -139,7 +139,7 @@ QState Nominal_motorsOn(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("Nominal_motorsOn-ENTRY\n");
-            logEventString("Maglev state machine state: Nominal_motorsOn");
+            logEventString("Maglev state machine state: Nominal_motorsOn\n");
             Maglev_HSM.enable_motors = 1;
             Maglev_HSM.update = 1;
             return Q_TRAN(&Nominal_motorsOn_spinUp);
@@ -165,7 +165,7 @@ QState Nominal_motorsOn_spinUp(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("Nominal_motorsOn_spinUp-ENTRY\n");
-            logEventString("Maglev state machine state: Nominal_motorsOn_spinUp");
+            logEventString("Maglev state machine state: Nominal_motorsOn_spinUp\n");
             Maglev_HSM.send_spunup = 1;
             return Q_HANDLED();
         }
@@ -189,7 +189,7 @@ QState Nominal_motorsOn_hover(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
         	BSP_display("Nominal_motorsOn_hover-ENTRY\n");
-            logEventString("Maglev state machine state: Nominal_motorsOn_hover");
+            logEventString("Maglev state machine state: Nominal_motorsOn_hover\n");
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -208,7 +208,7 @@ QState Fault(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("Fault-ENTRY\n");
-            logEventString("Maglev state machine state: Fault");
+            logEventString("Maglev state machine state: Fault\n");
             return Q_HANDLED();
         }
         case Q_EXIT_SIG: {
@@ -231,7 +231,7 @@ QState Fault_recoverable(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("Fault_recoverable-ENTRY\n");
-            logEventString("Maglev state machine state: Fault_recoverable");
+            logEventString("Maglev state machine state: Fault_recoverable\n");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
             Maglev_HSM.fault = 1;
@@ -258,7 +258,7 @@ QState Fault_unrecoverable(Maglev_HSM_t *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             BSP_display("Fault_unrecoverable-ENTRY\n");
-            logEventString("Maglev state machine state: Fault_unrecoverable");
+            logEventString("Maglev state machine state: Fault_unrecoverable\n");
             Maglev_HSM.enable_motors = 0;
             Maglev_HSM.update = 1;
             Maglev_HSM.fault = 2;
@@ -271,6 +271,10 @@ QState Fault_unrecoverable(Maglev_HSM_t *me) {
         case Q_INIT_SIG: {
             BSP_display("Fault_unrecoverable-INIT\n");
             return Q_HANDLED();
+        }
+        case MAGLEV_FAULT_UNREC: {
+        	BSP_display("Fault_unrecoverable -MAGLEV_FAULT_UNREC\n");
+        	return Q_HANDLED();
         }
     }
     return Q_SUPER(&Fault);
