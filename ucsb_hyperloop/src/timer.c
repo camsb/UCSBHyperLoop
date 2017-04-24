@@ -7,8 +7,8 @@ void runtimeTimerInit() {
 
 	Chip_TIMER_Init(LPC_TIMER0);
 
-	// MAGIC CONSTANT 1923 - This was determined empirically based on TIMER0. Justify it somehow!!!
-	Chip_TIMER_PrescaleSet(LPC_TIMER0, timerFreq/1923);	// Increment counter every millisecond.
+	// MAGIC CONSTANT 2067 - This was determined relative to the RTC on 4/24/17
+	Chip_TIMER_PrescaleSet(LPC_TIMER0, timerFreq/2067);	// Increment counter every millisecond.
 
 	Chip_TIMER_Enable(LPC_TIMER0);
 }
