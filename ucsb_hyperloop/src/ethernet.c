@@ -211,17 +211,12 @@ void recvDataPacket() {
 //	DEBUGOUT("Receiving Data Packet!\n");
 
 	// Check if the message received matches any state machine control signals, issue it if so.
-	char temp_text[DATA_BUF_SIZE];
-	memcpy(temp_text, Net_Rx_Data, DATA_BUF_SIZE);
-	if (strlen(temp_text) > 2){
-		temp_text[strlen(temp_text) - 1] = '\0'; // Strip "0" from end of signals
-		int i;
-		for (i = 0; i < CS_SIZE; i++){
-			if (strcmp(temp_text, control_signal_names[i]) == 0){
-				DEBUGOUT(control_signal_names[i]);
-				DEBUGOUT(" RECEIVED\n");
-				dispatch_signal_from_webapp(i); // Corresponding entry in enum control_signals
-			}
+	int i;
+	for (i = 0; i < CS_SIZE; i++){
+		if (strcmp(Net_Rx_Data, control_signal_names[i]) == 0){
+			DEBUGOUT(control_signal_names[i]);
+			DEBUGOUT(" RECEIVED\n");
+			dispatch_signal_from_webapp(i); // Corresponding entry in enum control_signals
 		}
 	}
 
