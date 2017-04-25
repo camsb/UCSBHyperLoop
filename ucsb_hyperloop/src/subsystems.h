@@ -8,6 +8,7 @@ enum control_signals{
 	// Special sequences
 	CS_GO,
 	CS_ALL_STOP,
+	CS_EMERGENCY_POD_STOP,
 	// Brakes
 	CS_BRAKES_ENGAGE,
 	CS_BRAKES_DISENGAGE,

@@ -18,6 +18,7 @@ const char *control_signal_names[] = {
 		// Special sequences
 		"GO\0",
 		"ALL_STOP\0",
+		"EMERGENCY_POD_STOP\0",
 		// Brakes
 		"BRAKES_ENGAGE\0",
 		"BRAKES_DISENGAGE\0",
