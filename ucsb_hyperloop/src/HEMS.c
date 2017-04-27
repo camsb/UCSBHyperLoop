@@ -79,12 +79,35 @@ HEMS* initialize_HEMS(uint8_t identity) {
   engine->IOX_device_address[0] = IOX_Address_Select[(HEMS_I2C_DIP[engine->identity] >> 2) & 0b110];
   engine->IOX_device_address[1] = IOX_Address_Select[((HEMS_I2C_DIP[engine->identity] >> 2) & 0b110) + 1];
 
+  // Initialize tachometer counters and rpm data
   int n;
   for (n = 0; n < 2; n++) {
     IOX_setup(engine->bus, engine->IOX_device_address[n]);
     engine->tachometer_counter[n] = IOX_read(engine->bus, engine->IOX_device_address[n]);
+    engine->rpm[n] = 0;
   }
 
+  // Initialize thermistor moving averages (with first read)
+  int temp_counter;
+  for (temp_counter = 0; temp_counter < 4; temp_counter++) {
+	  engine->temperatures[temp_counter] = calculate_temperature(ADC_read(engine->bus, engine->ADC_device_address[0], temp_counter + 1));
+  }
+
+#ifdef LPC
+  // Initialize short ranging moving averages (with first read)
+  int short_counter;
+  for (short_counter = 0; short_counter < NUM_SHORTIR; short_counter++){
+  	  float ShortRangingDataRaw = ADC_read(engine->bus, engine->ADC_device_address[0], short_counter + 5);
+  	  float voltage = ((float)ShortRangingDataRaw) / 1300;
+
+  		if (!((voltage < 0.34) || (voltage > 2.43))){
+  			uint16_t index = (uint16_t)(voltage * 100.0 + 0.5) - 34;
+  			engine->short_data[short_counter] = shortRangingDistanceLUT[index];
+  		}
+  }
+#endif
+
+  engine->amps = 0;
   engine->throttle_voltage = 0;
   engine->timestamp = 0;
 
@@ -108,10 +131,12 @@ uint8_t update_HEMS(HEMS* engine) {
       engine->alarm |= 0b00000001;
   }
 
+#ifdef LPC
   // Record short ranging sensor data
   int short_counter;
-  float ShortRangingMovingAverage = 0;
+  float ShortRangingMovingAverage;
 	for (short_counter = 0; short_counter < NUM_SHORTIR; short_counter++){
+	  ShortRangingMovingAverage = engine->short_data[short_counter];
 	  float ShortRangingDataRaw = ADC_read(engine->bus, engine->ADC_device_address[0], short_counter + 5);
 	  float voltage = ((float)ShortRangingDataRaw) / 1300;
 
@@ -121,6 +146,7 @@ uint8_t update_HEMS(HEMS* engine) {
 		}
 		engine->short_data[short_counter] = ShortRangingMovingAverage;
 	}
+#endif
 
   //Record Motor Controller Current
   //With no current, the ACS759x150B should output 3.3V/2
@@ -172,13 +198,32 @@ Maglev_BMS* initialize_Maglev_BMS(uint8_t identity) {
   bms->relay_pin = MAGLEV_BMS_HUB_PORT[bms->identity][1];
   bms->relay_active_low = 1;
 
+  int batt;
+  for (batt = 0; batt < 3; batt++) {
+	  // Initialize battery voltages to a default value
+	  bms->battery_voltage[batt] = 23.0; // TODO: Is this a good starting value? 23V?
+
+	  // Initialize cell voltages to a default value
+	  int i = 0;
+	  for (i = 0; i < 6; i++){
+		  bms->cell_voltages[batt][i] = 2.833; // TODO: Is this a good starting value? 23V / 6 cells?
+	  }
+
+	  // Initialize thermistor moving averages (with first read)
+      int temp_counter = 0;
+      for (temp_counter = 0; temp_counter < 2; temp_counter++) {
+    	bms->temperatures[batt][temp_counter] = calculate_temperature(ADC_read(bms->bus, I2C_ADC_Maglev_subBMS_Addresses[batt], temp_counter + 6));
+      }
+  }
+
+  bms->amps = 0;
   bms->timestamp = 0;
   bms->alarm = 0;
   return bms;
 }
 
 uint8_t update_Maglev_BMS(Maglev_BMS* bms) {
-  int batt, i, cell;
+  int batt, i;
   float prev_voltage;
 
   //0x19 FLOAT LOW
@@ -204,7 +249,7 @@ uint8_t update_Maglev_BMS(Maglev_BMS* bms) {
 		}
     }
   }
-
+  return bms->alarm;
 }
 
 

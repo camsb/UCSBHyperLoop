@@ -7,7 +7,6 @@
 
 //Includes and Libraries
 #include "math.h"
-#include "ranging.h"
 
 #ifdef ARDUINO //ARDUINO LIBRARIES BELOW
 #include "Arduino.h"
@@ -20,6 +19,7 @@
 #include "initialization.h"
 #include "i2c.h"
 #include "timer.h"
+#include "ranging.h"
 
 //I2C Bus Select
 
