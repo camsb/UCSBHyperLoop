@@ -8,6 +8,7 @@
 #include "gpio.h"
 #include "qpn_port.h"
 #include "subsystems.h"
+#include "actuation.h"
 
 /* Rx Buffer Addresses */
 uint16_t gSn_RX_BASE[] = {

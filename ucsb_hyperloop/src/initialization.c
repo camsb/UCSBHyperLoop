@@ -8,6 +8,7 @@
 #include "communication.h"
 #include "sdcard.h"
 #include "gpio.h"
+#include "HEMS.h"
 
 // Initialize all sensor and control systems that are enabled via #-defines in initialization.h!
 void initializeSensorsAndControls(){
@@ -66,6 +67,13 @@ void initializeSensorsAndControls(){
     	NVIC_EnableIRQ(GPIO_IRQn);
 
     	prototypeRunFlag = 0;
+    }
+
+    if (MAGLEV_BMS_ACTIVE){
+    	uint8_t i;
+    	for (i = 0; i < NUM_MAGLEV_BMS; i++){
+    		maglev_bmses[i] = initialize_Maglev_BMS(i);
+    	}
     }
 }
 

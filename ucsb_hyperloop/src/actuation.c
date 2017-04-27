@@ -1,6 +1,8 @@
 #include "maglev_state_machine.h"
 #include "initialization.h"
 #include "HEMS.h"
+#include "sensor_data.h"
+#include "actuation.h"
 
 int prototypeRunStartTime = 0;
 
@@ -192,4 +194,22 @@ void performActuation(){
 #endif // NO_OLD_PROTOTYPE_RUN
 
 
+}
+
+
+void set_motor_throttle(uint8_t motor_num, float voltage){
+  // Set the motor's throttle directly, but only if HEMS is enabled
+  #if MOTOR_BOARD_I2C_ACTIVE
+    if (motor_num < 4){
+        if (voltage <= MAX_THROTTLE_VOLTAGE && voltage >= 0){
+            motors[motor_num]->throttle_voltage = voltage;
+        }
+        else{
+            DEBUGOUT("Invalid voltage specified in set_motor_target_throttle");
+        }
+    }
+    else{
+        DEBUGOUT("Invalid motor number in set_motor_target_throttle!\n");
+    }
+  #endif
 }

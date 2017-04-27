@@ -2,6 +2,7 @@
 #include "maglev_state_machine.h"
 #include "HEMS.h"
 #include "initialization.h"
+#include "sensor_data.h"
 
 #define IGNORE_FAULTS 1 	// For testing
 

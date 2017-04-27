@@ -165,7 +165,7 @@ uint8_t update_HEMS(HEMS* engine) {
 
 
 const uint8_t I2C_ADC_Maglev_subBMS_Addresses[3] = {0x19, 0x0B, 0x18};
-Maglev_BMS* intialize_Maglev_BMS(uint8_t identity) {
+Maglev_BMS* initialize_Maglev_BMS(uint8_t identity) {
   Maglev_BMS* bms = malloc(sizeof(Maglev_BMS));
   bms->identity = identity;
   bms->bus = MAGLEV_BMS_HUB_PORT[bms->identity][0];
@@ -305,23 +305,3 @@ float runtime() {
 
   return runtime_in_seconds;
 }
-
-
-void set_motor_throttle(uint8_t motor_num, float voltage){
-  // Set the motor's throttle directly, but only if HEMS is enabled
-  #if MOTOR_BOARD_I2C_ACTIVE
-    if (motor_num < 4){
-        if (voltage <= MAX_THROTTLE_VOLTAGE && voltage >= 0){
-            motors[motor_num]->throttle_voltage = voltage;
-        }
-        else{
-            DEBUGOUT("Invalid voltage specified in set_motor_target_throttle");
-        }
-    }
-    else{
-        DEBUGOUT("Invalid motor number in set_motor_target_throttle!\n");
-    }
-  #endif
-}
-
-void set_motor_throttle(uint8_t motor_num, float voltage);
