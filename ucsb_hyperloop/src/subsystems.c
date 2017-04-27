@@ -81,9 +81,25 @@ void dispatch_signal_from_webapp(int signal){
 		int new_signal = (signal - CS_SERVPROP_ACTUATOR_LOWER) + SP_ADVANCE_SIG;
 		ISSUE_SIG(Service_Propulsion_HSM, new_signal);
 	}
-	else{
-		// Handle "GO" and "ALL STOP" signals here!
+	// High-level routine signals
+	else if (signal == CS_GO){
+		// start go routine
+		// Make sure to service it in the main loop too.
 	}
+	else if (signal == CS_ALL_STOP){
+		// Stop all subsystems as quickly as possible.
+		// Maglev - issue signal to cut throttle
+		// Braking, Payload actuators, service propulsion
+		//   issue signal to return to closest idle state (or go into 'recoverable fault'?)
+		//   Also, in actuation.c, actually intercept the actuator control signals and turn them off explicitly.
+	}
+	else if (signal == CS_EMERGENCY_POD_STOP){
+		// Stop the pod's forward motion
+		// Cut maglev throttle
+		// Lower payload actuators, if necessary?
+		// Activate brakes
+	}
+	// Else a bad signal was sent? This shouldn't be possible.
 
 }
 

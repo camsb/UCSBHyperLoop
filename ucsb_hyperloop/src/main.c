@@ -66,6 +66,8 @@ int main(void)
             logData(); 			// See communications.c
         }
 	
+        // Service high-level command routines ('go', 'all stop', 'emergency stop')
+
         // ** DETERMINE STATE MACHINE TRANSITIONS**
         if (collectDataFlag){
         	generate_signals_from_sensor_data(); // See subsystems.c
