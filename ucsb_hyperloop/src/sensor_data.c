@@ -112,13 +112,15 @@ void collectData(){
 
     	if(y%10 == 0) {
     		// Print sensor data at 1Hz.
-    		int i;
-    		for(i=0; i<NUM_MAGLEV_BMS; i++) {
-    			DEBUGOUT("BMS %d sensors: \n");
-    			DEBUGOUT("Batt 0: %f v - cell voltages %f | %f | %f | %f | %f | %f - temperatures %d | %d \n", maglev_bmses[i]->battery_voltage[0], maglev_bmses[i]->cell_voltages[0][0], maglev_bmses[i]->cell_voltages[0][1], maglev_bmses[i]->cell_voltages[0][2], maglev_bmses[i]->cell_voltages[0][3], maglev_bmses[i]->cell_voltages[0][4], maglev_bmses[i]->cell_voltages[0][5], maglev_bmses[i]->temperatures[0][0], maglev_bmses[i]->temperatures[0][1]);
-    			DEBUGOUT("Batt 1: %f v - cell voltages %f | %f | %f | %f | %f | %f - temperatures %d | %d \n", maglev_bmses[i]->battery_voltage[0], maglev_bmses[i]->cell_voltages[1][0], maglev_bmses[i]->cell_voltages[1][1], maglev_bmses[i]->cell_voltages[1][2], maglev_bmses[i]->cell_voltages[1][3], maglev_bmses[i]->cell_voltages[1][4], maglev_bmses[i]->cell_voltages[0][5], maglev_bmses[i]->temperatures[1][0], maglev_bmses[i]->temperatures[1][1]);
-    			DEBUGOUT("Batt 2: %f v - cell voltages %f | %f | %f | %f | %f | %f - temperatures %d | %d \n", maglev_bmses[i]->battery_voltage[0], maglev_bmses[i]->cell_voltages[2][0], maglev_bmses[i]->cell_voltages[2][1], maglev_bmses[i]->cell_voltages[2][2], maglev_bmses[i]->cell_voltages[2][3], maglev_bmses[i]->cell_voltages[2][4], maglev_bmses[i]->cell_voltages[0][5], maglev_bmses[i]->temperatures[2][0], maglev_bmses[i]->temperatures[2][1]);
-    		}
+    		//int i;
+    		int i = 1;
+    		//for(i=0; i<NUM_MAGLEV_BMS; i++) {
+    			DEBUGOUT("BMS %d sensors: \n", i);
+    			int j = 0;
+    			for (j = 0; j < 3; j++){
+    				DEBUGOUT("Batt %d: %f v - cell voltages %f | %f | %f | %f | %f | %f - temperatures %d | %d \n", j, maglev_bmses[i]->battery_voltage[j], maglev_bmses[i]->cell_voltages[j][0], maglev_bmses[i]->cell_voltages[j][1], maglev_bmses[i]->cell_voltages[j][2], maglev_bmses[i]->cell_voltages[j][3], maglev_bmses[i]->cell_voltages[j][4], maglev_bmses[i]->cell_voltages[j][5], maglev_bmses[i]->temperatures[j][0], maglev_bmses[i]->temperatures[j][1]);
+    			}
+    		//}
     		DEBUGOUT("\n");
     	}
     }
