@@ -51,10 +51,10 @@ void initializeSensorsAndControls(){
     	i2cInit(I2C2, SPEED_100KHZ);
 
     	// Create objects to hold parameters of the HEMS boards
-        motors[0] = initialize_HEMS(I2C1,0b11111000);   // Front Left
-        motors[1] = initialize_HEMS(I2C2,0);            // Back Left
-        motors[2] = initialize_HEMS(I2C2,0b11111000);   // Back Right
-        motors[3] = initialize_HEMS(I2C1,0);            // Front Right
+        motors[0] = initialize_HEMS(0);   			// Front Left
+        motors[1] = initialize_HEMS(1);            	// Back Left
+        motors[2] = initialize_HEMS(2);   			// Back Right
+        motors[3] = initialize_HEMS(3);          	// Front Right
 
     	// Enable GPIO interrupt.
 #if PHOTO_ELECTRIC_ACTIVE

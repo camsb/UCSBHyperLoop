@@ -22,7 +22,7 @@ void performActuation(){
                 DEBUGOUT("Engines disengaged\n.");
                 // Set throttle to 0
                 int i = 0;
-                for(i = 0; i < NUM_MOTORS; i++) {
+                for(i = 0; i < NUM_HEMS; i++) {
                     set_motor_throttle(i, 0);
                 }
             }

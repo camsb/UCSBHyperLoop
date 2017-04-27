@@ -1,12 +1,13 @@
 //Hyperloop Peripheral Management System
 //Kevin Kha
 
-#define ARDUINO
-//#define LPC
+//#define ARDUINO
+#define LPC
 
 
 //Includes and Libraries
 #include "math.h"
+#include "ranging.h"
 
 #ifdef ARDUINO //ARDUINO LIBRARIES BELOW
 #include "Arduino.h"
@@ -46,7 +47,7 @@
 #define AMMETER_50A_SENSITIVITY 40
 #define AMMETER_150A_SENSITIVITY 8.8		//[mV/A] for the 150amp version of the sensor
 
-
+#define NUM_SHORTIR 2
 
 //Tachometer Data
 #define TACHOMETER_TICKS 1	// Number of reflective strips on the motor.
@@ -80,6 +81,7 @@ typedef struct {
   //Data Storage
   float DAC_diagnostic;
   int temperatures[4];
+  float short_data[NUM_SHORTIR];
   uint8_t amps;
   uint16_t rpm[2];
 
@@ -95,6 +97,10 @@ typedef struct {
   //Safety
   uint8_t alarm;
 } HEMS;
+
+#ifdef LPC
+HEMS *motors[4];
+#endif
 
 HEMS* initialize_HEMS(uint8_t identity);  //See below for I2C DIP addressing
 uint8_t update_HEMS(HEMS* engine);
@@ -242,5 +248,7 @@ void DAC_write(uint8_t i2c_bus, uint8_t DAC_address, uint16_t output_voltage);
 void IOX_setup(uint8_t i2c_bus, uint8_t IOX_address);
 uint16_t IOX_read(uint8_t i2c_bus, uint8_t IOX_address);
 
+#define MAX_THROTTLE_VOLTAGE 5 //[V]
+void set_motor_throttle(uint8_t motor_num, float voltage);
 
 #endif //I2CPERIPHS_H
