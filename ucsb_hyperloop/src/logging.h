@@ -6,6 +6,10 @@
 #include "ethernet.h"
 #include "subsystems.h"
 
+#define FILE_POSITION "position"
+#define FILE_HEMS "maglev"
+#define FILE_BMS "bms"
+
 typedef enum {
 	MAX_EVT
 } Event;

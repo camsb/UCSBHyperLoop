@@ -3,6 +3,47 @@
 #include "ethernet.h"
 #include "HEMS.h"
 #include "sensor_data.h"
+#include "sdcard.h"
+
+void get_filepath(char* filepath, char* dir, char* name, int index) {
+	// Concat the dir and name variables and save to the filepath variable.
+
+}
+
+void initSDCard() {
+	// Create a new directory for this session.
+	char path[32];
+
+
+	// Create new files and add headers.
+	create_position_csv();
+	int i;
+	for(i=0; i<4; i++) {
+		create_hems_csv(i);
+	}
+
+}
+
+void create_csv(char* dir, char* filetype, int index)
+{
+	FIL fileObj;	/* File object */
+	char filepath[32];
+	get_filepath(filepath, dir, filetype, index);
+	f_open(&fileObj, filepath, FA_WRITE | FA_CREATE_ALWAYS);
+
+	// Add headers.
+	if(strcmp(filetype, FILE_POSITION) == 0) {
+
+	}
+	if(strcmp(filetype, FILE_HEMS) == 0) {
+
+	}
+	if(strcmp(filetype, FILE_BMS) == 0) {
+
+	}
+
+	f_close(&fileObj);
+}
 
 void logData(){
 	ethernet_prepare_packet();
