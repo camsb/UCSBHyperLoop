@@ -84,7 +84,7 @@ void collectData(){
         	stripDetectedFlag = 0;
             //DEBUGOUT("Strip %u, of %u in region %u!\n", stripCount, regionalStripCount, stripRegion);
             DEBUGOUT("Distance: %f feet\n", sensorData.photoelectric);
-            sensorData.photoelectric+=100.0;
+            //sensorData.photoelectric+=100.0; // This is moved INTO the handler so we don't lose strips between printouts.
         }
     }
 

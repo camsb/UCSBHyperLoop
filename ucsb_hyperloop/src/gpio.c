@@ -2,6 +2,7 @@
 #include "photo_electric.h"
 #include "ethernet.h"
 #include "timer.h"
+#include "sensor_data.h"
 
 void GPIO_IRQHandler(void)
 {
@@ -18,8 +19,12 @@ void GPIO_IRQHandler(void)
 
 		Chip_GPIOINT_ClearIntStatus(LPC_GPIOINT, PHOTOELECTRIC_INT_PORT, 1 << PHOTOELECTRIC_INT_PIN);
 		stripDetectedFlag = 1;
+		sensorData.photoelectric+=100.0;
+
+		/* Old and unused
 		stripCount++;
 		regionalStripCount++;
+		*/
 
 		Reset_Timer_Counter(LPC_TIMER3);
 		Chip_TIMER_Enable(LPC_TIMER3);

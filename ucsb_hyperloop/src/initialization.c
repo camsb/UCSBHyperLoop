@@ -56,15 +56,6 @@ void initializeSensorsAndControls(){
         motors[2] = initialize_HEMS(I2C2,0b11111000);   // Back Right
         motors[3] = initialize_HEMS(I2C1,0);            // Front Right
 
-    	// Enable GPIO interrupt.
-#if PHOTO_ELECTRIC_ACTIVE
-        Chip_GPIOINT_SetIntRising(LPC_GPIOINT, 2, ((1 << 11) || (1 << 1))); // Photoelectric AND HEMS I2C
-#else
-    	Chip_GPIOINT_SetIntRising(LPC_GPIOINT, 2, 1 << 11);
-#endif
-    	NVIC_ClearPendingIRQ(GPIO_IRQn);
-    	NVIC_EnableIRQ(GPIO_IRQn);
-
     	prototypeRunFlag = 0;
     }
 }
