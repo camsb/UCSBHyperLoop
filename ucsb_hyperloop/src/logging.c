@@ -1,5 +1,6 @@
 #include "logging.h"
 #include "subsystems.h"
+#include "initialization.h"
 
 void initEventLogFile()
 {
@@ -13,6 +14,8 @@ void initErrorLogFile()
 
 void logEventString(char* desc)
 {
+	// ADD GUARDS for web app or SD card here!
+#if ETHERNET_ACTIVE
 	// Send to web app.
 	// Copy strings to Net_Tx_Data
 //	int pos = 0;
@@ -27,7 +30,10 @@ void logEventString(char* desc)
 //	send_data_packet_helper(DAC, errorMsg, &pos);
 
 //	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+#endif
+#if SDCARD_ACTIVE
 	// Save to SD card file.
+#endif
 
 }
 
@@ -41,29 +47,10 @@ void logErrorString(char* desc)
 
 void logStateMachineEvent(int sig)
 {
+	// Get the name of a control signal that
 	char desc[64] = "Control signal: ";
 	char *sig_desc;
-	switch(sig)
-	{
-		case CS_GO:							sig_desc = "GO";							break;
-		case CS_ALL_STOP:					sig_desc = "ALL_STOP";						break;
-		case CS_BRAKES_ENGAGE:				sig_desc = "BRAKES_ENGAGE";					break;
-		case CS_BRAKES_DISENGAGE:			sig_desc = "BRAKES_DISENGAGE";				break;
-		case CS_BRAKES_EMERGENCY:			sig_desc = "BRAKES_EMERGENCY";				break;
-		case CS_BRAKES_EMERGENCY_RELEASE:	sig_desc = "BRAKES_EMERGENCY_RELEASE";		break;
-		case CS_BRAKES_TEST_ENTER:			sig_desc = "BRAKES_TEST_ENTER";				break;
-		case CS_BRAKES_TEST_EXIT:			sig_desc = "BRAKES_TEST_EXIT";				break;
-		case CS_ACTUATORS_RAISE:			sig_desc = "ACTUATORS_RAISE";				break;
-		case CS_ACTUATORS_LOWER:			sig_desc = "ACTUATORS_LOWER";				break;
-		case CS_MAGLEV_ENGAGE:				sig_desc = "MAGLEV_ENGAGE";					break;
-		case CS_MAGLEV_DISENGAGE:			sig_desc = "MAGLEV_DISENGAGE";				break;
-		case CS_SURFPROP_ACTUATOR_LOWER:	sig_desc = "SURFPROP_ACTUATOR_LOWER";		break;
-		case CS_SURFPROP_ACTUATOR_RAISE:	sig_desc = "SURFPROP_ACTUATOR_RAISE";		break;
-		case CS_SURFPROP_ENGAGE_FORWARD:	sig_desc = "SURFPROP_ENGAGE_FORWARD";		break;
-		case CS_SURFPROP_ENGAGE_REVERSE:	sig_desc = "SURFPROP_ENGAGE_REVERSE";		break;
-		case CS_SURFPROP_DISENGAGE:			sig_desc = "SURFPROP_DISENGAGE";			break;
-		default: 							sig_desc = "UNKNOWN_SIG";					break;
-	}
+	sig_desc = control_signal_names[sig];
 	strcat(desc, sig_desc);
 	logEventString(desc);
 }
