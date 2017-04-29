@@ -5,6 +5,8 @@
 #include "service_propulsion_sm.h"
 #include "initialization.h"
 #include "HEMS.h"
+#include "sensor_data.h"
+#include "actuation.h"
 
 int prototypeRunStartTime = 0;
 
@@ -51,7 +53,7 @@ void actuate_maglev(){
 			DEBUGOUT("Engines disengaged\n.");
 			// Set throttle to 0
 			int i = 0;
-			for(i = 0; i < NUM_MOTORS; i++) {
+			for(i = 0; i < NUM_HEMS; i++) {
 				set_motor_throttle(i, 0);
 			}
 		}
@@ -130,4 +132,22 @@ void actuate_service(){
     // ACTUATOR ENABLE = Payload_Actuator_HSM.actuator_enable;
 	// MOTOR DIRECTION = Payload_Actuator_HSM.motor_direction;
 	// MOTOR ENABLE = Payload_Actuator_HSM.motor_enable;
+}
+
+
+void set_motor_throttle(int motor_num, float voltage){
+  // Set the motor's throttle directly, but only if HEMS is enabled
+  #if MOTOR_BOARD_I2C_ACTIVE
+    if (motor_num < 4){
+        if (voltage <= MAX_THROTTLE_VOLTAGE && voltage >= 0){
+            motors[motor_num]->throttle_voltage = voltage;
+        }
+        else{
+            DEBUGOUT("Invalid voltage specified in set_motor_target_throttle");
+        }
+    }
+    else{
+        DEBUGOUT("Invalid motor number in set_motor_target_throttle!\n");
+    }
+  #endif
 }

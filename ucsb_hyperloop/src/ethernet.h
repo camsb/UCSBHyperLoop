@@ -174,6 +174,59 @@
 #define T14				"T14"		// Motor 4 Temperature 2
 #define T15				"T15"		// Motor 4 Temperature 3
 #define T16				"T16"		// Motor 4 Temperature 4
+#define V00				"V00"		// BMS0 Voltage 0
+#define V01				"V01"		// BMS0 Voltage 1
+#define V02 			"V02"		// BMS0 Voltage 2
+#define V03				"V03"		// BMS0 Voltage 3
+#define V04				"V04"		// BMS0 Voltage 4
+#define V05				"V05"		// BMS0 Voltage 5
+#define V06				"V06"		// BMS0 Voltage 6
+#define V07				"V07"		// BMS0 Voltage 7
+#define V08				"V08"		// BMS0 Voltage 8
+#define V09				"V09"		// BMS0 Voltage 9
+#define V0A				"V0A"		// BMS0 Voltage 10
+#define V0B				"V0B"		// BMS0 Voltage 11
+#define V0C				"V0C"		// BMS0 Voltage 12
+#define V0D				"V0D"		// BMS0 Voltage 13
+#define V0E				"V0E"		// BMS0 Voltage 14
+#define V0F				"V0F"		// BMS0 Voltage 15
+#define V0G				"V0G"		// BMS0 Voltage 16
+#define V0H				"V0H"		// BMS0 Voltage 17
+#define T00				"T00"		// BMS0 Temperature 0
+#define T01				"T01"		// BMS0 Temperature 1
+#define T02				"T02"		// BMS0 Temperature 2
+#define T03				"T03"		// BMS0 Temperature 3
+#define T04				"T04"		// BMS0 Temperature 4
+#define T05				"T05"		// BMS0 Temperature 5
+#define T06				"T06"		// BMS0 Temperature 6
+#define T07				"T07"		// BMS0 Temperature 7
+#define V10				"V10"		// BMS1 Voltage 0
+#define V11				"V11"		// BMS1 Voltage 1
+#define V12 			"V12"		// BMS1 Voltage 2
+#define V13				"V13"		// BMS1 Voltage 3
+#define V14				"V14"		// BMS1 Voltage 4
+#define V15				"V15"		// BMS1 Voltage 5
+#define V16				"V16"		// BMS1 Voltage 6
+#define V17				"V17"		// BMS1 Voltage 7
+#define V18				"V18"		// BMS1 Voltage 8
+#define V19				"V19"		// BMS1 Voltage 9
+#define V1A				"V1A"		// BMS1 Voltage 10
+#define V1B				"V1B"		// BMS1 Voltage 11
+#define V1C				"V1C"		// BMS1 Voltage 12
+#define V1D				"V1D"		// BMS1 Voltage 13
+#define V1E				"V1E"		// BMS1 Voltage 14
+#define V1F				"V1F"		// BMS1 Voltage 15
+#define V1G				"V1G"		// BMS1 Voltage 16
+#define V1H				"V1H"		// BMS1 Voltage 17
+#define TA0				"TA0"		// BMS1 Temperature 0
+#define TA1				"TA1"		// BMS1 Temperature 1
+#define TA2				"TA2"		// BMS1 Temperature 2
+#define TA3				"TA3"		// BMS1 Temperature 3
+#define TA4				"TA4"		// BMS1 Temperature 4
+#define TA5				"TA5"		// BMS1 Temperature 5
+#define TA6				"TA6"		// BMS1 Temperature 6
+#define TA7				"TA7"		// BMS1 Temperature 7
+
 
 
 struct data_packet {
@@ -256,7 +309,60 @@ struct prototype_packet {
 	char m4tmp2[6]; // Motor 4 Temperature2
 	char m4tmp3[6]; // Motor 4 Temperature3
 	char m4tmp4[6]; // Motor 4 Temperature4
-
+	/* BMS 0 */
+	char bms0volt0[6]; // BMS 0 Voltage 0
+	char bms0volt1[6]; // BMS 0 Voltage 1
+	char bms0volt2[6]; // BMS 0 Voltage 2
+	char bms0volt3[6]; // BMS 0 Voltage 3
+	char bms0volt4[6]; // BMS 0 Voltage 4
+	char bms0volt5[6]; // BMS 0 Voltage 5
+	char bms0volt6[6]; // BMS 0 Voltage 6
+	char bms0volt7[6]; // BMS 0 Voltage 7
+	char bms0volt8[6]; // BMS 0 Voltage 8
+	char bms0volt9[6]; // BMS 0 Voltage 9
+	char bms0volt10[6]; // BMS 0 Voltage 10
+	char bms0volt11[6]; // BMS 0 Voltage 11
+	char bms0volt12[6]; // BMS 0 Voltage 12
+	char bms0volt13[6]; // BMS 0 Voltage 13
+	char bms0volt14[6]; // BMS 0 Voltage 14
+	char bms0volt15[6]; // BMS 0 Voltage 15
+	char bms0volt16[6]; // BMS 0 Voltage 16
+	char bms0volt17[6]; // BMS 0 Voltage 17
+	char bms0temp0[6]; // BMS 0 Temperature 0
+	char bms0temp1[6]; // BMS 0 Temperature 1
+	char bms0temp2[6]; // BMS 0 Temperature 2
+	char bms0temp3[6]; // BMS 0 Temperature 3
+	char bms0temp4[6]; // BMS 0 Temperature 4
+	char bms0temp5[6]; // BMS 0 Temperature 5
+	char bms0temp6[6]; // BMS 0 Temperature 6
+	char bms0temp7[6]; // BMS 0 Temperature 7
+	/* BMS 1 */
+	char bms1volt0[6]; // BMS 1 Voltage 0
+	char bms1volt1[6]; // BMS 1 Voltage 1
+	char bms1volt2[6]; // BMS 1 Voltage 2
+	char bms1volt3[6]; // BMS 1 Voltage 3
+	char bms1volt4[6]; // BMS 1 Voltage 4
+	char bms1volt5[6]; // BMS 1 Voltage 5
+	char bms1volt6[6]; // BMS 1 Voltage 6
+	char bms1volt7[6]; // BMS 1 Voltage 7
+	char bms1volt8[6]; // BMS 1 Voltage 8
+	char bms1volt9[6]; // BMS 1 Voltage 9
+	char bms1volt10[6]; // BMS 1 Voltage 10
+	char bms1volt11[6]; // BMS 1 Voltage 11
+	char bms1volt12[6]; // BMS 1 Voltage 12
+	char bms1volt13[6]; // BMS 1 Voltage 13
+	char bms1volt14[6]; // BMS 1 Voltage 14
+	char bms1volt15[6]; // BMS 1 Voltage 15
+	char bms1volt16[6]; // BMS 1 Voltage 16
+	char bms1volt17[6]; // BMS 1 Voltage 17
+	char bms1temp0[6]; // BMS 1 Temperature 0
+	char bms1temp1[6]; // BMS 1 Temperature 1
+	char bms1temp2[6]; // BMS 1 Temperature 2
+	char bms1temp3[6]; // BMS 1 Temperature 3
+	char bms1temp4[6]; // BMS 1 Temperature 4
+	char bms1temp5[6]; // BMS 1 Temperature 5
+	char bms1temp6[6]; // BMS 1 Temperature 6
+	char bms1temp7[6]; // BMS 1 Temperature 7
 };
 
 struct data_packet DataPacket;

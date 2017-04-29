@@ -5,6 +5,7 @@
 #include "service_propulsion_sm.h"
 #include "HEMS.h"
 #include "initialization.h"
+#include "sensor_data.h"
 #include "logging.h"
 
 #define ISSUE_SIG(hsm, sig) do {\
@@ -361,11 +362,11 @@ int maglev_fault_from_sensors(){
 	// Recoverable faults (new or existing)
 	// Find the average RPM of all the motors
 	int avg_rpm = 0;
-	for (i = 0; i < NUM_MOTORS; i++){
+	for (i = 0; i < NUM_HEMS; i++){
 		avg_rpm += motors[i]->rpm[1];
 	}
-	avg_rpm /= NUM_MOTORS;
-	for (i = 0; i < NUM_MOTORS; i++){
+	avg_rpm /= NUM_HEMS;
+	for (i = 0; i < NUM_HEMS; i++){
 		// Check current readings
 		if (motors[i]->amps > HEMS_MAX_CURRENT){
 			return 1;
@@ -378,7 +379,7 @@ int maglev_fault_from_sensors(){
 		}
 
 		// Check that no thermistors are above the safe temperature
-		for (j = 0; j < NUM_THERMISTORS; j++){
+		for (j = 0; j < 4; j++){
 			if (motors[i]->temperatures[j] >= HEMS_MAX_TEMP){
 				return 1;
 			}

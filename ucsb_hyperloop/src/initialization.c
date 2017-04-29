@@ -8,6 +8,7 @@
 #include "communication.h"
 #include "sdcard.h"
 #include "gpio.h"
+#include "HEMS.h"
 
 // Initialize all sensor and control systems that are enabled via #-defines in initialization.h!
 void initializeSensorsAndControls(){
@@ -51,12 +52,19 @@ void initializeSensorsAndControls(){
     	i2cInit(I2C2, SPEED_100KHZ);
 
     	// Create objects to hold parameters of the HEMS boards
-        motors[0] = initialize_HEMS(I2C1,0b11111000);   // Front Left
-        motors[1] = initialize_HEMS(I2C2,0);            // Back Left
-        motors[2] = initialize_HEMS(I2C2,0b11111000);   // Back Right
-        motors[3] = initialize_HEMS(I2C1,0);            // Front Right
+        motors[0] = initialize_HEMS(0);   			// Front Left
+        motors[1] = initialize_HEMS(1);            	// Back Left
+        motors[2] = initialize_HEMS(2);   			// Back Right
+        motors[3] = initialize_HEMS(3);          	// Front Right
 
     	prototypeRunFlag = 0;
+    }
+
+    if (MAGLEV_BMS_ACTIVE){
+    	uint8_t i;
+    	for (i = 0; i < NUM_MAGLEV_BMS; i++){
+    		maglev_bmses[i] = initialize_Maglev_BMS(i);
+    	}
     }
 }
 

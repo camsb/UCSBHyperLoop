@@ -10,6 +10,9 @@ void    collectData();
 void    TIMER1_IRQHandler(void);
 void    gatherSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 
+HEMS *motors[NUM_HEMS];
+Maglev_BMS *maglev_bmses[NUM_MAGLEV_BMS];
+
 typedef struct{
 
   float x;

@@ -90,20 +90,40 @@ void collectData(){
 
     if(MOTOR_BOARD_I2C_ACTIVE) {
     	int i;
-    	for(i=0; i < NUM_MOTORS; i++) {
+    	for(i=0; i < NUM_HEMS; i++) {
     		update_HEMS(motors[i]);
     	}
 
     	if(y%10 == 0) {
     		// Print sensor data at 1Hz.
     		int i;
-    		for(i=0; i<NUM_MOTORS; i++) {
+    		for(i=0; i<NUM_HEMS; i++) {
     			DEBUGOUT("Motor %d sensors: RPM0=%d, RPM1=%d CURRENT=%d, TEMP=%d,%d,%d,%d, SHORT=%f\n", i, motors[i]->rpm[0], motors[i]->rpm[1], motors[i]->amps, motors[i]->temperatures[0], motors[i]->temperatures[1],motors[i]->temperatures[2],motors[i]->temperatures[3], motors[i]->short_data[0]);
     		}
     		DEBUGOUT("\n");
     	}
     }
 
+    if(MAGLEV_BMS_ACTIVE){
+    	int i;
+    	for (i = 0; i < NUM_MAGLEV_BMS; i++){
+    		update_Maglev_BMS(maglev_bmses[i]);
+    	}
+
+    	if(y%10 == 0) {
+    		// Print sensor data at 1Hz.
+    		//int i;
+    		int i = 1;
+    		//for(i=0; i<NUM_MAGLEV_BMS; i++) {
+    			DEBUGOUT("BMS %d sensors: \n", i);
+    			int j = 0;
+    			for (j = 0; j < 3; j++){
+    				DEBUGOUT("Batt %d: %f v - cell voltages %f | %f | %f | %f | %f | %f - temperatures %d | %d \n", j, maglev_bmses[i]->battery_voltage[j], maglev_bmses[i]->cell_voltages[j][0], maglev_bmses[i]->cell_voltages[j][1], maglev_bmses[i]->cell_voltages[j][2], maglev_bmses[i]->cell_voltages[j][3], maglev_bmses[i]->cell_voltages[j][4], maglev_bmses[i]->cell_voltages[j][5], maglev_bmses[i]->temperatures[j][0], maglev_bmses[i]->temperatures[j][1]);
+    			}
+    		//}
+    		DEBUGOUT("\n");
+    	}
+    }
 
 	getPressureFlag = !getPressureFlag; // Toggling between pressure and temperature register loading.
 
