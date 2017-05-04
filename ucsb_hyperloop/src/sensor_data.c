@@ -125,6 +125,13 @@ void collectData(){
     	}
     }
 
+    if(CONTACT_SENSOR_ACTIVE){
+    	int contact_sensor_pushed;
+    	contact_sensor_pushed = GPIO_Contact_Sensor_Pushed();
+    	sensorData.contact_sensor_pushed = contact_sensor_pushed;
+    	DEBUGOUT("contact_sensor_pushed: %d\n", contact_sensor_pushed);
+    }
+
 	getPressureFlag = !getPressureFlag; // Toggling between pressure and temperature register loading.
 
 	// Currently disabled debug-out printing of data.

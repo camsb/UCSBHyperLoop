@@ -66,6 +66,10 @@ void initializeSensorsAndControls(){
     		maglev_bmses[i] = initialize_Maglev_BMS(i);
     	}
     }
+
+    if (CONTACT_SENSOR_ACTIVE){
+    	GPIO_Input_Init(GPIO_CONTACT_SENSOR_PORT, GPIO_CONTACT_SENSOR_PIN);
+    }
 }
 
 void initializeCommunications(){

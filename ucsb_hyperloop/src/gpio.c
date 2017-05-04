@@ -97,3 +97,6 @@ void GPIO_Output_Init(uint8_t port, uint8_t pin) {
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO, port, pin);
 }
 
+int GPIO_Contact_Sensor_Pushed() {
+	return Chip_GPIO_GetPinState(LPC_GPIO, GPIO_CONTACT_SENSOR_PORT, GPIO_CONTACT_SENSOR_PIN);
+}

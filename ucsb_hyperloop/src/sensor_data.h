@@ -63,6 +63,8 @@ typedef struct{
 
   rangingData shortRangingData;
   rangingData longRangingData;
+  int contact_sensor_pushed;
+
 
 } sensor;
 
