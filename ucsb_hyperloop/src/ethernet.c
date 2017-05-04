@@ -343,76 +343,6 @@ void recvDataPacket() {
 	}
 }
 
-void sendDataPacket() {
-
-	sendDataFlag = 0;
-
-	// Copy strings to Net_Tx_Data
-	int pos = 0;
-	memset(Net_Tx_Data, 0, 256); // Make sure this clears enough space
-
-	/* Atmospheric, Miscellaneous Data */
-	sprintf(DataPacket.bm1, "%06.2f", sensorData.pressure1);
-	sprintf(DataPacket.bm2, "%06.2f", sensorData.pressure2);
-	sprintf(DataPacket.tm1, "%06.2f", sensorData.temp1);
-	sprintf(DataPacket.tm2, "%06.2f", sensorData.temp2);
-	sprintf(DataPacket.tm3, "%06.2f", sensorData.temp3);
-	sprintf(DataPacket.tm4, "%06.2f", sensorData.temp4);
-	sprintf(DataPacket.ta1, "%06.2f", sensorData.tacho1);
-	sprintf(DataPacket.ta2, "%06.2f", sensorData.tacho2);
-	sprintf(DataPacket.ta3, "%06.2f", sensorData.tacho3);
-	sprintf(DataPacket.ta4, "%06.2f", sensorData.tacho4);
-	sprintf(DataPacket.pwr, "%06.2f", sensorData.power);
-	/* Positional Data */
-	sprintf(DataPacket.pox, "%06.2f", sensorData.positionX);
-	sprintf(DataPacket.poy, "%06.2f", sensorData.positionY);
-	sprintf(DataPacket.poz, "%06.2f", sensorData.positionZ);
-	/* Velocity Data */
-	sprintf(DataPacket.vex, "%06.2f", sensorData.velocityX);
-	sprintf(DataPacket.vey, "%06.2f", sensorData.velocityY);
-	sprintf(DataPacket.vez, "%06.2f", sensorData.velocityZ);
-	/* Acceleration Data */
-	sprintf(DataPacket.acx, "%06.2f", sensorData.accelX);
-	sprintf(DataPacket.acy, "%06.2f", sensorData.accelY);
-	sprintf(DataPacket.acz, "%06.2f", sensorData.accelZ);
-	/* Attitudinal Data */
-	sprintf(DataPacket.rol, "%06.2f", sensorData.roll);
-	sprintf(DataPacket.pit, "%06.2f", sensorData.pitch);
-	sprintf(DataPacket.yaw, "%06.2f", sensorData.yaw);
-
-	/* Atmospheric, Miscellaneous Data */
-	send_data_packet_helper(BM1, DataPacket.bm1, &pos);
-	send_data_packet_helper(BM2, DataPacket.bm2, &pos);
-	send_data_packet_helper(TM1, DataPacket.tm1, &pos);
-	send_data_packet_helper(TM2, DataPacket.tm2, &pos);
-	send_data_packet_helper(TM3, DataPacket.tm3, &pos);
-	send_data_packet_helper(TM4, DataPacket.tm4, &pos);
-	send_data_packet_helper(TA1, DataPacket.ta1, &pos);
-	send_data_packet_helper(TA2, DataPacket.ta2, &pos);
-	send_data_packet_helper(TA3, DataPacket.ta3, &pos);
-	send_data_packet_helper(TA4, DataPacket.ta4, &pos);
-	send_data_packet_helper(PWR, DataPacket.pwr, &pos);
-	/* Positional Data */
-	send_data_packet_helper(POX, DataPacket.pox, &pos);
-	send_data_packet_helper(POY, DataPacket.poy, &pos);
-	send_data_packet_helper(POZ, DataPacket.poz, &pos);
-	/* Velocity Data */
-	send_data_packet_helper(VEX, DataPacket.vex, &pos);
-	send_data_packet_helper(VEY, DataPacket.vey, &pos);
-	send_data_packet_helper(VEZ, DataPacket.vez, &pos);
-	/* Acceleration Data */
-	send_data_packet_helper(ACX, DataPacket.acx, &pos);
-	send_data_packet_helper(ACY, DataPacket.acy, &pos);
-	send_data_packet_helper(ACZ, DataPacket.acz, &pos);
-	/* Attitudinal Data */
-	send_data_packet_helper(ROL, DataPacket.rol, &pos);
-	send_data_packet_helper(PIT, DataPacket.pit, &pos);
-	send_data_packet_helper(YAW, DataPacket.yaw, &pos);
-
-	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
-
-}
-
 void sendPrototypePacket(){
 	sendDataFlag = 0;
 
@@ -421,96 +351,98 @@ void sendPrototypePacket(){
 	memset(Net_Tx_Data, 0, 1024); // Make sure this clears enough space
 
 	/* DAC Output */
-	sprintf(PrototypePacket.dac, "%06.2f", motors[0]->throttle_voltage);
+	snprintf(PrototypePacket.dac, 16, "%06.2f", motors[0]->throttle_voltage);
 	/* Short Ranging */
-	sprintf(PrototypePacket.sr1, "%06.2f", motors[0]->short_data[0]);
-	sprintf(PrototypePacket.sr2, "%06.2f", motors[1]->short_data[0]);
-	sprintf(PrototypePacket.sr3, "%06.2f", motors[2]->short_data[0]);
-	sprintf(PrototypePacket.sr4, "%06.2f", motors[3]->short_data[0]);
+	snprintf(PrototypePacket.sr1, 16, "%06.2f", (float)motors[0]->short_data[0]);
+	snprintf(PrototypePacket.sr2, 16, "%06.2f", (float)motors[1]->short_data[0]);
+	snprintf(PrototypePacket.sr3, 16, "%06.2f", (float)motors[2]->short_data[0]);
+	snprintf(PrototypePacket.sr4, 16, "%06.2f", (float)motors[3]->short_data[0]);
 	/* Photoelectric */
-//	sprintf(PrototypePacket.ph1, "%06.2f", sensorData.photoelectric);
+	snprintf(PrototypePacket.ph1, 16, "%06.2f", (float)sensorData.photoelectric);
 	/* Current Output */
-	sprintf(PrototypePacket.cu1, "%06.2f", (float)motors[0]->amps);
-	sprintf(PrototypePacket.cu2, "%06.2f", (float)motors[1]->amps);
-	sprintf(PrototypePacket.cu3, "%06.2f", (float)motors[2]->amps);
-	sprintf(PrototypePacket.cu4, "%06.2f", (float)motors[3]->amps);
+	snprintf(PrototypePacket.cu1, 16, "%06.2f", (float)motors[0]->amps);
+	snprintf(PrototypePacket.cu2, 16, "%06.2f", (float)motors[1]->amps);
+	snprintf(PrototypePacket.cu3, 16, "%06.2f", (float)motors[2]->amps);
+	snprintf(PrototypePacket.cu4, 16, "%06.2f", (float)motors[3]->amps);
 	/* Tachometer Output */ // TODO: EXPAND THIS TO READING BOTH VALUES
-	sprintf(PrototypePacket.ta1, "%06.2f", (float)motors[0]->rpm[1]);
-	sprintf(PrototypePacket.ta2, "%06.2f", (float)motors[1]->rpm[1]);
-	sprintf(PrototypePacket.ta3, "%06.2f", (float)motors[2]->rpm[1]);
-	sprintf(PrototypePacket.ta4, "%06.2f", (float)motors[3]->rpm[1]);
+	snprintf(PrototypePacket.ta1, 16, "%06.2f", (float)motors[0]->rpm[1]);
+	snprintf(PrototypePacket.ta2, 16, "%06.2f", (float)motors[1]->rpm[1]);
+	snprintf(PrototypePacket.ta3, 16, "%06.2f", (float)motors[2]->rpm[1]);
+	snprintf(PrototypePacket.ta4, 16, "%06.2f", (float)motors[3]->rpm[1]);
 	/* Temperature Output */
-	sprintf(PrototypePacket.m1tmp1, "%06.f", (float)motors[0]->temperatures[0]);
-	sprintf(PrototypePacket.m1tmp2, "%06.f", (float)motors[0]->temperatures[1]);
-	sprintf(PrototypePacket.m1tmp3, "%06.f", (float)motors[0]->temperatures[2]);
-	sprintf(PrototypePacket.m1tmp4, "%06.f", (float)motors[0]->temperatures[3]);
-	sprintf(PrototypePacket.m2tmp1, "%06.f", (float)motors[1]->temperatures[0]);
-	sprintf(PrototypePacket.m2tmp2, "%06.f", (float)motors[1]->temperatures[1]);
-	sprintf(PrototypePacket.m2tmp3, "%06.f", (float)motors[1]->temperatures[2]);
-	sprintf(PrototypePacket.m2tmp4, "%06.f", (float)motors[1]->temperatures[3]);
-	sprintf(PrototypePacket.m3tmp1, "%06.f", (float)motors[2]->temperatures[0]);
-	sprintf(PrototypePacket.m3tmp2, "%06.f", (float)motors[2]->temperatures[1]);
-	sprintf(PrototypePacket.m3tmp3, "%06.f", (float)motors[2]->temperatures[2]);
-	sprintf(PrototypePacket.m3tmp4, "%06.f", (float)motors[2]->temperatures[3]);
-	sprintf(PrototypePacket.m4tmp1, "%06.f", (float)motors[3]->temperatures[0]);
-	sprintf(PrototypePacket.m4tmp2, "%06.f", (float)motors[3]->temperatures[1]);
-	sprintf(PrototypePacket.m4tmp3, "%06.f", (float)motors[3]->temperatures[2]);
-	sprintf(PrototypePacket.m4tmp4, "%06.f", (float)motors[3]->temperatures[3]);
+	snprintf(PrototypePacket.m1tmp1, 16, "%06.f", (float)motors[0]->temperatures[0]);
+	snprintf(PrototypePacket.m1tmp2, 16, "%06.f", (float)motors[0]->temperatures[1]);
+	snprintf(PrototypePacket.m1tmp3, 16, "%06.f", (float)motors[0]->temperatures[2]);
+	snprintf(PrototypePacket.m1tmp4, 16, "%06.f", (float)motors[0]->temperatures[3]);
+	snprintf(PrototypePacket.m2tmp1, 16, "%06.f", (float)motors[1]->temperatures[0]);
+	snprintf(PrototypePacket.m2tmp2, 16, "%06.f", (float)motors[1]->temperatures[1]);
+	snprintf(PrototypePacket.m2tmp3, 16, "%06.f", (float)motors[1]->temperatures[2]);
+	snprintf(PrototypePacket.m2tmp4, 16, "%06.f", (float)motors[1]->temperatures[3]);
+	snprintf(PrototypePacket.m3tmp1, 16, "%06.f", (float)motors[2]->temperatures[0]);
+	snprintf(PrototypePacket.m3tmp2, 16, "%06.f", (float)motors[2]->temperatures[1]);
+	snprintf(PrototypePacket.m3tmp3, 16, "%06.f", (float)motors[2]->temperatures[2]);
+	snprintf(PrototypePacket.m3tmp4, 16, "%06.f", (float)motors[2]->temperatures[3]);
+	snprintf(PrototypePacket.m4tmp1, 16, "%06.f", (float)motors[3]->temperatures[0]);
+	snprintf(PrototypePacket.m4tmp2, 16, "%06.f", (float)motors[3]->temperatures[1]);
+	snprintf(PrototypePacket.m4tmp3, 16, "%06.f", (float)motors[3]->temperatures[2]);
+	snprintf(PrototypePacket.m4tmp4, 16, "%06.f", (float)motors[3]->temperatures[3]);
 	/* BMS 0 Voltage */
-	sprintf(PrototypePacket.bms0volt0, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][0]);
-	sprintf(PrototypePacket.bms0volt1, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][1]);
-	sprintf(PrototypePacket.bms0volt2, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][2]);
-	sprintf(PrototypePacket.bms0volt3, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][3]);
-	sprintf(PrototypePacket.bms0volt4, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][4]);
-	sprintf(PrototypePacket.bms0volt5, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][5]);
-	sprintf(PrototypePacket.bms0volt6, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][0]);
-	sprintf(PrototypePacket.bms0volt7, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][1]);
-	sprintf(PrototypePacket.bms0volt8, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][2]);
-	sprintf(PrototypePacket.bms0volt9, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][3]);
-	sprintf(PrototypePacket.bms0volt10, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][4]);
-	sprintf(PrototypePacket.bms0volt11, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][5]);
-	sprintf(PrototypePacket.bms0volt12, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][0]);
-	sprintf(PrototypePacket.bms0volt13, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][1]);
-	sprintf(PrototypePacket.bms0volt14, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][2]);
-	sprintf(PrototypePacket.bms0volt15, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][3]);
-	sprintf(PrototypePacket.bms0volt16, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][4]);
-	sprintf(PrototypePacket.bms0volt17, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][5]);
+	snprintf(PrototypePacket.bms0volt0, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][0]);
+	snprintf(PrototypePacket.bms0volt1, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][1]);
+	snprintf(PrototypePacket.bms0volt2, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][2]);
+	snprintf(PrototypePacket.bms0volt3, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][3]);
+	snprintf(PrototypePacket.bms0volt4, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][4]);
+	snprintf(PrototypePacket.bms0volt5, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[0][5]);
+	snprintf(PrototypePacket.bms0volt6, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][0]);
+	snprintf(PrototypePacket.bms0volt7, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][1]);
+	snprintf(PrototypePacket.bms0volt8, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][2]);
+	snprintf(PrototypePacket.bms0volt9, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][3]);
+	snprintf(PrototypePacket.bms0volt10, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][4]);
+	snprintf(PrototypePacket.bms0volt11, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[1][5]);
+	snprintf(PrototypePacket.bms0volt12, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][0]);
+	snprintf(PrototypePacket.bms0volt13, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][1]);
+	snprintf(PrototypePacket.bms0volt14, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][2]);
+	snprintf(PrototypePacket.bms0volt15, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][3]);
+	snprintf(PrototypePacket.bms0volt16, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][4]);
+	snprintf(PrototypePacket.bms0volt17, 16, "%06.f", (float)maglev_bmses[0]->cell_voltages[2][5]);
 	/* BMS 0 Temperature */
-	sprintf(PrototypePacket.bms0temp0, "%06.f", (float)maglev_bmses[0]->temperatures[0][0]);
-	sprintf(PrototypePacket.bms0temp1, "%06.f", (float)maglev_bmses[0]->temperatures[0][1]);
-	sprintf(PrototypePacket.bms0temp2, "%06.f", (float)maglev_bmses[0]->temperatures[1][0]);
-	sprintf(PrototypePacket.bms0temp3, "%06.f", (float)maglev_bmses[0]->temperatures[1][1]);
-	sprintf(PrototypePacket.bms0temp4, "%06.f", (float)maglev_bmses[0]->temperatures[2][0]);
-	sprintf(PrototypePacket.bms0temp5, "%06.f", (float)maglev_bmses[0]->temperatures[2][1]);
+	snprintf(PrototypePacket.bms0temp0, 16, "%06.f", (float)maglev_bmses[0]->temperatures[0][0]);
+	snprintf(PrototypePacket.bms0temp1, 16, "%06.f", (float)maglev_bmses[0]->temperatures[0][1]);
+	snprintf(PrototypePacket.bms0temp2, 16, "%06.f", (float)maglev_bmses[0]->temperatures[1][0]);
+	snprintf(PrototypePacket.bms0temp3, 16, "%06.f", (float)maglev_bmses[0]->temperatures[1][1]);
+	snprintf(PrototypePacket.bms0temp4, 16, "%06.f", (float)maglev_bmses[0]->temperatures[2][0]);
+	snprintf(PrototypePacket.bms0temp5, 16, "%06.f", (float)maglev_bmses[0]->temperatures[2][1]);
 	/* BMS 0 Voltage */
-	sprintf(PrototypePacket.bms1volt0, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][0]);
-	sprintf(PrototypePacket.bms1volt1, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][1]);
-	sprintf(PrototypePacket.bms1volt2, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][2]);
-	sprintf(PrototypePacket.bms1volt3, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][3]);
-	sprintf(PrototypePacket.bms1volt4, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][4]);
-	sprintf(PrototypePacket.bms1volt5, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][5]);
-	sprintf(PrototypePacket.bms1volt6, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][0]);
-	sprintf(PrototypePacket.bms1volt7, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][1]);
-	sprintf(PrototypePacket.bms1volt8, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][2]);
-	sprintf(PrototypePacket.bms1volt9, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][3]);
-	sprintf(PrototypePacket.bms1volt10, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][4]);
-	sprintf(PrototypePacket.bms1volt11, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][5]);
-	sprintf(PrototypePacket.bms1volt12, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][0]);
-	sprintf(PrototypePacket.bms1volt13, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][1]);
-	sprintf(PrototypePacket.bms1volt14, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][2]);
-	sprintf(PrototypePacket.bms1volt15, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][3]);
-	sprintf(PrototypePacket.bms1volt16, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][4]);
-	sprintf(PrototypePacket.bms1volt17, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][5]);
+	snprintf(PrototypePacket.bms1volt0, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][0]);
+	snprintf(PrototypePacket.bms1volt1, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][1]);
+	snprintf(PrototypePacket.bms1volt2, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][2]);
+	snprintf(PrototypePacket.bms1volt3, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][3]);
+	snprintf(PrototypePacket.bms1volt4, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][4]);
+	snprintf(PrototypePacket.bms1volt5, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[0][5]);
+	snprintf(PrototypePacket.bms1volt6, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][0]);
+	snprintf(PrototypePacket.bms1volt7, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][1]);
+	snprintf(PrototypePacket.bms1volt8, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][2]);
+	snprintf(PrototypePacket.bms1volt9, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][3]);
+	snprintf(PrototypePacket.bms1volt10, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][4]);
+	snprintf(PrototypePacket.bms1volt11, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[1][5]);
+	snprintf(PrototypePacket.bms1volt12, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][0]);
+	snprintf(PrototypePacket.bms1volt13, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][1]);
+	snprintf(PrototypePacket.bms1volt14, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][2]);
+	snprintf(PrototypePacket.bms1volt15, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][3]);
+	snprintf(PrototypePacket.bms1volt16, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][4]);
+	snprintf(PrototypePacket.bms1volt17, 16, "%06.f", (float)maglev_bmses[1]->cell_voltages[2][5]);
 	/* BMS 0 Temperature */
-	sprintf(PrototypePacket.bms1temp0, "%06.f", (float)maglev_bmses[1]->temperatures[0][0]);
-	sprintf(PrototypePacket.bms1temp1, "%06.f", (float)maglev_bmses[1]->temperatures[0][1]);
-	sprintf(PrototypePacket.bms1temp2, "%06.f", (float)maglev_bmses[1]->temperatures[1][0]);
-	sprintf(PrototypePacket.bms1temp3, "%06.f", (float)maglev_bmses[1]->temperatures[1][1]);
-	sprintf(PrototypePacket.bms1temp4, "%06.f", (float)maglev_bmses[1]->temperatures[2][0]);
-	sprintf(PrototypePacket.bms1temp5, "%06.f", (float)maglev_bmses[1]->temperatures[2][1]);
+	snprintf(PrototypePacket.bms1temp0, 16, "%06.f", (float)maglev_bmses[1]->temperatures[0][0]);
+	snprintf(PrototypePacket.bms1temp1, 16, "%06.f", (float)maglev_bmses[1]->temperatures[0][1]);
+	snprintf(PrototypePacket.bms1temp2, 16, "%06.f", (float)maglev_bmses[1]->temperatures[1][0]);
+	snprintf(PrototypePacket.bms1temp3, 16, "%06.f", (float)maglev_bmses[1]->temperatures[1][1]);
+	snprintf(PrototypePacket.bms1temp4, 16, "%06.f", (float)maglev_bmses[1]->temperatures[2][0]);
+	snprintf(PrototypePacket.bms1temp5, 16, "%06.f", (float)maglev_bmses[1]->temperatures[2][1]);
 
 	/* DAC Data */
 	send_data_packet_helper(DAC, PrototypePacket.dac, &pos);
+	/* Photoelectric Data */
+	send_data_packet_helper(PH1, PrototypePacket.ph1, &pos);
 	/* Short Ranging */
 	send_data_packet_helper(SR1, PrototypePacket.sr1, &pos);
 	send_data_packet_helper(SR2, PrototypePacket.sr2, &pos);
@@ -543,6 +475,13 @@ void sendPrototypePacket(){
 	send_data_packet_helper(T14, PrototypePacket.m4tmp2, &pos);
 	send_data_packet_helper(T15, PrototypePacket.m4tmp3, &pos);
 	send_data_packet_helper(T16, PrototypePacket.m4tmp4, &pos);
+
+	// Send intitial data
+	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
+
+	// Copy strings to Net_Tx_Data
+	int pos = 0;
+	memset(Net_Tx_Data, 0, 1024); // Make sure this clears enough space
 	/* BMS 0 Voltage Data */
 	send_data_packet_helper(V00, PrototypePacket.bms0volt0, &pos);
 	send_data_packet_helper(V01, PrototypePacket.bms0volt1, &pos);
@@ -562,7 +501,7 @@ void sendPrototypePacket(){
 	send_data_packet_helper(V0F, PrototypePacket.bms0volt15, &pos);
 	send_data_packet_helper(V0G, PrototypePacket.bms0volt16, &pos);
 	send_data_packet_helper(V0H, PrototypePacket.bms0volt17, &pos);
-	/* BMS 0 Temperature Data*/
+//	/* BMS 0 Temperature Data*/
 	send_data_packet_helper(T00, PrototypePacket.bms0temp0, &pos);
 	send_data_packet_helper(T01, PrototypePacket.bms0temp1, &pos);
 	send_data_packet_helper(T02, PrototypePacket.bms0temp2, &pos);
@@ -571,7 +510,7 @@ void sendPrototypePacket(){
 	send_data_packet_helper(T05, PrototypePacket.bms0temp5, &pos);
 	send_data_packet_helper(T06, PrototypePacket.bms0temp6, &pos);
 	send_data_packet_helper(T07, PrototypePacket.bms0temp7, &pos);
-	/* BMS 1 Voltage Data */
+//	/* BMS 1 Voltage Data */
 	send_data_packet_helper(V10, PrototypePacket.bms1volt0, &pos);
 	send_data_packet_helper(V11, PrototypePacket.bms1volt1, &pos);
 	send_data_packet_helper(V12, PrototypePacket.bms1volt2, &pos);
@@ -590,38 +529,22 @@ void sendPrototypePacket(){
 	send_data_packet_helper(V1F, PrototypePacket.bms1volt15, &pos);
 	send_data_packet_helper(V1G, PrototypePacket.bms1volt16, &pos);
 	send_data_packet_helper(V1H, PrototypePacket.bms1volt17, &pos);
-	/* BMS 1 Temperature Data*/
-	send_data_packet_helper(TA0, PrototypePacket.bms1temp0, &pos);
-	send_data_packet_helper(TA1, PrototypePacket.bms1temp1, &pos);
-	send_data_packet_helper(TA2, PrototypePacket.bms1temp2, &pos);
-	send_data_packet_helper(TA3, PrototypePacket.bms1temp3, &pos);
-	send_data_packet_helper(TA4, PrototypePacket.bms1temp4, &pos);
-	send_data_packet_helper(TA5, PrototypePacket.bms1temp5, &pos);
-	send_data_packet_helper(TA6, PrototypePacket.bms1temp6, &pos);
-	send_data_packet_helper(TA7, PrototypePacket.bms1temp7, &pos);
+//	/* BMS 1 Temperature Data*/
+	send_data_packet_helper(TB0, PrototypePacket.bms1temp0, &pos);
+	send_data_packet_helper(TB1, PrototypePacket.bms1temp1, &pos);
+	send_data_packet_helper(TB2, PrototypePacket.bms1temp2, &pos);
+	send_data_packet_helper(TB3, PrototypePacket.bms1temp3, &pos);
+	send_data_packet_helper(TB4, PrototypePacket.bms1temp4, &pos);
+	send_data_packet_helper(TB5, PrototypePacket.bms1temp5, &pos);
+	send_data_packet_helper(TB6, PrototypePacket.bms1temp6, &pos);
+	send_data_packet_helper(TB7, PrototypePacket.bms1temp7, &pos);
 
 	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 
-	// Copy strings to Net_Tx_Data
-//	pos = 0;
-//	memset(Net_Tx_Data, 0, 512); // Make sure this clears enough space
-
-	/* Short Ranging Data */
-//	send_data_packet_helper(SR1, PrototypePacket.sr1, &pos);
-//	send_data_packet_helper(SR2, PrototypePacket.sr2, &pos);
-//	send_data_packet_helper(SR3, PrototypePacket.sr3, &pos);
-//	send_data_packet_helper(SR4, PrototypePacket.sr4, &pos);
-	/* BMS data */
-
-	/* Photoelectric Data */
-//	send_data_packet_helper(PH1, PrototypePacket.ph1, &pos);
-
 //	int i;
 //	for (i = 0; i < DATA_BUF_SIZE; i++) {
-//		DEBUGOUT("%i:%c\n", i, Net_Tx_Data[i]);
+//		printf("%i:%c\n", i, Net_Tx_Data[i]);
 //	}
-
-//	Wiz_Send_Blocking(SOCKET_ID, Net_Tx_Data);
 }
 
 // Singular, will change to multiple, or do an interrupt or something

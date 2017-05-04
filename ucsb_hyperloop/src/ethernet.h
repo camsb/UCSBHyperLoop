@@ -101,33 +101,6 @@
 #define REMOTE_PORT1 	0x12
 
 /* Protocol Methods */
-/* Atmospheric data */
-#define BM1 			"BM1"	// Pressure
-#define BM2 			"BM2"	// Pressure
-#define TM1 			"TM1"	// Temperature
-#define TM2 			"TM2"	// Temperature 2
-#define TM3				"TM3"   // Temperature 3
-#define TM4				"TM4"   // Temperature 4
-#define TA1 			"TA1"	// Tachometer 1
-#define TA2 			"TA2"	// Tachometer 2
-#define TA3				"TA3"   // Tachometer 3
-#define TA4				"TA4"   // Tachometer 4
-/* Positional Data */
-#define POX 			"POX"	// x Position
-#define POY 			"POY"	// y Position
-#define POZ 			"POZ"	// z Position
-/* Velocity Data */
-#define VEX 			"VEX"	// x Velocity
-#define VEY 			"VEY"	// y Velocity
-#define VEZ 			"VEZ"	// z Velocity
-/* Acceleration Data */
-#define ACX 			"ACX"	// x Acceleration
-#define ACY 			"ACY"	// y Acceleration
-#define ACZ 			"ACZ"	// z Acceleration
-/* Attitudinal Data */
-#define ROL 			"ROL"	// Roll
-#define PIT 			"PIT"	// Pitch
-#define YAW 			"YAW"	// Yaw
 /* Miscellaneous */
 #define MSG 			"MSG"	// Message
 #define PWR 			"PWR"	// Power
@@ -226,46 +199,58 @@
 #define TA5				"TA5"		// BMS1 Temperature 5
 #define TA6				"TA6"		// BMS1 Temperature 6
 #define TA7				"TA7"		// BMS1 Temperature 7
-
-
-
-struct data_packet {
-	// all pointers are ini
-	// pass in pointer to null terminated data string
-	// packet construction will be taken care of by function
-	// format with ###.## zero padded
-
-	/* Atmospheric Data */
-	char bm1[6];	// Pressure1
-	char bm2[6];	// Pressure2
-	char tm1[6];	// Temperature
-	char tm2[6];	// Temperature2
-	char tm3[6];	// Temperature3
-	char tm4[6];	// Temperature4
-	char ta1[6];	// Tachometer1
-	char ta2[6];	// Tachometer2
-	char ta3[6];	// Tachometer3
-	char ta4[6];	// Tachometer4
-	char pwr[6];	// Power Consumption
-	/* Positional Data */
-	char pox[6];	// x Position
-	char poy[6];	// y Position
-	char poz[6];	// z Position
-	/* Velocity Data */
-	char vex[6];	// x Velocity
-	char vey[6];	// y Velocity
-	char vez[6];	// z Velocity
-	/* Acceleration Data */
-	char acx[6];	// x Acceleration
-	char acy[6];	// y Acceleration
-	char acz[6];	// z Acceleration
-	/* Attitudinal Data */
-	char rol[6];	// Roll
-	char pit[6];	// Pitch
-	char yaw[6];	// Yaw
-
-};
-
+#define V00				"V00"		// BMS0 Voltage 0
+#define V01				"V01"		// BMS0 Voltage 1
+#define V02 			"V02"		// BMS0 Voltage 2
+#define V03				"V03"		// BMS0 Voltage 3
+#define V04				"V04"		// BMS0 Voltage 4
+#define V05				"V05"		// BMS0 Voltage 5
+#define V06				"V06"		// BMS0 Voltage 6
+#define V07				"V07"		// BMS0 Voltage 7
+#define V08				"V08"		// BMS0 Voltage 8
+#define V09				"V09"		// BMS0 Voltage 9
+#define V0A				"V0A"		// BMS0 Voltage 10
+#define V0B				"V0B"		// BMS0 Voltage 11
+#define V0C				"V0C"		// BMS0 Voltage 12
+#define V0D				"V0D"		// BMS0 Voltage 13
+#define V0E				"V0E"		// BMS0 Voltage 14
+#define V0F				"V0F"		// BMS0 Voltage 15
+#define V0G				"V0G"		// BMS0 Voltage 16
+#define V0H				"V0H"		// BMS0 Voltage 17
+#define T00				"T00"		// BMS0 Temperature 0
+#define T01				"T01"		// BMS0 Temperature 1
+#define T02				"T02"		// BMS0 Temperature 2
+#define T03				"T03"		// BMS0 Temperature 3
+#define T04				"T04"		// BMS0 Temperature 4
+#define T05				"T05"		// BMS0 Temperature 5
+#define T06				"T06"		// BMS0 Temperature 6
+#define T07				"T07"		// BMS0 Temperature 7
+#define V10				"V10"		// BMS1 Voltage 0
+#define V11				"V11"		// BMS1 Voltage 1
+#define V12 			"V12"		// BMS1 Voltage 2
+#define V13				"V13"		// BMS1 Voltage 3
+#define V14				"V14"		// BMS1 Voltage 4
+#define V15				"V15"		// BMS1 Voltage 5
+#define V16				"V16"		// BMS1 Voltage 6
+#define V17				"V17"		// BMS1 Voltage 7
+#define V18				"V18"		// BMS1 Voltage 8
+#define V19				"V19"		// BMS1 Voltage 9
+#define V1A				"V1A"		// BMS1 Voltage 10
+#define V1B				"V1B"		// BMS1 Voltage 11
+#define V1C				"V1C"		// BMS1 Voltage 12
+#define V1D				"V1D"		// BMS1 Voltage 13
+#define V1E				"V1E"		// BMS1 Voltage 14
+#define V1F				"V1F"		// BMS1 Voltage 15
+#define V1G				"V1G"		// BMS1 Voltage 16
+#define V1H				"V1H"		// BMS1 Voltage 17
+#define TB0				"TB0"		// BMS1 Temperature 0
+#define TB1				"TB1"		// BMS1 Temperature 1
+#define TB2				"TB2"		// BMS1 Temperature 2
+#define TB3				"TB3"		// BMS1 Temperature 3
+#define TB4				"TB4"		// BMS1 Temperature 4
+#define TB5				"TB5"		// BMS1 Temperature 5
+#define TB6				"TB6"		// BMS1 Temperature 6
+#define TB7				"TB7"		// BMS1 Temperature 7
 
 struct prototype_packet {
 	// all pointers are ini
@@ -365,7 +350,6 @@ struct prototype_packet {
 	char bms1temp7[6]; // BMS 1 Temperature 7
 };
 
-struct data_packet DataPacket;
 struct prototype_packet PrototypePacket;
 
 extern uint16_t gSn_RX_BASE[];
@@ -393,7 +377,6 @@ uint8_t Net_Rx_Data[DATA_BUF_SIZE];
 void wizIntFunction();
 void rec_method(char *method, char *val, int *val_len);
 void send_method(char *method, char* val, int val_len);
-void sendDataPacket();
 void sendPrototypePacket();
 void sendSensorDataTimerInit(LPC_TIMER_T * timer, uint8_t timerInterrupt, uint32_t tickRate);
 void Wiz_Restart();
