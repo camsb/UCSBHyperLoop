@@ -4,7 +4,7 @@
 #include "payload_actuator_sm.h"
 #include "service_propulsion_sm.h"
 #include "initialization.h"
-#include "HEMS.h"
+#include "I2CPERIPHS.h"
 #include "sensor_data.h"
 #include "actuation.h"
 

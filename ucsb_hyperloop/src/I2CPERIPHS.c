@@ -1,19 +1,19 @@
 //Hyperloop Peripheral Management System
 //Kevin Kha
 
-//For use with HEMSv3, Maglev BMS, I2C Hub
+//For use with HEMS, Maglev BMS, I2C Hub
 //If using this on the Arduino, this should be saved as a .cpp file. Otherwise it should be saved as a .c
 
-//#include "I2CPERIPHS.h"
-#include "HEMS.h"
+#include "I2CPERIPHS.h"
 
 //POD PIN MAPPING, CALIBRATION
 //Hub Data:
 const uint8_t HUB_I2C_BUS[NUM_HUBS] = {0, 1, 2};
+const uint8_t HUB_AUX_GPIO_REGISTER[NUM_HUBS] = {4, 2, 2};
 const uint8_t HUB_AUX_PINS[NUM_HUBS][NUM_HUB_PORTS] = {
-  {0, 0, 0, 0},
-  {0, 0, 0, 0},
-  {0, 0, 0, 0}
+  {31, 30, 29, 28, 27, 26, 25, 24},
+  {23, 22, 21, 20, 19, 18, 17, 16},
+  {23, 22, 21, 20, 19, 18, 17, 16}
 };
 
 //HEMS Data:
@@ -33,12 +33,12 @@ const uint8_t MAGLEV_BMS_HUB_PORT[NUM_MAGLEV_BMS][2] = {   //Max 1 per I2C bus o
   {2, 1}
 };
 const float MAGLEV_BMS_CAL_CONVERSIONS[NUM_MAGLEV_BMS][3][6] = {
-  {   //BMS0
+  { //BMS0
     {2.0, 2.0, 3.0, 4.0, 5.02, 5.99},   //SubBMS0
     {2.0, 2.0, 3.0, 4.0, 5.02, 5.99},   //SubBMS1
     {2.0, 2.0, 3.0, 4.0, 5.02, 5.99}    //SubBMS2
   },
-  {   //BMS1
+  { //BMS1
     {2.0, 2.0, 3.0, 4.0, 5.02, 5.99},   //SubBMS0
     {2.0, 2.0, 3.0, 4.0, 5.02, 5.99},   //SubBMS1
     {2.0, 2.0, 3.0, 4.0, 5.02, 5.99}    //SubBMS2
@@ -80,6 +80,10 @@ HEMS* initialize_HEMS(uint8_t identity) {
   engine->IOX_device_address[1] = IOX_Address_Select[((HEMS_I2C_DIP[engine->identity] >> 2) & 0b110) + 1];
 
   // Initialize tachometer counters and rpm data
+  GPIO_Setup(HUB_AUX_GPIO_REGISTER[HEMS_HUB_PORT[engine->identity][0]], HUB_AUX_PINS[HEMS_HUB_PORT[engine->identity][0]][HEMS_HUB_PORT[engine->identity][1]], OUT);
+  GPIO_Write(HUB_AUX_GPIO_REGISTER[HEMS_HUB_PORT[engine->identity][0]], HUB_AUX_PINS[HEMS_HUB_PORT[engine->identity][0]][HEMS_HUB_PORT[engine->identity][1]], 1);
+  GPIO_Write(HUB_AUX_GPIO_REGISTER[HEMS_HUB_PORT[engine->identity][0]], HUB_AUX_PINS[HEMS_HUB_PORT[engine->identity][0]][HEMS_HUB_PORT[engine->identity][1]], 0);
+
   int n;
   for (n = 0; n < 2; n++) {
     IOX_setup(engine->bus, engine->IOX_device_address[n]);
@@ -90,20 +94,20 @@ HEMS* initialize_HEMS(uint8_t identity) {
   // Initialize thermistor moving averages (with first read)
   int temp_counter;
   for (temp_counter = 0; temp_counter < 4; temp_counter++) {
-	  engine->temperatures[temp_counter] = calculate_temperature(ADC_read(engine->bus, engine->ADC_device_address[0], temp_counter + 1));
+    engine->temperatures[temp_counter] = calculate_temperature(ADC_read(engine->bus, engine->ADC_device_address[0], temp_counter + 1));
   }
 
 #ifdef LPC
   // Initialize short ranging moving averages (with first read)
   int short_counter;
-  for (short_counter = 0; short_counter < NUM_SHORTIR; short_counter++){
-  	  float ShortRangingDataRaw = ADC_read(engine->bus, engine->ADC_device_address[0], short_counter + 5);
-  	  float voltage = ((float)ShortRangingDataRaw) / 1300;
+  for (short_counter = 0; short_counter < NUM_SHORTIR; short_counter++) {
+    float ShortRangingDataRaw = ADC_read(engine->bus, engine->ADC_device_address[0], short_counter + 5);
+    float voltage = ((float)ShortRangingDataRaw) / 1300;
 
-  		if (!((voltage < 0.34) || (voltage > 2.43))){
-  			uint16_t index = (uint16_t)(voltage * 100.0 + 0.5) - 34;
-  			engine->short_data[short_counter] = shortRangingDistanceLUT[index];
-  		}
+    if (!((voltage < 0.34) || (voltage > 2.43))) {
+      uint16_t index = (uint16_t)(voltage * 100.0 + 0.5) - 34;
+      engine->short_data[short_counter] = shortRangingDistanceLUT[index];
+    }
   }
 #endif
 
@@ -135,17 +139,17 @@ uint8_t update_HEMS(HEMS* engine) {
   // Record short ranging sensor data
   int short_counter;
   float ShortRangingMovingAverage;
-	for (short_counter = 0; short_counter < NUM_SHORTIR; short_counter++){
-	  ShortRangingMovingAverage = engine->short_data[short_counter];
-	  float ShortRangingDataRaw = ADC_read(engine->bus, engine->ADC_device_address[0], short_counter + 5);
-	  float voltage = ((float)ShortRangingDataRaw) / 1300;
+  for (short_counter = 0; short_counter < NUM_SHORTIR; short_counter++) {
+    ShortRangingMovingAverage = engine->short_data[short_counter];
+    float ShortRangingDataRaw = ADC_read(engine->bus, engine->ADC_device_address[0], short_counter + 5);
+    float voltage = ((float)ShortRangingDataRaw) / 1300;
 
-		if (!((voltage < 0.34) || (voltage > 2.43))){
-			uint16_t index = (uint16_t)(voltage * 100.0 + 0.5) - 34;
-			ShortRangingMovingAverage = ALPHA*ShortRangingMovingAverage + BETA*shortRangingDistanceLUT[index];
-		}
-		engine->short_data[short_counter] = ShortRangingMovingAverage;
-	}
+    if (!((voltage < 0.34) || (voltage > 2.43))) {
+      uint16_t index = (uint16_t)(voltage * 100.0 + 0.5) - 34;
+      ShortRangingMovingAverage = ALPHA * ShortRangingMovingAverage + BETA * shortRangingDistanceLUT[index];
+    }
+    engine->short_data[short_counter] = ShortRangingMovingAverage;
+  }
 #endif
 
   //Record Motor Controller Current
@@ -156,6 +160,7 @@ uint8_t update_HEMS(HEMS* engine) {
 
   if (new_amps > HEMS_MAX_CURRENT)
     engine->alarm |= 0b00000010;
+
 
   //Record RPMs
   uint16_t current_tachometer_counter[2];
@@ -181,6 +186,12 @@ uint8_t update_HEMS(HEMS* engine) {
   }
   engine->timestamp = runtime();
 
+  if (engine->bc_reset_active_high) {
+    GPIO_Write(HUB_AUX_GPIO_REGISTER[HEMS_HUB_PORT[engine->identity][0]], HUB_AUX_PINS[HEMS_HUB_PORT[engine->identity][0]][HEMS_HUB_PORT[engine->identity][1]], 1);
+    GPIO_Write(HUB_AUX_GPIO_REGISTER[HEMS_HUB_PORT[engine->identity][0]], HUB_AUX_PINS[HEMS_HUB_PORT[engine->identity][0]][HEMS_HUB_PORT[engine->identity][1]], 0);
+    engine->bc_reset_active_high = 0;
+  }
+
   return engine->alarm;
 }
 
@@ -195,25 +206,28 @@ Maglev_BMS* initialize_Maglev_BMS(uint8_t identity) {
   Maglev_BMS* bms = malloc(sizeof(Maglev_BMS));
   bms->identity = identity;
   bms->bus = MAGLEV_BMS_HUB_PORT[bms->identity][0];
-  bms->relay_pin = MAGLEV_BMS_HUB_PORT[bms->identity][1];
+
+
+  GPIO_Setup(HUB_AUX_GPIO_REGISTER[MAGLEV_BMS_HUB_PORT[bms->identity][0]], HUB_AUX_PINS[MAGLEV_BMS_HUB_PORT[bms->identity][0]][MAGLEV_BMS_HUB_PORT[bms->identity][1]], OUT);
+  GPIO_Write(HUB_AUX_GPIO_REGISTER[MAGLEV_BMS_HUB_PORT[bms->identity][0]], HUB_AUX_PINS[MAGLEV_BMS_HUB_PORT[bms->identity][0]][MAGLEV_BMS_HUB_PORT[bms->identity][1]], 1);
   bms->relay_active_low = 1;
 
   int batt;
   for (batt = 0; batt < 3; batt++) {
-	  // Initialize battery voltages to a default value
-	  bms->battery_voltage[batt] = 23.0; // TODO: Is this a good starting value? 23V?
+    // Initialize battery voltages to a default value
+    bms->battery_voltage[batt] = 23.0; // TODO: Is this a good starting value? 23V?
 
-	  // Initialize cell voltages to a default value
-	  int i = 0;
-	  for (i = 0; i < 6; i++){
-		  bms->cell_voltages[batt][i] = 2.833; // TODO: Is this a good starting value? 23V / 6 cells?
-	  }
+    // Initialize cell voltages to a default value
+    int i = 0;
+    for (i = 0; i < 6; i++) {
+      bms->cell_voltages[batt][i] = 2.833; // TODO: Is this a good starting value? 23V / 6 cells?
+    }
 
-	  // Initialize thermistor moving averages (with first read)
-      int temp_counter = 0;
-      for (temp_counter = 0; temp_counter < 2; temp_counter++) {
-    	bms->temperatures[batt][temp_counter] = calculate_temperature(ADC_read(bms->bus, I2C_ADC_Maglev_subBMS_Addresses[batt], temp_counter + 6));
-      }
+    // Initialize thermistor moving averages (with first read)
+    int temp_counter = 0;
+    for (temp_counter = 0; temp_counter < 2; temp_counter++) {
+      bms->temperatures[batt][temp_counter] = calculate_temperature(ADC_read(bms->bus, I2C_ADC_Maglev_subBMS_Addresses[batt], temp_counter + 6));
+    }
   }
 
   bms->amps = 0;
@@ -241,14 +255,17 @@ uint8_t update_Maglev_BMS(Maglev_BMS* bms) {
     //Record Temperatures
     int temp_counter = 0;
     for (temp_counter = 0; temp_counter < 2; temp_counter++) {
-		int new_temperature = calculate_temperature(ADC_read(bms->bus, I2C_ADC_Maglev_subBMS_Addresses[batt], temp_counter + 6));
-		new_temperature = ((1 - THERMISTOR_AVG_WEIGHT) * new_temperature + THERMISTOR_AVG_WEIGHT * bms->temperatures[batt][temp_counter]);
-		bms->temperatures[batt][temp_counter] = new_temperature;
-		if (new_temperature > BATT_MAX_TEMP || new_temperature < BATT_MIN_TEMP){
-		  bms->alarm |= 0b00000001;
-		}
+      int new_temperature = calculate_temperature(ADC_read(bms->bus, I2C_ADC_Maglev_subBMS_Addresses[batt], temp_counter + 6));
+      new_temperature = ((1 - THERMISTOR_AVG_WEIGHT) * new_temperature + THERMISTOR_AVG_WEIGHT * bms->temperatures[batt][temp_counter]);
+      bms->temperatures[batt][temp_counter] = new_temperature;
+      if (new_temperature > BATT_MAX_TEMP || new_temperature < BATT_MIN_TEMP) {
+        bms->alarm |= 0b00000001;
+      }
     }
   }
+
+  GPIO_Write(HUB_AUX_GPIO_REGISTER[MAGLEV_BMS_HUB_PORT[bms->identity][0]], HUB_AUX_PINS[MAGLEV_BMS_HUB_PORT[bms->identity][0]][MAGLEV_BMS_HUB_PORT[bms->identity][1]], bms->relay_active_low);
+
   return bms->alarm;
 }
 
@@ -348,6 +365,35 @@ uint16_t IOX_read(uint8_t bus, uint8_t IOX_address) {
 }
 
 
+
+void GPIO_Setup(uint8_t port, uint8_t pin, uint8_t dir) {
+#ifdef ARDUINO
+  if (dir == IN) pinMode(AUX_PIN, INPUT);
+  else if (dir == OUT) pinMode(AUX_PIN, OUTPUT);
+#endif //ARDUINO
+#ifdef LPC
+  if (dir == IN) GPIO_Input_Init(port, pin);
+  else if (dir == OUT) GPIO_Output_Init(port, pin);
+#endif //LPC
+}
+
+void GPIO_Write(uint8_t port, uint8_t pin, uint8_t setting) {
+#ifdef ARDUINO
+  digitalWrite(AUX_PIN, setting);
+#endif //ARDUINO
+#ifdef LPC
+  Chip_GPIO_SetPinState(LPC_GPIO, port, pin, setting);
+#endif //LPC
+}
+
+uint8_t GPIO_Read(uint8_t port, uint8_t pin) {
+#ifdef ARDUINO
+  return digitalRead(AUX_PIN);
+#endif //ARDUINO
+#ifdef LPC
+  return Chip_GPIO_GetPinState(LPC_GPIO, port, pin);
+#endif //LPC
+}
 
 float runtime() {
   float runtime_in_seconds;

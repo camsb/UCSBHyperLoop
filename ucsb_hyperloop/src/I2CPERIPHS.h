@@ -1,8 +1,8 @@
 //Hyperloop Peripheral Management System
 //Kevin Kha
 
-//#define ARDUINO
-#define LPC
+#define ARDUINO
+//#define LPC
 
 
 //Includes and Libraries
@@ -12,11 +12,14 @@
 #include "Arduino.h"
 #include "Wire.h"
 
+#define AUX_PIN 7
+
 #endif //ARDUINO
 
 #ifdef LPC //LPC LIBRARIES BELOW
 #include "stdlib.h"
 #include "initialization.h"
+#include "gpio.h"
 #include "i2c.h"
 #include "timer.h"
 #include "ranging.h"
@@ -31,7 +34,7 @@
 
 //Number of Boards
 #define NUM_HUBS 3
-#define NUM_HUB_PORTS 4
+#define NUM_HUB_PORTS 8
 #define NUM_HEMS 4
 #define NUM_MAGLEV_BMS 2
 #define NUM_ELECTRONICS_BMS 1
@@ -46,8 +49,6 @@
 #define AMMETER_10A_SENSITIVITY 264
 #define AMMETER_50A_SENSITIVITY 40
 #define AMMETER_150A_SENSITIVITY 8.8		//[mV/A] for the 150amp version of the sensor
-
-#define NUM_SHORTIR 2
 
 //Tachometer Data
 #define TACHOMETER_TICKS 1	// Number of reflective strips on the motor.
@@ -66,6 +67,13 @@
 
 #define MAX12BITVAL 4095.0
 
+#define IN 0
+#define OUT 1
+void GPIO_Setup(uint8_t port, uint8_t pin, uint8_t dir);
+void GPIO_Write(uint8_t port, uint8_t pin, uint8_t setting);
+uint8_t GPIO_Read(uint8_t port, uint8_t pin);
+
+
 typedef struct {
   uint8_t identity;
   
@@ -74,14 +82,11 @@ typedef struct {
   uint8_t ADC_device_address[1];   //ADC LTC2309 - Thermistors, Ammeter
   uint8_t DAC_device_address[1];   //DAC MCP4725 - Throttle
   uint8_t IOX_device_address[2];   //IOX MCP23017 - Tachometer    {MAGLEV, NAVIGATION}
-  uint8_t BC_RESET_pin;
-  uint8_t PWR_RESET_pin;
-  uint8_t dI2C_READY_pin;
 
   //Data Storage
   float DAC_diagnostic;
   int temperatures[4];
-  float short_data[NUM_SHORTIR];
+  float short_data[2];
   uint8_t amps;
   uint16_t rpm[2];
 
@@ -91,8 +96,7 @@ typedef struct {
 
   //Control
   float throttle_voltage;
-  uint8_t bc_reset;
-  uint8_t pwr_reset;
+  uint8_t bc_reset_active_high;
 
   //Safety
   uint8_t alarm;
@@ -129,7 +133,6 @@ typedef struct{   //Designed for 3x 6S batteries;
   uint8_t amps;               //No onboard ammeter; relies on data from HEMS or other.
 
   //Controls
-  uint8_t relay_pin;
   uint8_t relay_active_low;       //Active Low
 
   float timestamp;

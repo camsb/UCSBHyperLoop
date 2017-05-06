@@ -8,7 +8,7 @@
 #include "communication.h"
 #include "sdcard.h"
 #include "gpio.h"
-#include "HEMS.h"
+#include "I2CPERIPHS.h"
 
 // Initialize all sensor and control systems that are enabled via #-defines in initialization.h!
 void initializeSensorsAndControls(){

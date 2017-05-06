@@ -1,6 +1,6 @@
 #include "ethernet.h"
 #include "sensor_data.h"
-#include "HEMS.h"
+#include "I2CPERIPHS.h"
 #include <string.h>
 #include "stdio.h"
 #include "timer.h"
